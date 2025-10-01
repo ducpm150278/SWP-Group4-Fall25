@@ -4,6 +4,7 @@
  */
 package entity;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -14,7 +15,7 @@ public class User {
     private String phoneNumber;
     private String password;
     private String gender;
-    private LocalDate dateOfBirth;
+    private Date dateOfBirth;
     private String address;
     private String accountStatus;
     private String role;
@@ -23,7 +24,20 @@ public class User {
 
     public User() {}
 
-    public User(Integer userID, String fullName, String email, String phoneNumber, String password, String gender, LocalDate dateOfBirth,
+        public User(int userID, String fullName, String email, String phoneNumber, String password, String gender, String role, String address, Date dateOfBirth, String accountStatus) {
+        this.userID = userID;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+        this.gender = gender;
+        this.role = role;
+        this.address = address;
+        this.dateOfBirth = dateOfBirth;
+        this.accountStatus = accountStatus;
+    }
+    
+    public User(Integer userID, String fullName, String email, String phoneNumber, String password, String gender, Date dateOfBirth,
             String address, String accountStatus, String role, LocalDateTime createdDate, LocalDateTime lastModifiedDate) {
         
         this.userID = userID;
@@ -60,8 +74,8 @@ public class User {
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 
-    public LocalDate getDateOfBirth() { return dateOfBirth; }
-    public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public Date getDateOfBirth() { return dateOfBirth; }
+    public void setDateOfBirth(Date dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
