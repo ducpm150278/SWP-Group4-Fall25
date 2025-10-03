@@ -26,8 +26,8 @@ public class DBContext {
         // For example : StudentDBContext extends DBContext , 
         //where StudentDBContext is located in dal package, 
         try {
-            String user = "minhd";
-            String pass = "12345";
+            String user = "sa";
+            String pass = "123";
             String url = "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=MovieTicketDB;"
                     + "sendStringParametersAsUnicode=true;"
                     + "characterEncoding=UTF-8;";
