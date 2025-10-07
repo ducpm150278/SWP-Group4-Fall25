@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dal.UserDAO;
@@ -65,6 +61,7 @@ public class AdminDashboardServlet extends HttpServlet {
         UserDAO ud = new UserDAO();
         try {
             String section = request.getParameter("section");
+            System.out.println(section);
             if (section != null && section.equals("user-management")) {
                 try {
                     String action = request.getParameter("action");
@@ -74,13 +71,13 @@ public class AdminDashboardServlet extends HttpServlet {
                             int user_Id = Integer.parseInt(request.getParameter("userId"));
                             User user = ud.getUserByID(user_Id);
                             if (user != null) {
-                                System.out.println("true");
+                                System.out.println("User found: " + user.getFullName());
                             }
                             request.setAttribute("viewUser", user);
                         }
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println(e);
+                    System.out.println("Error parsing user ID: " + e.getMessage());
                 }
 
                 // Get param for filter list
@@ -88,6 +85,7 @@ public class AdminDashboardServlet extends HttpServlet {
                 String roleFilter = request.getParameter("role");
                 String statusFilter = request.getParameter("status");
                 String sortBy = request.getParameter("sort");
+                
                 // Set value get all in case role or status filter is null
                 if (roleFilter == null) {
                     roleFilter = "all";
@@ -95,19 +93,23 @@ public class AdminDashboardServlet extends HttpServlet {
                 if (statusFilter == null) {
                     statusFilter = "all";
                 }
+                
                 // Get list user after filter và sort
                 List<User> listU = ud.getAllUsers(search, roleFilter, statusFilter, sortBy);
+                System.out.println(listU);
                 // Page setting
                 int page = 1;
                 int recordsPerPage = 10;
                 try {
                     page = Integer.parseInt(request.getParameter("page"));
                 } catch (NumberFormatException e) {
-                    System.out.println(e);
+                    System.out.println("Error parsing page number: " + e.getMessage());
                 }
+                
                 // Kiểm tra nếu danh sách rỗng
                 boolean isEmptyList = listU.isEmpty();
                 request.setAttribute("isEmptyList", isEmptyList);
+                
                 // Phân trang (chỉ thực hiện nếu danh sách không rỗng)
                 if (!isEmptyList) {
                     List<User> usersPerPage = listU.stream()
@@ -131,7 +133,7 @@ public class AdminDashboardServlet extends HttpServlet {
             request.setCharacterEncoding("UTF-8");
             request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
         } catch (ServletException | IOException e) {
-            System.out.println(e);
+            System.out.println("Error in doGet: " + e.getMessage());
         }
     }
 
@@ -181,7 +183,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
                             // Save temporary user to database
                             boolean isCreated = ud.addNewUser(fullname, email, phone, temp_pass, "Male", role, ud.generateAddress(), Date.valueOf(ud.generateRandomDOB(18, 60)), "Temporary");
-                            System.out.println(isCreated);
+                            System.out.println("User created: " + isCreated);
 
                             if (isCreated) {
                                 // Record logs
@@ -193,7 +195,7 @@ public class AdminDashboardServlet extends HttpServlet {
 //                                        + "Role: " + role + "<br>"
 //                                        + "Temporary Password: " + temp_pass + "<br>"
 //                                        + "Need login and change temporary password.", "N/A"));
-//                                System.out.println(addLog);
+//                                System.out.println("Log added: " + addLog);
 
                                 // Send email with credentials
                                 String emailContent = "Your account has been created successfully!\n\n"
@@ -213,12 +215,16 @@ public class AdminDashboardServlet extends HttpServlet {
 //                                    // Log this case as it's not critical but should be monitored
 //                                    System.err.println("User created but email not sent to: " + email);
 //                                }
+                                
+                                // Temporary: always show success for testing
+                                request.getSession().setAttribute("showToast", "add_success");
                             } else {
                                 request.getSession().setAttribute("showToast", "add_failed");
                             }
                         } catch (NumberFormatException e) {
                             request.getSession().setAttribute("ExceptionError", "add_failed");
                             request.getSession().setAttribute("showError", "Error: " + e.getMessage());
+                            System.out.println("Error in add user: " + e.getMessage());
                         }
                         response.sendRedirect("dashboard?section=user-management");
                     }
@@ -230,13 +236,16 @@ public class AdminDashboardServlet extends HttpServlet {
 
                             if (isDeleted) {
 //                                boolean addLog = lhd.addNewLog(new LogHistory(1, "DELETE", "USER", userId, "N/A", "N/A", "Delete an user for testing", "N/A"));
-//                                System.out.println(addLog);
+//                                System.out.println("Delete log added: " + addLog);
+                                request.getSession().setAttribute("showToast", "delete_success");
+                            } else {
+                                request.getSession().setAttribute("ExceptionError", "delete_failed");
+                                request.getSession().setAttribute("showError", "Error deleting user: User not found or deletion failed");
                             }
-                            // Set success message
-                            request.getSession().setAttribute("showToast", "delete_success");
                         } catch (NumberFormatException e) {
                             request.getSession().setAttribute("ExceptionError", "delete_failed");
                             request.getSession().setAttribute("showError", "Error deleting user: " + e.getMessage());
+                            System.out.println("Error in delete user: " + e.getMessage());
                         }
 
                         // Redirect back to user list
@@ -251,14 +260,21 @@ public class AdminDashboardServlet extends HttpServlet {
 
                             User user = ud.getUserByID(userId);
 
+                            if (user == null) {
+                                request.getSession().setAttribute("ExceptionError", "update_failed");
+                                request.getSession().setAttribute("showError", "Error update user: User not found");
+                                response.sendRedirect("dashboard?section=user-management");
+                                return;
+                            }
+
                             // Log get input
-                            System.out.println(user.getRole());
-                            System.out.println(role);
-                            System.out.println(user.getAccountStatus());
-                            System.out.println(status);
+                            System.out.println("Current Role: " + user.getRole());
+                            System.out.println("New Role: " + role);
+                            System.out.println("Current Status: " + user.getAccountStatus());
+                            System.out.println("New Status: " + status);
 
                             //Set value
-//                            String old_value = "Role: " + user.getRole() + " , Status: " + user.getStatus() + ".";
+//                            String old_value = "Role: " + user.getRole() + " , Status: " + user.getAccountStatus() + ".";
 //                            String new_value = "Role: " + role + " , Status: " + status + ".";
 
                             boolean isUpdated = ud.updateSettingUser(role, status, userId);
@@ -267,11 +283,15 @@ public class AdminDashboardServlet extends HttpServlet {
                                 request.getSession().setAttribute("showToast", "update_success");
 
 //                                boolean addLog = lhd.addNewLog(new LogHistory(1, "UPDATE", "USER", userId, old_value, new_value, "Update setting for user account.", "N/A"));
-//                                System.out.println(addLog);
+//                                System.out.println("Update log added: " + addLog);
+                            } else {
+                                request.getSession().setAttribute("ExceptionError", "update_failed");
+                                request.getSession().setAttribute("showError", "Error update user: Update failed");
                             }
                         } catch (NumberFormatException e) {
                             request.getSession().setAttribute("ExceptionError", "update_failed");
                             request.getSession().setAttribute("showError", "Error update user: " + e.getMessage());
+                            System.out.println("Error in update user: " + e.getMessage());
                         }
                         response.sendRedirect("dashboard?section=user-management");
                     }
@@ -280,7 +300,7 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             }
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Error in doPost: " + e.getMessage());
         }
     }
 

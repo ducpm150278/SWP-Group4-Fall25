@@ -28,10 +28,9 @@
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="dashboard?section=user-management&role=all&status=${requestScope.statusFilter}&search=${requestScope.search}">All Roles</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=Administrator&status=${requestScope.statusFilter}&search=${requestScope.search}">Administrator</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=InventoryManager&status=${requestScope.statusFilter}&search=${requestScope.search}">Inventory Manager</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=Supplier&status=${requestScope.statusFilter}&search=${requestScope.search}">Supplier</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=Employees&status=${requestScope.statusFilter}&search=${requestScope.search}">Employees</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=Admin&status=${requestScope.statusFilter}&search=${requestScope.search}">Admin</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=Staff&status=${requestScope.statusFilter}&search=${requestScope.search}">Staff</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&role=Customer&status=${requestScope.statusFilter}&search=${requestScope.search}">Customer</a></li>
                 </ul>
             </div>
 
@@ -44,9 +43,10 @@
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="dashboard?section=user-management&status=all&role=${requestScope.roleFilter}&search=${requestScope.search}">All Statuses</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=active&role=${requestScope.roleFilter}&search=${requestScope.search}">Active</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=suspend&role=${requestScope.roleFilter}&search=${requestScope.search}">Suspend</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=temporary&role=${requestScope.roleFilter}&search=${requestScope.search}">Temporary</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=Active&role=${requestScope.roleFilter}&search=${requestScope.search}">Active</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=Suspended&role=${requestScope.roleFilter}&search=${requestScope.search}">Suspended</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=Disabled&role=${requestScope.roleFilter}&search=${requestScope.search}">Disabled</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=user-management&status=Temporary&role=${requestScope.roleFilter}&search=${requestScope.search}">Temporary</a></li>
                 </ul>
             </div>
 
@@ -108,40 +108,42 @@
                     <c:forEach var="user" items="${requestScope.listU}" varStatus="loop">
                         <tr>
                             <td>${(currentPage - 1) * recordsPerPage + loop.index + 1}</td>
-                            <td>${user.fullname}</td>
+                            <td>${user.fullName}</td>
                             <td>${user.email}</td>
-                            <td>${user.phonenumber}</td>
+                            <td>${user.phoneNumber}</td>
                             <td>${user.role}</td>
                             <td>
-                                <c:if test="${user.status == 'Active' }">
-                                    <span class="badge bg-success">
-                                        ${user.status}
-                                    </span>
-                                </c:if>
-                                <c:if test="${user.status == 'Temporary' }">
-                                    <span class="badge bg-warning me-2">
-                                        ${user.status}
-                                    </span>
-                                </c:if>
-                                <c:if test="${user.status == 'Suspend' }">
-                                    <span class="badge bg-secondary">
-                                        ${user.status}
-                                    </span>
-                                </c:if>
+                                <c:choose>
+                                    <c:when test="${user.accountStatus == 'Active'}">
+                                        <span class="badge bg-success">${user.accountStatus}</span>
+                                    </c:when>
+                                    <c:when test="${user.accountStatus == 'Temporary'}">
+                                        <span class="badge bg-warning">${user.accountStatus}</span>
+                                    </c:when>
+                                    <c:when test="${user.accountStatus == 'Suspended'}">
+                                        <span class="badge bg-secondary">${user.accountStatus}</span>
+                                    </c:when>
+                                    <c:when test="${user.accountStatus == 'Disabled'}">
+                                        <span class="badge bg-danger">${user.accountStatus}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge bg-light text-dark">${user.accountStatus}</span>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                             <td>
                                 <form action="dashboard" method="GET" style="display:inline;">
                                     <input type="hidden" name="action" value="view"/>
-                                    <input type="hidden" name="userId" value="${user.user_id}"/>
+                                    <input type="hidden" name="userId" value="${user.userID}"/>
                                     <input type="hidden" name="section" value="user-management"/>
                                     <button type="submit" class="btn btn-sm btn-info me-1">View</button>
                                 </form>
                                 <button class="btn btn-sm btn-danger" 
                                         onclick="showDeleteModal(
-                                                        '${user.user_id}',
-                                                        '${user.fullname}',
+                                                        '${user.userID}',
+                                                        '${user.fullName}',
                                                         '${user.email}',
-                                                        '${user.phonenumber}',
+                                                        '${user.phoneNumber}',
                                                         '${user.role}'
                                                         )">Delete</button>
                             </td>
@@ -278,10 +280,9 @@
                             <label class="form-label">Role</label>
                             <select class="form-select" name="role" required>
                                 <option value="">Select User Role</option>
-                                <option value="Administrator">Administrator</option>
-                                <option value="InventoryManager">Inventory Manager</option>
-                                <option value="Supplier">Supplier</option>
-                                <option value="Employees">Employees</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Customer">Customer</option>
                             </select>
                         </div>
                     </div>
@@ -340,53 +341,53 @@
                 <form id="userForm" action="dashboard" method="POST">
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="section" value="user-management">
-                    <input type="hidden" name="userId" value="${requestScope.viewUser.user_id}">
+                    <input type="hidden" name="userId" value="${requestScope.viewUser.userID}">
                     <div class="modal-body">
-                        <form id="userForm">
-                            <div class="mb-2"><label>Full Name</label><input type="text" class="form-control" name="fullname" value="${requestScope.viewUser.fullname}" readonly></div>
-                            <div class="mb-2"><label>Email</label><input type="text" class="form-control" name="email" value="${requestScope.viewUser.email}" readonly></div>
-                            <div class="mb-2"><label>Phone Number</label><input type="text" class="form-control" name="phonenumber" value="${requestScope.viewUser.phonenumber}" readonly></div>
+                        <div class="mb-2"><label>Full Name</label><input type="text" class="form-control" name="fullname" value="${requestScope.viewUser.fullName}" readonly></div>
+                        <div class="mb-2"><label>Email</label><input type="text" class="form-control" name="email" value="${requestScope.viewUser.email}" readonly></div>
+                        <div class="mb-2"><label>Phone Number</label><input type="text" class="form-control" name="phonenumber" value="${requestScope.viewUser.phoneNumber}" readonly></div>
 
-                            <!-- Role field - editable when in edit mode -->
-                            <div class="mb-2">
-                                <label>Role</label>
-                                <select class="form-select" name="role" id="roleField" ${param.mode != 'edit' ? 'disabled' : ''}>
-                                    <option value="Administrator" ${viewUser.role == 'Administrator' ? 'selected' : ''}>Administrator</option>
-                                    <option value="InventoryManager" ${viewUser.role == 'InventoryManager' ? 'selected' : ''}>Inventory Manager</option>
-                                    <option value="Supplier" ${viewUser.role == 'Supplier' ? 'selected' : ''}>Supplier</option>
-                                    <option value="Employees" ${viewUser.role == 'Employees' ? 'selected' : ''}>Employees</option>
-                                </select>
-                            </div>
+                        <!-- Role field - editable when in edit mode -->
+                        <div class="mb-2">
+                            <label>Role</label>
+                            <select class="form-select" name="role" id="roleField" ${param.mode != 'edit' ? 'disabled' : ''}>
+                                <option value="Admin" ${viewUser.role == 'Admin' ? 'selected' : ''}>Admin</option>
+                                <option value="Staff" ${viewUser.role == 'Staff' ? 'selected' : ''}>Staff</option>
+                                <option value="Customer" ${viewUser.role == 'Customer' ? 'selected' : ''}>Customer</option>
+                            </select>
+                        </div>
 
-                            <!-- Status field - editable when in edit mode -->
-                            <div class="mb-2">
-                                <label>Status</label>
-                                <select class="form-select" name="status" id="statusField" ${param.mode != 'edit' ? 'disabled' : ''}>
-                                    <option value="Active" ${viewUser.status == 'Active' ? 'selected' : ''}>Active</option>
-                                    <option value="Suspend" ${viewUser.status == 'Suspend' ? 'selected' : ''}>Suspend</option>
-                                </select>
-                            </div>
+                        <!-- Status field - editable when in edit mode -->
+                        <div class="mb-2">
+                            <label>Status</label>
+                            <select class="form-select" name="status" id="statusField" ${param.mode != 'edit' ? 'disabled' : ''}>
+                                <option value="Active" ${viewUser.accountStatus == 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Suspended" ${viewUser.accountStatus == 'Suspended' ? 'selected' : ''}>Suspended</option>
+                                <option value="Disabled" ${viewUser.accountStatus == 'Disabled' ? 'selected' : ''}>Disabled</option>
+                                <option value="Temporary" ${viewUser.accountStatus == 'Temporary' ? 'selected' : ''}>Temporary</option>
+                            </select>
+                        </div>
 
-                            <!-- Các trường khác (readonly) -->
-                            <div class="mb-2"><label>Gender</label><input type="text" class="form-control" value="${requestScope.viewUser.gender}" readonly></div>
-                            <div class="mb-2"><label>Date of Birth</label><input type="text" class="form-control" value="${requestScope.viewUser.dob}" readonly></div>
-                            <div class="mb-2"><label>Address</label><textarea class="form-control" readonly>${requestScope.viewUser.address}</textarea></div>
-                            <div class="mb-2 position-relative">
-                                <label>Password</label>
-                                <input type="password" class="form-control" value="${requestScope.viewUser.password}" readonly id="passwordField">
-                                <button type="button" class="password-toggle-btn" onclick="togglePassword()">
-                                    <span class="eye-icon">👁</span>
-                                </button>
-                            </div>
+                        <!-- Các trường khác (readonly) -->
+                        <div class="mb-2"><label>Gender</label><input type="text" class="form-control" value="${requestScope.viewUser.gender}" readonly></div>
+                        <div class="mb-2"><label>Date of Birth</label><input type="text" class="form-control" value="${requestScope.viewUser.dateOfBirth}" readonly></div>
+                        <div class="mb-2"><label>Address</label><textarea class="form-control" readonly>${requestScope.viewUser.address}</textarea></div>
+                        <div class="mb-2 position-relative">
+                            <label>Password</label>
+                            <input type="password" class="form-control" value="${requestScope.viewUser.password}" readonly id="passwordField">
+                            <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                                <span class="eye-icon">👁</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="modal-footer justify-content-between">
                         <c:choose>
                             <c:when test="${param.mode == 'edit'}">
                                 <button type="submit" class="btn btn-success">Save</button>
-                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.user_id}" class="btn btn-secondary">Cancel</a>
+                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.userID}" class="btn btn-secondary">Cancel</a>
                             </c:when>
                             <c:otherwise>
-                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.user_id}&mode=edit" class="btn btn-warning">Edit</a>
+                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.userID}&mode=edit" class="btn btn-warning">Edit</a>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </c:otherwise>
                         </c:choose>
@@ -566,7 +567,7 @@
                 document.getElementById('statusField').disabled = true;
                 // Khôi phục giá trị ban đầu từ server 
                 document.getElementById('roleField').value = '${requestScope.viewUser.role}';
-                document.getElementById('statusField').value = '${requestScope.viewUser.status}';
+                document.getElementById('statusField').value = '${requestScope.viewUser.accountStatus}';
                 // Thay đổi hiển thị các nút
                 document.getElementById('editButton').classList.remove('d-none');
                 document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.remove('d-none');

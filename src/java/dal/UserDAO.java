@@ -11,12 +11,14 @@ import java.sql.SQLException;
 import java.sql.Date;
 import entity.User;
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.text.Normalizer;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -44,11 +46,11 @@ public class UserDAO {
         // Gender data
         String[] gender = {"Male", "Female", "Other"};
 
-        // Role data
-        String[] role = {"Administrator", "InventoryManager", "StoreManager", "Salesperson"};
+        // Role data -  theo bảng mới
+        String[] role = {"Customer", "Admin", "Staff"};
 
-        //Status data
-        String[] status = {"Active", "Suspend"};
+        //Status data -  theo bảng mới
+        String[] status = {"Active", "Disabled", "Suspended", "Temporary"};
 
         // Generator user data
         String fullName;
@@ -73,7 +75,7 @@ public class UserDAO {
         }
     }
 
-// Account generator
+// Account generator (giữ nguyên)
     // Address generator
     public String generateAddress() {
         Random random = new Random();
@@ -149,9 +151,7 @@ public class UserDAO {
         password.add(LOWER.charAt(random.nextInt(LOWER.length())));
 
         // Thêm các ký tự còn lại
-        for (int i = 4;
-                i < length;
-                i++) {
+        for (int i = 4; i < length; i++) {
             password.add(ALL_ALLOWED.charAt(random.nextInt(ALL_ALLOWED.length())));
         }
 
@@ -233,7 +233,17 @@ public class UserDAO {
         return LocalDate.ofEpochDay(randomDay);
     }
 
-// Database access object
+// Chuyển đổi Timestamp sang LocalDateTime
+    private LocalDateTime toLocalDateTime(Timestamp timestamp) {
+        try {
+            return timestamp != null ? timestamp.toLocalDateTime() : null;
+        } catch (Exception e) {
+            System.out.println("Error converting timestamp: " + e.getMessage());
+            return null;
+        }
+    }
+
+// Database access object 
 // Get all user infor
     public List<User> getAllUser() {
         List<User> list = new ArrayList<>();
@@ -243,19 +253,31 @@ public class UserDAO {
                 + "      ,[PhoneNumber]\n"
                 + "      ,[Password]\n"
                 + "      ,[Gender]\n"
-                + "      ,[role]\n"
-                + "      ,[Address]\n"
                 + "      ,[DateOfBirth]\n"
-                + "      ,[Status]\n"
-                + "      ,[CreatedAt]\n"
-                + "      ,[UpdatedAt]\n"
+                + "      ,[Address]\n"
+                + "      ,[AccountStatus]\n"
+                + "      ,[Role]\n"
+                + "      ,[CreatedDate]\n"
+                + "      ,[LastModifiedDate]\n"
                 + "  FROM [dbo].[Users]";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                list.add(new User(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getDate(9), rs.getString(10)));
+                list.add(new User(
+                        rs.getInt("UserID"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("PhoneNumber"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getDate("DateOfBirth"),
+                        rs.getString("Address"),
+                        rs.getString("AccountStatus"),
+                        rs.getString("Role"),
+                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
+                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
+                ));
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -263,22 +285,21 @@ public class UserDAO {
         return list;
     }
 
-    // Add new user
-    public boolean addNewUser(String fullname, String email, String phonenumber, String password, String gender, String role, String address, Date dob, String status) {
+    // Add new user 
+    public boolean addNewUser(String fullname, String email, String phonenumber, String password,
+            String gender, String role, String address, Date dob, String status) {
         String sql = "INSERT INTO [dbo].[Users]\n"
                 + "           ([FullName]\n"
                 + "           ,[Email]\n"
                 + "           ,[PhoneNumber]\n"
                 + "           ,[Password]\n"
                 + "           ,[Gender]\n"
-                + "           ,[role]\n"
+                + "           ,[Role]\n"
                 + "           ,[Address]\n"
                 + "           ,[DateOfBirth]\n"
-                + "           ,[Status]\n"
-                + "           ,[CreatedAt]\n"
-                + "           ,[UpdatedAt])\n"
+                + "           ,[AccountStatus])\n"
                 + "     VALUES"
-                + "           (?,?,?,?,?,?,?,?,?,GETDATE(),GETDATE())";
+                + "           (?,?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, fullname);
@@ -298,7 +319,7 @@ public class UserDAO {
         }
     }
 
-    // Delete user
+    // Delete user 
     public boolean deleteUser(int user_id) {
         String sql = "DELETE FROM [dbo].[Users] WHERE UserID = ?";
         try {
@@ -312,10 +333,10 @@ public class UserDAO {
         }
     }
 
-    // Update setting user (only role and status)
+    // Update setting user (only role and status) - 
     public boolean updateSettingUser(String role, String status, int user_id) {
-        String sql = "UPDATE  [dbo].[Users] SET [role] = ?,"
-                + "[Status] = ?, UpdatedAt = GETDATE() WHERE [UserID] = ?";
+        String sql = "UPDATE [dbo].[Users] SET [Role] = ?,"
+                + "[AccountStatus] = ?, [LastModifiedDate] = GETDATE() WHERE [UserID] = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, role);
@@ -329,27 +350,40 @@ public class UserDAO {
         }
     }
 
-    // Get user by input ID
+    // Get user by input ID 
     public User getUserByID(int user_Id) {
-        String sql = "SELECT [FullName]\n"
+        String sql = "SELECT [UserID]\n"
+                + "      ,[FullName]\n"
                 + "      ,[Email]\n"
                 + "      ,[PhoneNumber]\n"
                 + "      ,[Password]\n"
                 + "      ,[Gender]\n"
-                + "      ,[role]\n"
-                + "      ,[Address]\n"
                 + "      ,[DateOfBirth]\n"
-                + "      ,[Status]\n"
-                + "      ,[CreatedAt]\n"
-                + "      ,[UpdatedAt]\n"
+                + "      ,[Address]\n"
+                + "      ,[AccountStatus]\n"
+                + "      ,[Role]\n"
+                + "      ,[CreatedDate]\n"
+                + "      ,[LastModifiedDate]\n"
                 + "  FROM [dbo].[Users] WHERE [UserID] = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, user_Id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new User(user_Id, rs.getString(1), rs.getString(2), rs.getString(3),
-                        rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getDate(8), rs.getString(9));
+                return new User(
+                        rs.getInt("UserID"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("PhoneNumber"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getDate("DateOfBirth"),
+                        rs.getString("Address"),
+                        rs.getString("AccountStatus"),
+                        rs.getString("Role"),
+                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
+                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
+                );
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -357,7 +391,7 @@ public class UserDAO {
         return null;
     }
 
-    // Check existed email
+    // Check existed email 
     public boolean checkExistedEmail(String email) {
         String sql = "SELECT 1 FROM dbo.Users WHERE [Email] = ?";
         try {
@@ -371,7 +405,7 @@ public class UserDAO {
         }
     }
 
-    // Check existed phone
+    // Check existed phone 
     public boolean checkExistedPhone(String phone) {
         String sql = "SELECT 1 FROM dbo.Users WHERE [PhoneNumber] = ?";
         try {
@@ -385,7 +419,7 @@ public class UserDAO {
         }
     }
 
-    // Lấy danh sách user với sort, search và filter
+    // Lấy danh sách user với sort, search và filter 
     public List<User> getAllUsers(String search, String roleFilter, String statusFilter, String sortBy) {
         List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM [dbo].[Users] WHERE 1=1";
@@ -397,12 +431,12 @@ public class UserDAO {
 
         // Thêm điều kiện filter role
         if (roleFilter != null && !roleFilter.equals("all")) {
-            sql += " AND [role] = ?";
+            sql += " AND [Role] = ?";
         }
 
         // Thêm điều kiện filter status
         if (statusFilter != null && !statusFilter.equals("all")) {
-            sql += " AND [Status] = ?";
+            sql += " AND [AccountStatus] = ?";
         }
 
         // Thêm điều kiện sort
@@ -412,6 +446,10 @@ public class UserDAO {
                     sql += " ORDER BY [FullName] ASC";
                 case "name_desc" ->
                     sql += " ORDER BY [FullName] DESC";
+                case "date_asc" ->
+                    sql += " ORDER BY [CreatedDate] ASC";
+                case "date_desc" ->
+                    sql += " ORDER BY [CreatedDate] DESC";
             }
         }
 
@@ -440,8 +478,20 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                list.add(new User(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getDate(9), rs.getString(10)));
+                list.add(new User(
+                        rs.getInt("UserID"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("PhoneNumber"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getDate("DateOfBirth"),
+                        rs.getString("Address"),
+                        rs.getString("AccountStatus"),
+                        rs.getString("Role"),
+                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
+                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
+                ));
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -450,7 +500,7 @@ public class UserDAO {
         return list;
     }
 
-    // Get account by email and pass
+    // Get account by email and pass 
     public User authenticate(String email, String password) {
         String sql = "SELECT [UserID]\n"
                 + "      ,[FullName]\n"
@@ -458,10 +508,12 @@ public class UserDAO {
                 + "      ,[PhoneNumber]\n"
                 + "      ,[Password]\n"
                 + "      ,[Gender]\n"
-                + "      ,[role]\n"
-                + "      ,[Address]\n"
                 + "      ,[DateOfBirth]\n"
-                + "      ,[Status]\n"
+                + "      ,[Address]\n"
+                + "      ,[AccountStatus]\n"
+                + "      ,[Role]\n"
+                + "      ,[CreatedDate]\n"
+                + "      ,[LastModifiedDate]\n"
                 + "  FROM [dbo].[Users] WHERE [Email] = ? AND [Password] = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -469,8 +521,20 @@ public class UserDAO {
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new User(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
-                        rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8), rs.getDate(9), rs.getString(10));
+                return new User(
+                        rs.getInt("UserID"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("PhoneNumber"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getDate("DateOfBirth"),
+                        rs.getString("Address"),
+                        rs.getString("AccountStatus"),
+                        rs.getString("Role"),
+                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
+                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
+                );
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -478,44 +542,47 @@ public class UserDAO {
         return null;
     }
 
-    // Reset password for temporary account
+    // Reset password for temporary account 
     public boolean updatePasswordTempAcc(int userId, String newPassword) {
-        String sql = "UPDATE Users SET Password = ?, UpdatedAt = GETDATE() WHERE UserID = ?";
+        String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, newPassword);
             ps.setInt(2, userId);
-            return ps.execute();
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println(e);
             return false;
         }
     }
 
-    // Finish profile for temporary account
-    public boolean updateProfileTempAcc(int userId, String gender, String address, String dob) {
-        String sql = "UPDATE Users SET Gender = ?, Address = ?, DateOfBirth = ?, UpdatedAt = GETDATE() WHERE UserID = ?";
+    // Finish profile for temporary account 
+    public boolean updateProfileTempAcc(int userId, String gender, String address, Date dob) {
+        String sql = "UPDATE Users SET Gender = ?, Address = ?, DateOfBirth = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, gender);
             ps.setString(2, address);
-            ps.setString(3, dob);
+            ps.setDate(3, dob);
             ps.setInt(4, userId);
-            return ps.execute();
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println(e);
             return false;
         }
     }
 
-    // Set status for account after finish information
+    // Set status for account after finish information 
     public boolean updateStatusForTempAcc(int userId, String status) {
-        String sql = "UPDATE Users SET Status = ?, UpdatedAt = GETDATE() WHERE UserID = ?";
+        String sql = "UPDATE Users SET AccountStatus = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, status);
             ps.setInt(2, userId);
-            return ps.execute();
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             System.out.println(e);
             return false;
