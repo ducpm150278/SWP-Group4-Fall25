@@ -313,6 +313,84 @@
                 transition: all 0.3s ease;
             }
 
+            /* CSS cho các trường readonly trong modal edit */
+            #user-management-content .form-control[readonly] {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                cursor: not-allowed !important;
+                opacity: 0.8 !important;
+            }
+
+            #user-management-content .form-control:not([readonly]) {
+                background-color: #ffffff !important;
+                border-color: #ced4da !important;
+                color: #212529 !important;
+            }
+
+            /* Đảm bảo select box khi disabled cũng có style tương tự */
+            #user-management-content .form-select:disabled {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                cursor: not-allowed !important;
+                opacity: 0.8 !important;
+            }
+
+            #user-management-content .form-select:not(:disabled) {
+                background-color: #ffffff !important;
+                border-color: #ced4da !important;
+                color: #212529 !important;
+            }
+
+            /* Style cho textarea readonly */
+            #user-management-content textarea.form-control[readonly] {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                resize: none !important;
+            }
+
+            /* Hiệu ứng chuyển tiếp mượt mà khi chuyển giữa edit và view mode */
+            #user-management-content .form-control,
+            #user-management-content .form-select {
+                transition: all 0.3s ease-in-out;
+            }
+
+            /* Label style để phân biệt rõ hơn */
+            #user-management-content .modal-body label {
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #495057;
+            }
+
+            /* Style đặc biệt cho password field */
+            #user-management-content #passwordField[readonly] {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                font-family: 'Courier New', monospace;
+            }
+
+            /* Đảm bảo button toggle password vẫn hoạt động tốt */
+            #user-management-content .password-toggle-btn {
+                z-index: 5;
+            }
+
+            /* Khi ở chế độ edit, các field có thể edit sẽ có border highlight */
+            #user-management-content .form-select:not(:disabled) {
+                border-color: #86b7fe !important;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 576px) {
+                #user-management-content .modal-body .form-control,
+                #user-management-content .modal-body .form-select {
+                    font-size: 14px;
+                }
+            }
+
             #price-update-content .active-filters {
                 display: inline-flex;
                 align-items: center;
@@ -425,7 +503,7 @@
                         </a>
                     </li>-->
                     <li class="${param.section eq 'user-management' ? 'active' : ''}">
-                        <a href="<c:url value='/admin/dashboard?section=user-management'/>">
+                        <a href="<c:url value='/adminFE/dashboard?section=user-management'/>">
                             <i class="fas fa-users"></i>
                             <span>User Management</span>
                         </a>
@@ -476,7 +554,7 @@
             <div class="container-fluid py-4" id="contentArea">
                 <c:choose>
                     <c:when test="${param.section eq 'user-management'}">
-                        <jsp:include page="user-management.jsp"/>
+                        <jsp:include page="user_management.jsp"/>
                     </c:when>
                     <c:when test="${param.section eq 'price-update'}">
                         <jsp:include page="price-update.jsp"/>
@@ -487,8 +565,12 @@
                     <c:when test="${param.section eq 'request-management'}">
                         <jsp:include page="request.jsp"/>
                     </c:when>
-                    <c:otherwise>
-                        <jsp:include page="/admin/dashboard?section=user-management"/>
+                    <c:otherwise> 
+                        <!-- Default section or dashboard home -->
+                        <div class="text-center py-5">
+                            <h3>Welcome to Admin Dashboard</h3>
+                            <p>Select a section from the sidebar to get started.</p>
+                        </div>
                     </c:otherwise>
                 </c:choose>
             </div>
