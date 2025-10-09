@@ -8,6 +8,14 @@
         <servlet-name>CustomerProfileServlet</servlet-name>
         <url-pattern>/CustomerProfile</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>FoodManagementServlet</servlet-name>
+        <servlet-class>controller.FoodManagementServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FoodManagementServlet</servlet-name>
+        <url-pattern>/food-management</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
