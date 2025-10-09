@@ -203,7 +203,7 @@ public class CinemaDAO {
 
     // ============ FILTER AND SORT ============
 
-    // Get all cinemas with filter and sort (không phân trang)
+    // Get all cinemas with filter and sort
     public List<Cinema> getAllCinemas(String search, String statusFilter, String sortBy) {
         List<Cinema> list = new ArrayList<>();
         
@@ -280,7 +280,7 @@ public class CinemaDAO {
         return list;
     }
 
-    // Count total cinemas (có thể dùng cho phân trang ở servlet sau này)
+    // Count total cinemas
     public int countCinemas(String search, String statusFilter) {
         String sql = "SELECT COUNT(*) as Total\n"
                 + "  FROM [dbo].[Cinemas]\n"
@@ -323,7 +323,7 @@ public class CinemaDAO {
 
     // ============ ADDITIONAL BUSINESS LOGIC ============
 
-    // Get active cinemas only (for dropdowns, etc.)
+    // Get active cinemas only
     public List<Cinema> getActiveCinemas() {
         List<Cinema> list = new ArrayList<>();
         String sql = "SELECT [CinemaID]\n"
