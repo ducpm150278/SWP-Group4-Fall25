@@ -74,11 +74,11 @@
                             </a>
 
                             <div class="sb-sidenav-menu-heading">Quản lý</div>
-                            <a class="<%= uri.contains("adminFE/dashboard") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard">
+                            <a class="<%= uri.equals("/hotelrentalmanagement/views/dashboard/room.jsp") ? "nav-link active" : "nav-link" %>" href="listRoom">
                                 <div class="sb-nav-link-icon"><i class="fas fa-bed"></i></div>
                                 Quản lý tài khoản
                             </a>
-                            <a class="<%= uri.contains("list") ? "nav-link active" : "nav-link" %>" href="list">
+                            <a class="<%= uri.equals("/movieticket/listmovie.jsp") ? "nav-link active" : "nav-link" %>" href="list">
                                 <div class="sb-nav-link-icon"><i class="fas fa-layer-group"></i></div>
                                 Quản lý phim
                             </a>
@@ -92,12 +92,16 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-comment-dots"></i></div>
                                 Quản lý phòng chiếu
                             </a>
+                            <a class="<%= uri.equals("/movieticket/listscreening.jsp") ? "nav-link active" : "nav-link" %>" href="listScreening">
+                                <div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>
+                                Quản lý lịch chiếu
+                            </a>
 
                             <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="listapprovebooking">
                                 <div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>
                                 Quản lý khuyến mãi
                             </a>
-                          
+
 
                             <!-- Quản lý đồ ăn -->
                             <a class="nav-link collapsed <%= isFood ? "active" : "" %>" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFood" aria-expanded="<%= isFood ? "true" : "false" %>">
