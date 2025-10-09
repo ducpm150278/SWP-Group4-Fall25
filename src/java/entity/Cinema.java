@@ -19,11 +19,9 @@ public class Cinema {
     private Boolean isActive;
     private LocalDateTime createdDate;
 
-    // Constructor mặc định
     public Cinema() {
     }
 
-    // Constructor với tất cả tham số
     public Cinema(Integer cinemaID, String cinemaName, String location,
             Integer totalRooms, Boolean isActive, LocalDateTime createdDate) {
         this.cinemaID = cinemaID;
@@ -44,7 +42,6 @@ public class Cinema {
         this.createdDate = createdDate;
     }
 
-    // Getter và Setter
     public Integer getCinemaID() {
         return cinemaID;
     }
