@@ -16,6 +16,38 @@
         <servlet-name>FoodManagementServlet</servlet-name>
         <url-pattern>/food-management</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <url-pattern>/GoogleAuthCallback</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AuthController</servlet-name>
+        <servlet-class>controller.AuthController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuthController</servlet-name>
+        <url-pattern>/auth/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>GoogleAuthController</servlet-name>
+        <servlet-class>controller.GoogleAuthController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GoogleAuthController</servlet-name>
+        <url-pattern>/auth/google</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

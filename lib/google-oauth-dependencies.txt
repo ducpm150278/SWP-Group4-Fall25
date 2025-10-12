@@ -1,0 +1,30 @@
+# Google OAuth Dependencies for Java Web Application
+# Download these JAR files and place them in the lib folder:
+
+# Core Google API Client
+google-api-client-1.32.1.jar
+google-http-client-1.43.3.jar
+google-http-client-jackson2-1.43.3.jar
+
+# OAuth Client
+google-oauth-client-1.32.1.jar
+google-oauth-client-jetty-1.32.1.jar
+
+# Google APIs
+google-api-services-oauth2-v2-rev157-1.25.0.jar
+
+# Additional dependencies
+jackson-core-2.15.2.jar
+jackson-databind-2.15.2.jar
+jackson-annotations-2.15.2.jar
+
+# Jetty for OAuth (if using embedded server)
+jetty-client-9.4.51.v20230217.jar
+jetty-http-9.4.51.v20230217.jar
+jetty-io-9.4.51.v20230217.jar
+jetty-util-9.4.51.v20230217.jar
+
+# Note: You can download these from Maven Central Repository
+# https://mvnrepository.com/artifact/com.google.api-client/google-api-client
+# https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty
+# https://mvnrepository.com/artifact/com.google.apis/google-api-services-oauth2
