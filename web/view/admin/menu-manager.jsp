@@ -143,7 +143,7 @@ System.out.println("URI: " + uri); // Xem trong console/log Tomcat
                             </div>
                             <!-- Tài khoản -->
                             <div class="sb-sidenav-menu-heading">Tài khoản</div>
-                            <a class="nav-link text-danger" href="logout">
+                            <a class="nav-link text-danger" href="${pageContext.request.contextPath}/auth/logout">
                                 <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                                 Đăng xuất
                             </a>
