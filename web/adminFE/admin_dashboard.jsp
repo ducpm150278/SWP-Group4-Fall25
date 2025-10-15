@@ -508,12 +508,12 @@
                             <span>User Management</span>
                         </a>
                     </li>
-<!--                    <li class="${param.section eq 'price-update' ? 'active' : ''}">
-                        <a href="<c:url value='/admin/dashboard?section=price-update'/>">
+                    <li class="${param.section eq 'cinema-management' ? 'active' : ''}">
+                        <a href="<c:url value='/adminFE/dashboard?section=cinema-management'/>">
                             <i class="fas fa-tags"></i>
-                            <span>Price Update</span>
+                            <span>Cinema Management</span>
                         </a>
-                    </li>-->
+                    </li>
 <!--                    <li class="${param.section eq 'log-history' ? 'active' : ''}">
                         <a href="<c:url value='/admin/dashboard?section=log-history'/>">
                             <i class="fas fa-history"></i>
@@ -556,8 +556,8 @@
                     <c:when test="${param.section eq 'user-management'}">
                         <jsp:include page="user_management.jsp"/>
                     </c:when>
-                    <c:when test="${param.section eq 'price-update'}">
-                        <jsp:include page="price-update.jsp"/>
+                    <c:when test="${param.section eq 'cinema-management'}">
+                        <jsp:include page="cinema_management.jsp"/>
                     </c:when>
                     <c:when test="${param.section eq 'log-history'}">
                         <jsp:include page="log-history.jsp"/>
