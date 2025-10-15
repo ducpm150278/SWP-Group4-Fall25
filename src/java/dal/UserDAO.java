@@ -588,4 +588,46 @@ public class UserDAO {
             return false;
         }
     }
+
+    // Temporary Get user (For Customer)
+    public User getUserByEmail(String email) {
+        User user = null;
+        String sql = "SELECT * FROM Users WHERE Email = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                user = new User();
+                user.setUserID(rs.getInt("UserID"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setPhoneNumber(rs.getString("PhoneNumber"));
+                user.setGender(rs.getString("Gender"));
+                user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                user.setAddress(rs.getString("Address"));
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return user;
+    }
+
+    public boolean updateUser(User user) {
+        String sql = "UPDATE Users SET FullName=?, PhoneNumber=?, Gender=?, DateOfBirth=?, Address=? WHERE UserID=?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhoneNumber());
+            ps.setString(3, user.getGender());
+            ps.setDate(4, user.getDateOfBirth());
+            ps.setString(5, user.getAddress());
+            ps.setInt(6, user.getUserID());
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
 }
