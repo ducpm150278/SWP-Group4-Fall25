@@ -1,8 +1,10 @@
 package controller;
 
 import dal.CinemaDAO;
+import dal.ScreeningRoomDAO;
 import dal.UserDAO;
 import entity.Cinema;
+import entity.ScreeningRoom;
 import entity.User;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -139,10 +141,14 @@ public class AdminDashboardServlet extends HttpServlet {
                         // Check view list or view detail
                         if (action.equals("view")) {
                             int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
-                            Cinema cinema = cd.getCinemaByID(cinemaId);
+                            Cinema cinema = cd.getCinemaById(cinemaId);
                             if (cinema != null) {
                                 System.out.println("Cinema found: " + cinema.getCinemaName());
                             }
+
+                            ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
+                            List<ScreeningRoom> screeningRooms = roomDAO.getScreeningRoomsByCinemaId(cinemaId);
+                            request.setAttribute("screeningRooms", screeningRooms);
                             request.setAttribute("viewCinema", cinema);
                         }
                     }
@@ -393,7 +399,11 @@ public class AdminDashboardServlet extends HttpServlet {
                             }
 
                             // Save cinema to database
-                            boolean isCreated = cd.addNewCinema(cinemaName, location, totalRooms, isActive);
+                            Cinema newCinema = new Cinema();
+                            newCinema.setCinemaName(cinemaName);
+                            newCinema.setLocation(location);
+                            newCinema.setActive(isActive);
+                            boolean isCreated = cd.addCinema(newCinema);
                             System.out.println("Cinema created: " + isCreated);
 
                             if (isCreated) {
@@ -450,7 +460,7 @@ public class AdminDashboardServlet extends HttpServlet {
                             int totalRooms = Integer.parseInt(request.getParameter("totalRooms"));
                             boolean isActive = request.getParameter("isActive") != null;
 
-                            Cinema cinema = cd.getCinemaByID(cinemaId);
+                            Cinema cinema = cd.getCinemaById(cinemaId);
 
                             if (cinema == null) {
                                 request.getSession().setAttribute("showToast", "update_error");
@@ -482,7 +492,7 @@ public class AdminDashboardServlet extends HttpServlet {
                             System.out.println("New Location: " + location);
                             System.out.println("Current Rooms: " + cinema.getTotalRooms());
                             System.out.println("New Rooms: " + totalRooms);
-                            System.out.println("Current Status: " + cinema.getIsActive());
+                            System.out.println("Current Status: " + cinema.isActive());
                             System.out.println("New Status: " + isActive);
 
                             // Set value for log (commented out for now)

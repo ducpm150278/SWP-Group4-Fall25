@@ -1,29 +1,24 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-/**
- *
- * @author dungv
- */
 public class Cinema {
 
-    private Integer cinemaID;
+    private int cinemaID;
     private String cinemaName;
     private String location;
-    private Integer totalRooms;
-    private Boolean isActive;
+    private int totalRooms; // Sẽ được tính từ số lượng ScreeningRoom
+    private boolean isActive;
     private LocalDateTime createdDate;
+    private List<ScreeningRoom> screeningRooms; // Danh sách phòng chiếu
 
+    // Constructors
     public Cinema() {
     }
 
-    public Cinema(Integer cinemaID, String cinemaName, String location,
-            Integer totalRooms, Boolean isActive, LocalDateTime createdDate) {
+    public Cinema(int cinemaID, String cinemaName, String location, int totalRooms,
+            boolean isActive, LocalDateTime createdDate) {
         this.cinemaID = cinemaID;
         this.cinemaName = cinemaName;
         this.location = location;
@@ -32,21 +27,12 @@ public class Cinema {
         this.createdDate = createdDate;
     }
 
-    // Constructor không có ID (dùng khi tạo mới)
-    public Cinema(String cinemaName, String location, Integer totalRooms,
-            Boolean isActive, LocalDateTime createdDate) {
-        this.cinemaName = cinemaName;
-        this.location = location;
-        this.totalRooms = totalRooms;
-        this.isActive = isActive;
-        this.createdDate = createdDate;
-    }
-
-    public Integer getCinemaID() {
+    // Getters and Setters
+    public int getCinemaID() {
         return cinemaID;
     }
 
-    public void setCinemaID(Integer cinemaID) {
+    public void setCinemaID(int cinemaID) {
         this.cinemaID = cinemaID;
     }
 
@@ -66,20 +52,20 @@ public class Cinema {
         this.location = location;
     }
 
-    public Integer getTotalRooms() {
+    public int getTotalRooms() {
         return totalRooms;
     }
 
-    public void setTotalRooms(Integer totalRooms) {
+    public void setTotalRooms(int totalRooms) {
         this.totalRooms = totalRooms;
     }
 
-    public Boolean getIsActive() {
+    public boolean isActive() {
         return isActive;
     }
 
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public LocalDateTime getCreatedDate() {
@@ -88,6 +74,14 @@ public class Cinema {
 
     public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public List<ScreeningRoom> getScreeningRooms() {
+        return screeningRooms;
+    }
+
+    public void setScreeningRooms(List<ScreeningRoom> screeningRooms) {
+        this.screeningRooms = screeningRooms;
     }
 
     @Override
