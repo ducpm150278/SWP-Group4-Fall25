@@ -606,28 +606,72 @@ public class UserDAO {
                 user.setGender(rs.getString("Gender"));
                 user.setDateOfBirth(rs.getDate("DateOfBirth"));
                 user.setAddress(rs.getString("Address"));
+                user.setPassword(rs.getString("Password"));
             }
         } catch (Exception e) {
             System.out.println(e);
         }
         return user;
     }
+    // Customer
+public boolean updateUser(User user) {
+    String sql = "UPDATE Users SET FullName=?, PhoneNumber=?, Gender=?, DateOfBirth=?, Address=? WHERE UserID=?";
+    try {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, user.getFullName());
+        ps.setString(2, user.getPhoneNumber());
+        ps.setString(3, user.getGender());
+        ps.setDate(4, user.getDateOfBirth());
+        ps.setString(5, user.getAddress());
+        ps.setInt(6, user.getUserID());
 
-    public boolean updateUser(User user) {
-        String sql = "UPDATE Users SET FullName=?, PhoneNumber=?, Gender=?, DateOfBirth=?, Address=? WHERE UserID=?";
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, user.getFullName());
-            ps.setString(2, user.getPhoneNumber());
-            ps.setString(3, user.getGender());
-            ps.setDate(4, user.getDateOfBirth());
-            ps.setString(5, user.getAddress());
-            ps.setInt(6, user.getUserID());
-            int rows = ps.executeUpdate();
-            return rows > 0;
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        return false;
+        System.out.println("🧠 DEBUG — Updating user:");
+        System.out.println("ID: " + user.getUserID());
+        System.out.println("FullName: " + user.getFullName());
+        System.out.println("Phone: " + user.getPhoneNumber());
+        System.out.println("Gender: " + user.getGender());
+        System.out.println("DateOfBirth: " + user.getDateOfBirth());
+        System.out.println("Address: " + user.getAddress());
+
+        int rows = ps.executeUpdate();
+        System.out.println("➡️ Rows affected: " + rows);
+        return rows > 0;
+    } catch (Exception e) {
+        System.out.println("❌ DAO Exception: " + e);
     }
+    return false;
+}
+
+
+// Customer
+public boolean updatePassword(int userId, String newPassword) {
+    String sql = "UPDATE Users SET Password = ? WHERE UserID = ?";
+    try {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, newPassword);
+        ps.setInt(2, userId);
+        int rows = ps.executeUpdate();
+        System.out.println("Password updated for userID: " + userId);
+        return rows > 0;
+    } catch (Exception e) {
+        System.out.println("Error updating password: " + e);
+    }
+    return false;
+}
+
+// Customer
+public boolean updateEmail(int userId, String newEmail) {
+    String sql = "UPDATE Users SET Email = ? WHERE UserID = ?";
+    try {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, newEmail);
+        ps.setInt(2, userId);
+        int rows = ps.executeUpdate();
+        System.out.println("Email updated for userID: " + userId);
+        return rows > 0;
+    } catch (Exception e) {
+        System.out.println("Error updating email: " + e);
+    }
+    return false;
+}
 }
