@@ -4,22 +4,22 @@
  */
 package dal;
 
+import entity.User;
+import java.security.SecureRandom;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
-import entity.User;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -674,4 +674,76 @@ public boolean updateEmail(int userId, String newEmail) {
     }
     return false;
 }
+    
+    // Password reset functionality
+    public boolean storePasswordResetToken(String email, String token) {
+        String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE Email = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, token); // Store token temporarily in password field
+            ps.setString(2, email);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+    
+    public User getUserByResetToken(String token) {
+        String sql = "SELECT * FROM Users WHERE Password = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new User(
+                    rs.getInt("UserID"),
+                    rs.getString("FullName"),
+                    rs.getString("Email"),
+                    rs.getString("PhoneNumber"),
+                    rs.getString("Password"),
+                    rs.getString("Gender"),
+                    rs.getDate("DateOfBirth"),
+                    rs.getString("Address"),
+                    rs.getString("AccountStatus"),
+                    rs.getString("Role"),
+                    toLocalDateTime(rs.getTimestamp("CreatedDate")),
+                    toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
+                );
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+    
+    public boolean updatePasswordByToken(String token, String newPassword) {
+        String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE Password = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, token);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+    
+    public boolean updateUserStatus(int userId, String status) {
+        String sql = "UPDATE [Users] SET AccountStatus = ?, LastModifiedDate = ? WHERE UserID = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, status);
+            ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(3, userId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.err.println("Error updating user status: " + e.getMessage());
+        }
+        return false;
+    }
 }
