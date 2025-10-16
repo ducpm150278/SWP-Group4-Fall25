@@ -8,8 +8,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.sql.Statement; 
 import entity.Cinema;
+import entity.ScreeningRoom;
 
 /**
  *
@@ -19,6 +20,7 @@ public class CinemaDAO {
 
     DBContext db = new DBContext();
     protected Connection connection = db.connection;
+    private ScreeningRoomDAO screeningRoomDAO = new ScreeningRoomDAO();
 
     // Test function
     public static void main(String[] args) throws SQLException {
@@ -33,27 +35,22 @@ public class CinemaDAO {
         // Test add new cinema
 //        boolean added = cinemaDAO.addNewCinema("CGV Vincom Center", "72 Lê Thánh Tôn, Quận 1, TP.HCM", 8, true);
 //        System.out.println("Add cinema result: " + added);
-
         // Test get cinema by ID
 //        System.out.println("\n=== Cinema by ID ===");
 //        Cinema cinema = cinemaDAO.getCinemaByID(1);
 //        System.out.println(cinema);
-
         // Test update cinema
 //        boolean updated = cinemaDAO.updateCinema(1, "CGV Vincom Center Updated", "72 Lê Thánh Tôn, Quận 1, TP.HCM Updated", 10, false);
 //        System.out.println("Update cinema result: " + updated);
-
         // Test delete cinema (soft delete)
 //        boolean deleted = cinemaDAO.deleteCinema(1);
 //        System.out.println("Delete cinema result: " + deleted);
-
         // Test filter and sort cinemas
 //        System.out.println("\n=== Filtered Cinemas ===");
 //        List<Cinema> filtered = cinemaDAO.getAllCinemas("CGV", "active", "name_asc");
 //        for (Cinema c : filtered) {
 //            System.out.println(c);
 //        }
-
         // Test count cinemas
 //        int total = cinemaDAO.countCinemas("CGV", "active");
 //        System.out.println("Total cinemas: " + total);
@@ -70,7 +67,6 @@ public class CinemaDAO {
     }
 
     // ============ CRUD OPERATIONS ============
-
     // Get all cinemas
     public List<Cinema> getAllCinemas() {
         List<Cinema> list = new ArrayList<>();
@@ -103,59 +99,59 @@ public class CinemaDAO {
     }
 
     // Get cinema by ID
-    public Cinema getCinemaByID(int cinemaID) {
-        String sql = "SELECT [CinemaID]\n"
-                + "      ,[CinemaName]\n"
-                + "      ,[Location]\n"
-                + "      ,[TotalRooms]\n"
-                + "      ,[IsActive]\n"
-                + "      ,[CreatedDate]\n"
-                + "  FROM [dbo].[Cinemas]\n"
-                + "  WHERE [CinemaID] = ?";
+    public Cinema getCinemaById(int cinemaId) {
+        Cinema cinema = null;
+        String sql = "SELECT CinemaID, CinemaName, Location, TotalRooms, IsActive, CreatedDate FROM Cinemas WHERE CinemaID = ?";
 
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setInt(1, cinemaID);
-            ResultSet rs = ps.executeQuery();
+        try (Connection conn = db.connection; PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, cinemaId);
+            ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
-                return new Cinema(
-                        rs.getInt("CinemaID"),
-                        rs.getString("CinemaName"),
-                        rs.getString("Location"),
-                        rs.getInt("TotalRooms"),
-                        rs.getBoolean("IsActive"),
-                        toLocalDateTime(rs.getTimestamp("CreatedDate"))
-                );
+                cinema = new Cinema();
+                cinema.setCinemaID(rs.getInt("CinemaID"));
+                cinema.setCinemaName(rs.getString("CinemaName"));
+                cinema.setLocation(rs.getString("Location"));
+                cinema.setTotalRooms(rs.getInt("TotalRooms"));
+                cinema.setActive(rs.getBoolean("IsActive"));
+                cinema.setCreatedDate(rs.getTimestamp("CreatedDate").toLocalDateTime());
+
+                // Lấy danh sách phòng chiếu
+                List<ScreeningRoom> rooms = screeningRoomDAO.getScreeningRoomsByCinemaId(cinemaId);
+                cinema.setScreeningRooms(rooms);
             }
         } catch (SQLException e) {
-            System.out.println("Error in getCinemaByID: " + e);
+            e.printStackTrace();
         }
-        return null;
+        return cinema;
     }
 
     // Add new cinema
-    public boolean addNewCinema(String cinemaName, String location, int totalRooms, boolean isActive) {
-        String sql = "INSERT INTO [dbo].[Cinemas]\n"
-                + "           ([CinemaName]\n"
-                + "           ,[Location]\n"
-                + "           ,[TotalRooms]\n"
-                + "           ,[IsActive])\n"
-                + "     VALUES\n"
-                + "           (?, ?, ?, ?)";
-
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, cinemaName);
-            ps.setString(2, location);
-            ps.setInt(3, totalRooms);
-            ps.setBoolean(4, isActive);
+    public boolean addCinema(Cinema cinema) {
+        String sql = "INSERT INTO Cinemas (CinemaName, Location, IsActive) VALUES (?, ?, ?)";
+        
+        try (Connection conn = db.connection;
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            stmt.setString(1, cinema.getCinemaName());
+            stmt.setString(2, cinema.getLocation());
+            stmt.setBoolean(3, cinema.isActive());
+            
+            int affectedRows = stmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        cinema.setCinemaID(generatedKeys.getInt(1));
+                    }
+                }
+                return true;
+            }
         } catch (SQLException e) {
-            System.out.println("Error in addNewCinema: " + e);
-            return false;
+            e.printStackTrace();
         }
+        return false;
     }
 
     // Update cinema
@@ -174,7 +170,7 @@ public class CinemaDAO {
             ps.setInt(3, totalRooms);
             ps.setBoolean(4, isActive);
             ps.setInt(5, cinemaID);
-            
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -192,7 +188,7 @@ public class CinemaDAO {
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, cinemaID);
-            
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -202,11 +198,10 @@ public class CinemaDAO {
     }
 
     // ============ FILTER AND SORT ============
-
     // Get all cinemas with filter and sort
     public List<Cinema> getAllCinemas(String search, String statusFilter, String sortBy) {
         List<Cinema> list = new ArrayList<>();
-        
+
         String sql = "SELECT [CinemaID]\n"
                 + "      ,[CinemaName]\n"
                 + "      ,[Location]\n"
@@ -322,7 +317,6 @@ public class CinemaDAO {
     }
 
     // ============ ADDITIONAL BUSINESS LOGIC ============
-
     // Get active cinemas only
     public List<Cinema> getActiveCinemas() {
         List<Cinema> list = new ArrayList<>();
@@ -394,7 +388,7 @@ public class CinemaDAO {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setBoolean(1, isActive);
             ps.setInt(2, cinemaID);
-            
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
