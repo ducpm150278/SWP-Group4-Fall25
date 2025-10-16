@@ -7,7 +7,7 @@
         <!-- Search Bar -->
         <div class="w-50">
             <form action="dashboard" method="GET" class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Search cinemas by name or location..." 
+                <input type="text" name="search" class="form-control" placeholder="Search cinemas by name or address..." 
                        value="${requestScope.search}" aria-label="Search cinemas">
                 <input type="hidden" name="page" value="1">
                 <input type="hidden" name="section" value="cinema-management">
@@ -19,17 +19,53 @@
 
         <!-- Filter and Action Buttons -->
         <div class="d-flex">
+            <!-- Location Filter Dropdown -->
+            <div class="dropdown me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <c:choose>
+                        <c:when test="${not empty requestScope.locationFilter && requestScope.locationFilter != 'all'}">
+                            Location: ${requestScope.locationFilter}
+                        </c:when>
+                        <c:otherwise>
+                            Filter by Location
+                        </c:otherwise>
+                    </c:choose>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=all&status=${requestScope.statusFilter}&search=${requestScope.search}">All Locations</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Hà Nội&status=${requestScope.statusFilter}&search=${requestScope.search}">Hà Nội</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=TP.HCM&status=${requestScope.statusFilter}&search=${requestScope.search}">TP.HCM</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Đà Nẵng&status=${requestScope.statusFilter}&search=${requestScope.search}">Đà Nẵng</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Hải Phòng&status=${requestScope.statusFilter}&search=${requestScope.search}">Hải Phòng</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Cần Thơ&status=${requestScope.statusFilter}&search=${requestScope.search}">Cần Thơ</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Nha Trang&status=${requestScope.statusFilter}&search=${requestScope.search}">Nha Trang</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Vũng Tàu&status=${requestScope.statusFilter}&search=${requestScope.search}">Vũng Tàu</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Đà Lạt&status=${requestScope.statusFilter}&search=${requestScope.search}">Đà Lạt</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Huế&status=${requestScope.statusFilter}&search=${requestScope.search}">Huế</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Quy Nhơn&status=${requestScope.statusFilter}&search=${requestScope.search}">Quy Nhơn</a></li>
+                </ul>
+            </div>
+
             <!-- Status Filter Dropdown -->
             <div class="dropdown me-2">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
                         data-bs-toggle="dropdown" aria-expanded="false">
-                    Filter by Status
+                    <c:choose>
+                        <c:when test="${not empty requestScope.statusFilter && requestScope.statusFilter != 'all'}">
+                            Status: ${requestScope.statusFilter}
+                        </c:when>
+                        <c:otherwise>
+                            Filter by Status
+                        </c:otherwise>
+                    </c:choose>
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&status=all&search=${requestScope.search}">All Statuses</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&status=all&location=${requestScope.locationFilter}&search=${requestScope.search}">All Statuses</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&status=active&search=${requestScope.search}">Active</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&status=inactive&search=${requestScope.search}">Inactive</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&status=active&location=${requestScope.locationFilter}&search=${requestScope.search}">Active</a></li>
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&status=inactive&location=${requestScope.locationFilter}&search=${requestScope.search}">Inactive</a></li>
                 </ul>
             </div>
 
@@ -44,16 +80,16 @@
                             <i class="bi bi-plus-circle"></i> Add New Cinema
                         </a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=name_asc&status=${requestScope.statusFilter}&search=${requestScope.search}">
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=name_asc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
                             <i class="bi bi-sort-alpha-down"></i> Sort by Name A-Z
                         </a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=name_desc&status=${requestScope.statusFilter}&search=${requestScope.search}">
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=name_desc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
                             <i class="bi bi-sort-alpha-down-alt"></i> Sort by Name Z-A
                         </a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=rooms_asc&status=${requestScope.statusFilter}&search=${requestScope.search}">
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=rooms_asc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
                             <i class="bi bi-sort-numeric-down"></i> Sort by Rooms (Low to High)
                         </a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=rooms_desc&status=${requestScope.statusFilter}&search=${requestScope.search}">
+                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=rooms_desc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
                             <i class="bi bi-sort-numeric-down-alt"></i> Sort by Rooms (High to Low)
                         </a></li>
                 </ul>
@@ -61,28 +97,54 @@
         </div>
     </div>
 
+    <!-- Active Filters Display -->
+    <c:if test="${requestScope.statusFilter != 'all' or requestScope.locationFilter != 'all' or not empty requestScope.search}">
+        <div class="active-filters mb-3">
+            <span class="badge bg-light text-dark me-2">
+                <i class="bi bi-funnel"></i> Current Filters:
+            </span>
+            <c:if test="${not empty requestScope.search}">
+                <span class="badge bg-info me-2">
+                    Search: "${requestScope.search}"
+                    <a href="dashboard?section=cinema-management&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}" class="text-white ms-1">
+                        <i class="bi bi-x"></i>
+                    </a>
+                </span>
+            </c:if>
+            <c:if test="${requestScope.statusFilter != 'all'}">
+                <span class="badge bg-warning me-2">
+                    Status: ${requestScope.statusFilter}
+                    <a href="dashboard?section=cinema-management&location=${requestScope.locationFilter}&search=${requestScope.search}" class="text-white ms-1">
+                        <i class="bi bi-x"></i>
+                    </a>
+                </span>
+            </c:if>
+            <c:if test="${requestScope.locationFilter != 'all'}">
+                <span class="badge bg-success me-2">
+                    Location: ${requestScope.locationFilter}
+                    <a href="dashboard?section=cinema-management&status=${requestScope.statusFilter}&search=${requestScope.search}" class="text-white ms-1">
+                        <i class="bi bi-x"></i>
+                    </a>
+                </span>
+            </c:if>
+            <a href="dashboard?section=cinema-management" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Clear All
+            </a>
+        </div>
+    </c:if>
+
     <!-- Phần hiển thị table - CHỈ HIỆN KHI KHÔNG PHẢI ĐANG VIEW CINEMA -->
     <c:if test="${empty requestScope.viewCinema}">
         <c:choose>
             <c:when test="${not empty listCinemas}">
-                <c:if test="${requestScope.statusFilter != 'all'}">
-                    <div class="active-filters mb-4">
-                        <span class="badge bg-light text-dark me-2">
-                            <i class="bi bi-funnel"></i> Current Filters:
-                        </span>
-                        <c:if test="${requestScope.statusFilter != 'all'}">
-                            <span class="badge bg-warning me-2">
-                                Status filter: ${requestScope.statusFilter}
-                            </span>
-                        </c:if>
-                    </div>
-                </c:if>
                 <table class="table table-bordered table-hover">
                     <thead class="table-light">
                         <tr>
                             <th>No.</th>
                             <th>Cinema Name</th>
                             <th>Location</th>
+                            <th>Address</th>
+                            <th>Total Rooms</th>
                             <th>Status</th>
                             <th>Created Date</th>
                             <th>Action</th>
@@ -93,7 +155,11 @@
                             <tr>
                                 <td>${(currentPage - 1) * recordsPerPage + loop.index + 1}</td>
                                 <td>${cinema.cinemaName}</td>
-                                <td>${cinema.location}</td>
+                                <td>
+                                    <span class="badge bg-primary">${cinema.location}</span>
+                                </td>
+                                <td class="address-cell">${cinema.address}</td>
+                                <td>${cinema.totalRooms}</td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${cinema.active}">
@@ -126,6 +192,7 @@
                                                             '${cinema.cinemaID}',
                                                             '${cinema.cinemaName}',
                                                             '${cinema.location}',
+                                                            '${cinema.address}',
                                                             '${cinema.totalRooms}'
                                                             )">Delete</button>
                                 </td>
@@ -139,7 +206,7 @@
                     <ul class="pagination justify-content-center" id="pagination">
                         <c:if test="${currentPage > 1}">
                             <li class="page-item">
-                                <a class="page-link" href="dashboard?section=cinema-management&page=${currentPage-1}&status=${requestScope.statusFilter}&search=${requestScope.search}" aria-label="Previous">
+                                <a class="page-link" href="dashboard?section=cinema-management&page=${currentPage-1}&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
@@ -151,14 +218,14 @@
                                     <li class="page-item active"><a class="page-link" href="#">${i}</a></li>
                                     </c:when>
                                     <c:otherwise>
-                                    <li class="page-item"><a class="page-link" href="dashboard?section=cinema-management&page=${i}&status=${requestScope.statusFilter}&search=${requestScope.search}">${i}</a></li>
+                                    <li class="page-item"><a class="page-link" href="dashboard?section=cinema-management&page=${i}&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">${i}</a></li>
                                     </c:otherwise>
                                 </c:choose>
                             </c:forEach>
 
                         <c:if test="${currentPage lt noOfPages}">
                             <li class="page-item">
-                                <a class="page-link" href="dashboard?section=cinema-management&page=${currentPage+1}&status=${requestScope.statusFilter}&search=${requestScope.search}" aria-label="Next">
+                                <a class="page-link" href="dashboard?section=cinema-management&page=${currentPage+1}&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -189,19 +256,24 @@
                             Try adjusting your search criteria or add a new cinema.
                         </p>
 
-                        <c:if test="${not empty requestScope.search != null or requestScope.statusFilter != 'all'}">
+                        <c:if test="${not empty requestScope.search or requestScope.statusFilter != 'all' or requestScope.locationFilter != 'all'}">
                             <div class="active-filters mb-4">
                                 <span class="badge bg-light text-dark me-2">
                                     <i class="bi bi-funnel"></i> Current Filters:
                                 </span>
                                 <c:if test="${not empty requestScope.search}">
                                     <span class="badge bg-info me-2">
-                                        Search input: "${requestScope.search}"
+                                        Search: "${requestScope.search}"
                                     </span>
                                 </c:if>
                                 <c:if test="${requestScope.statusFilter != 'all'}">
                                     <span class="badge bg-warning me-2">
-                                        Status filter: ${requestScope.statusFilter}
+                                        Status: ${requestScope.statusFilter}
+                                    </span>
+                                </c:if>
+                                <c:if test="${requestScope.locationFilter != 'all'}">
+                                    <span class="badge bg-success me-2">
+                                        Location: ${requestScope.locationFilter}
                                     </span>
                                 </c:if>
                             </div>
@@ -235,14 +307,32 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Cinema Name</label>
+                            <label class="form-label">Cinema Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="cinemaName" placeholder="Ex: CGV Vincom Center, Lotte Cinema, etc..." required>
+                            <div class="invalid-feedback">Please enter cinema name.</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Location</label>
-                            <textarea class="form-control" name="location" rows="3" placeholder="Enter full address..." required></textarea>
+                            <label class="form-label">Location <span class="text-danger">*</span></label>
+                            <select class="form-select" name="location" required>
+                                <option value="">Select Location</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="TP.HCM">TP.HCM</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                                <option value="Hải Phòng">Hải Phòng</option>
+                                <option value="Cần Thơ">Cần Thơ</option>
+                                <option value="Nha Trang">Nha Trang</option>
+                                <option value="Vũng Tàu">Vũng Tàu</option>
+                                <option value="Đà Lạt">Đà Lạt</option>
+                                <option value="Huế">Huế</option>
+                                <option value="Quy Nhơn">Quy Nhơn</option>
+                            </select>
+                            <div class="invalid-feedback">Please select location.</div>
                         </div>
-                        <!-- ĐÃ XÓA TRƯỜNG TOTAL ROOMS KHI TẠO MỚI -->
+                        <div class="mb-3">
+                            <label class="form-label">Address <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="address" rows="3" placeholder="Enter detailed address..." required></textarea>
+                            <div class="invalid-feedback">Please enter address.</div>
+                        </div>
                         <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" name="isActive" id="isActiveSwitch" checked>
@@ -275,6 +365,7 @@
                         <div class="card-body">
                             <p class="mb-1"><strong>Cinema Name:</strong> <span id="deleteCinemaName"></span></p>
                             <p class="mb-1"><strong>Location:</strong> <span id="deleteCinemaLocation"></span></p>
+                            <p class="mb-1"><strong>Address:</strong> <span id="deleteCinemaAddress"></span></p>
                             <p class="mb-1"><strong>Total Rooms:</strong> <span id="deleteCinemaRooms"></span></p>
                         </div>
                     </div>
@@ -295,7 +386,7 @@
         </div>
     </div>
 
-    <!-- View Cinema Modal - ĐÃ THÊM DANH SÁCH PHÒNG CHIẾU -->
+    <!-- View Cinema Modal -->
     <div class="modal fade" id="viewCinemaModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -310,21 +401,39 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-2">
-                                    <label class="form-label">Cinema Name</label>
-                                    <input type="text" class="form-control" name="cinemaName" value="${requestScope.viewCinema.cinemaName}" ${param.mode != 'edit' ? 'readonly' : ''}>
+                                <div class="mb-3">
+                                    <label class="form-label">Cinema Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="cinemaName" value="${requestScope.viewCinema.cinemaName}" ${param.mode != 'edit' ? 'readonly' : ''} required>
                                 </div>
-                                <div class="mb-2">
-                                    <label class="form-label">Location</label>
-                                    <textarea class="form-control" name="location" ${param.mode != 'edit' ? 'readonly' : ''}>${requestScope.viewCinema.location}</textarea>
+                                <div class="mb-3">
+                                    <label class="form-label">Location <span class="text-danger">*</span></label>
+                                    <c:choose>
+                                        <c:when test="${param.mode == 'edit'}">
+                                            <select class="form-select" name="location" ${param.mode != 'edit' ? 'disabled' : ''} required>
+                                                <option value="Hà Nội" ${requestScope.viewCinema.location == 'Hà Nội' ? 'selected' : ''}>Hà Nội</option>
+                                                <option value="TP.HCM" ${requestScope.viewCinema.location == 'TP.HCM' ? 'selected' : ''}>TP.HCM</option>
+                                                <option value="Đà Nẵng" ${requestScope.viewCinema.location == 'Đà Nẵng' ? 'selected' : ''}>Đà Nẵng</option>
+                                                <option value="Hải Phòng" ${requestScope.viewCinema.location == 'Hải Phòng' ? 'selected' : ''}>Hải Phòng</option>
+                                                <option value="Cần Thơ" ${requestScope.viewCinema.location == 'Cần Thơ' ? 'selected' : ''}>Cần Thơ</option>
+                                                <option value="Nha Trang" ${requestScope.viewCinema.location == 'Nha Trang' ? 'selected' : ''}>Nha Trang</option>
+                                                <option value="Vũng Tàu" ${requestScope.viewCinema.location == 'Vũng Tàu' ? 'selected' : ''}>Vũng Tàu</option>
+                                                <option value="Đà Lạt" ${requestScope.viewCinema.location == 'Đà Lạt' ? 'selected' : ''}>Đà Lạt</option>
+                                                <option value="Huế" ${requestScope.viewCinema.location == 'Huế' ? 'selected' : ''}>Huế</option>
+                                                <option value="Quy Nhơn" ${requestScope.viewCinema.location == 'Quy Nhơn' ? 'selected' : ''}>Quy Nhơn</option>
+                                            </select>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <input type="text" class="form-control" value="${requestScope.viewCinema.location}" readonly>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-2">
-                                    <label class="form-label">Total Rooms</label>
-                                    <input type="text" class="form-control" value="${requestScope.viewCinema.totalRooms}" readonly>
+                                <div class="mb-3">
+                                    <label class="form-label">Address <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="address" ${param.mode != 'edit' ? 'readonly' : ''} required>${requestScope.viewCinema.address}</textarea>
                                 </div>
-                                <div class="mb-2">
+                                <div class="mb-3">
                                     <label class="form-label">Status</label>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="isActive" id="viewIsActive" ${requestScope.viewCinema.active ? 'checked' : ''} ${param.mode != 'edit' ? 'disabled' : ''}>
@@ -333,7 +442,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="mb-2">
+                                <div class="mb-3">
                                     <label class="form-label">Created Date</label>
                                     <input type="text" class="form-control" value="${requestScope.viewCinema.createdDate}" readonly>
                                 </div>
@@ -510,19 +619,15 @@
             <c:if test="${requestScope.viewCinema != null}">
                 var viewModal = new bootstrap.Modal(document.getElementById('viewCinemaModal'));
                 viewModal.show();
-                
-                // Ẩn các phần không cần thiết khi đang view
-                document.getElementById('cinema-management-content').querySelectorAll('.table, .empty-state-container, .pagination').forEach(function(el) {
-                    el.style.display = 'none';
-                });
             </c:if>
         });
 
-        // Hàm hiện modal delete với thông tin của cinema
-        function showDeleteModal(cinemaId, cinemaName, location, totalRooms) {
+        // Hàm hiện modal delete với thông tin của cinema - ĐÃ SỬA
+        function showDeleteModal(cinemaId, cinemaName, location, address, totalRooms) {
             // Set cinema details in the modal
             document.getElementById('deleteCinemaName').textContent = cinemaName;
             document.getElementById('deleteCinemaLocation').textContent = location;
+            document.getElementById('deleteCinemaAddress').textContent = address;
             document.getElementById('deleteCinemaRooms').textContent = totalRooms;
             document.getElementById('deleteCinemaIdInput').value = cinemaId;
 
@@ -533,13 +638,146 @@
 
         // Form validation
         document.getElementById("addCinemaForm").addEventListener('submit', function (e) {
-            // Validation logic nếu cần
+            const cinemaName = document.querySelector('input[name="cinemaName"]');
+            const location = document.querySelector('select[name="location"]');
+            const address = document.querySelector('textarea[name="address"]');
+            
+            let isValid = true;
+            
+            // Clear previous validation
+            cinemaName.classList.remove('is-invalid');
+            location.classList.remove('is-invalid');
+            address.classList.remove('is-invalid');
+            
+            // Validate cinema name
+            if (!cinemaName.value.trim()) {
+                cinemaName.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate location
+            if (!location.value) {
+                location.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate address
+            if (!address.value.trim()) {
+                address.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        // Real-time validation
+        document.querySelectorAll('input[name="cinemaName"], select[name="location"], textarea[name="address"]').forEach(input => {
+            input.addEventListener('input', function () {
+                this.classList.remove('is-invalid');
+            });
         });
 
         // Xử lý khi modal view bị ẩn
         document.getElementById('viewCinemaModal').addEventListener('hidden.bs.modal', function () {
-            // Redirect về trang danh sách
             window.location.href = 'dashboard?section=cinema-management&page=${requestScope.currentPage}';
         });
     </script>
+
+    <style>
+        /* CSS cho validation */
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        /* CSS cho address cell trong bảng */
+        .address-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* CSS cho các trường readonly trong modal edit */
+        .form-control[readonly] {
+            background-color: #f8f9fa !important;
+            border-color: #e9ecef !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.8 !important;
+        }
+
+        .form-control:not([readonly]) {
+            background-color: #ffffff !important;
+            border-color: #ced4da !important;
+            color: #212529 !important;
+        }
+
+        /* Đảm bảo select box khi disabled cũng có style tương tự */
+        .form-select:disabled {
+            background-color: #f8f9fa !important;
+            border-color: #e9ecef !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.8 !important;
+        }
+
+        .form-select:not(:disabled) {
+            background-color: #ffffff !important;
+            border-color: #ced4da !important;
+            color: #212529 !important;
+        }
+
+        /* Style cho textarea readonly */
+        textarea.form-control[readonly] {
+            background-color: #f8f9fa !important;
+            border-color: #e9ecef !important;
+            color: #6c757d !important;
+            resize: none !important;
+        }
+
+        /* Hiệu ứng chuyển tiếp mượt mà khi chuyển giữa edit và view mode */
+        .form-control,
+        .form-select {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Label style để phân biệt rõ hơn */
+        .modal-body label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+
+        /* Khi ở chế độ edit, các field có thể edit sẽ có border highlight */
+        .form-select:not(:disabled) {
+            border-color: #86b7fe !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .modal-body .form-control,
+            .modal-body .form-select {
+                font-size: 14px;
+            }
+            
+            .address-cell {
+                max-width: 150px;
+            }
+        }
+    </style>
 </div>
