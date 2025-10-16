@@ -5,8 +5,7 @@
 
 package controller;
 
-import dal.MovieDAO;
-import entity.Movie;
+import dal.ScreeningDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,14 +13,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name="ListMovieServlet", urlPatterns={"/list"})
-public class ListMovieServlet extends HttpServlet {
+@WebServlet(name="CancelScreeningServlet", urlPatterns={"/cancelScreening"})
+public class CancelScreeningServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -38,10 +36,10 @@ public class ListMovieServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ListMovieServlet</title>");  
+            out.println("<title>Servlet CancelScreeningServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ListMovieServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet CancelScreeningServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -57,39 +55,31 @@ public class ListMovieServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-     
-    String keyword = request.getParameter("keyword");
-    int page = 1;
-    int recordsPerPage = 6;
+            throws ServletException, IOException {
 
-    // Lấy trang hiện tại (nếu có)
-    String pageParam = request.getParameter("page");
-    if (pageParam != null) {
         try {
-            page = Integer.parseInt(pageParam);
-        } catch (NumberFormatException e) {
-            page = 1;
+            String idStr = request.getParameter("screeningID");
+            if (idStr == null || idStr.isEmpty()) {
+                response.sendRedirect("listScreening?error=invalid_id");
+                return;
+            }
+
+            int screeningID = Integer.parseInt(idStr);
+            ScreeningDAO dao = new ScreeningDAO();
+
+            boolean deleted = dao.cancelScreening(screeningID);
+
+            if (deleted) {
+                response.sendRedirect("listScreening?cancelSuccess=1");
+            } else {
+                response.sendRedirect("listScreening?cancelFail=1");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("listScreening?error=exception");
         }
     }
-
-    MovieDAO dao = new MovieDAO();
-
-    int totalRecords = dao.getTotalMovies(keyword);
-    int totalPages = (int) Math.ceil(totalRecords / (double) recordsPerPage);
-
-    int offset = (page - 1) * recordsPerPage;
-
-    List<Movie> movies = dao.getMoviesPaginated(offset, recordsPerPage, keyword);
-
-    // Gửi dữ liệu sang JSP
-    request.setAttribute("movies", movies);
-    request.setAttribute("currentPage", page);
-    request.setAttribute("totalPages", totalPages);
-    request.setAttribute("keyword", keyword);
-
-    request.getRequestDispatcher("listMovie.jsp").forward(request, response);
-    } 
 
     /** 
      * Handles the HTTP <code>POST</code> method.

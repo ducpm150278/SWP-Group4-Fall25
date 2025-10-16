@@ -56,7 +56,6 @@
                             <table class="table table-bordered table-hover align-middle">
                                 <thead class="table-dark text-center">
                                     <tr>
-                                        <th>ID</th>
                                         <th>Tiêu đề</th>
                                         <th>Thể loại</th>
                                         <th>Tóm tắt</th>
@@ -74,7 +73,6 @@
                                 <tbody>
                                     <c:forEach var="m" items="${movies}">
                                         <tr>
-                                            <td class="text-center">${m.movieID}</td>
                                             <td>${m.title}</td>
                                             <td>${m.genre}</td>
                                             <td>${m.summary}</td>
@@ -95,9 +93,9 @@
                                             </td>
                                             <td class="text-center">${m.languageName}</td>
                                             <td class="text-center">
-                                                <a href="edit?movieID=${m.movieID}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                                                <a href="edit?movieID=${m.movieID}" class="btn btn-sm btn-warning">Edit</a>
                                                 <a href="delete?movieID=${m.movieID}" class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bạn có chắc muốn xóa phim này?');">🗑️ Delete</a>
+                                                   onclick="return confirm('Bạn có chắc muốn xóa phim này?');">Delete</a>
                                             </td>
                                         </tr>
                                     </c:forEach>
