@@ -29,7 +29,7 @@ public class MovieDAO extends DBContext {
                                       FROM Movies m 
                                       JOIN Language l ON m.languageID = l.languageID""";
         try {
-            PreparedStatement pre = connection.prepareStatement(sql);
+            PreparedStatement pre = getConnection().prepareStatement(sql);
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
 
@@ -62,7 +62,7 @@ public class MovieDAO extends DBContext {
         String sql = "INSERT INTO Movies (Title, Genre, Summary, TrailerURL, Cast, Director, Duration, ReleasedDate, PosterURL, LanguageID, Status, CreatedDate) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pre = connection.prepareStatement(sql)) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, title);
             pre.setString(2, genre);
             pre.setString(3, summary);
@@ -93,7 +93,7 @@ public class MovieDAO extends DBContext {
         WHERE m.Title LIKE ?
     """;
         try {
-            PreparedStatement pre = connection.prepareStatement(sql);
+            PreparedStatement pre = getConnection().prepareStatement(sql);
             pre.setString(1, "%" + keyword + "%");
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
@@ -132,7 +132,7 @@ public class MovieDAO extends DBContext {
             Duration=?, ReleasedDate=?, PosterURL=?, Status=?, LanguageID=?
         WHERE MovieID=?""";
 
-        try (PreparedStatement pre = connection.prepareStatement(sql)) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, title);
             pre.setString(2, genre);
             pre.setString(3, summary);
@@ -155,7 +155,7 @@ public class MovieDAO extends DBContext {
     public void delete(int movieID) {
         String sql = "DELETE FROM Movies WHERE MovieID = ?";
         try {
-            PreparedStatement pre = connection.prepareStatement(sql);
+            PreparedStatement pre = getConnection().prepareStatement(sql);
             pre.setInt(1, movieID);
             pre.executeUpdate();
         } catch (SQLException e) {
@@ -173,7 +173,7 @@ public class MovieDAO extends DBContext {
         WHERE m.MovieID = ?
         """;
 
-        try (PreparedStatement pre = connection.prepareStatement(sql)) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setInt(1, id);
             ResultSet rs = pre.executeQuery();
             if (rs.next()) {
@@ -203,7 +203,7 @@ public class MovieDAO extends DBContext {
     public List<Language> getAllLanguages() {
         List<Language> list = new ArrayList<>();
         String sql = "SELECT LanguageID, LanguageName FROM Language WHERE IsActive = 1";
-        try (PreparedStatement pre = connection.prepareStatement(sql)) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
                 list.add(new Language(

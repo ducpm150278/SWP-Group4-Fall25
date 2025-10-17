@@ -391,204 +391,172 @@
                 }
             }
 
-            #price-update-content .active-filters {
-                display: inline-flex;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-
-            /* Đảm bảo các badge không bị wrap khi không đủ chỗ */
-            #price-update-content .active-filters .badge {
-                white-space: nowrap;
-            }
-
-            #request-management-content .stat-card {
-                min-width: 120px;
-            }
-
-            #request-management-content .change-comparison {
+            /* Cinema Management Styles */
+            #cinema-management-content .address-cell {
                 max-width: 200px;
-                word-break: break-word;
-            }
-
-            #request-management-content .view-detail-btn {
+                overflow: hidden;
+                text-overflow: ellipsis;
                 white-space: nowrap;
             }
 
-            /* Sửa lại phần dropdown */
-            #request-management-content .dropdown-menu {
-                border: none;
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-                border-radius: 0.5rem;
-                padding: 0.5rem;
-                margin-top: 0.5rem;
-                min-width: 12rem;
+            #cinema-management-content .is-invalid {
+                border-color: #dc3545 !important;
             }
 
-            #request-management-content .dropdown-item {
-                border-radius: 0.25rem;
-                padding: 0.5rem 1rem;
-                margin: 0.125rem 0;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
+            #cinema-management-content .invalid-feedback {
+                display: none;
+                width: 100%;
+                margin-top: 0.25rem;
+                font-size: 0.875em;
+                color: #dc3545;
             }
 
-            #request-management-content .dropdown-item:hover,
-            #request-management-content .dropdown-item:focus {
-                background-color: #f8f9fa;
-                color: #0d6efd;
+            #cinema-management-content .is-invalid ~ .invalid-feedback {
+                display: block;
             }
 
-            #request-management-content .dropdown-item.active {
-                background-color: #0d6efd;
-                color: white;
+            #cinema-management-content .form-control[readonly] {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                cursor: not-allowed !important;
+                opacity: 0.8 !important;
             }
 
-            #request-management-content .dropdown-divider {
-                margin: 0.5rem 0;
-                border-color: rgba(0, 0, 0, 0.05);
+            #cinema-management-content .form-select:disabled {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                cursor: not-allowed !important;
+                opacity: 0.8 !important;
             }
 
-            /* Date dropdown specific */
-            #request-management-content #dateDropdown .dropdown-menu {
-                width: 300px;
-                padding: 1rem;
+            #cinema-management-content textarea.form-control[readonly] {
+                background-color: #f8f9fa !important;
+                border-color: #e9ecef !important;
+                color: #6c757d !important;
+                resize: none !important;
             }
 
-            /* Đảm bảo table responsive không chồng lên dropdown */
-            #request-management-content .table-responsive {
-                position: relative;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
+            /* Responsive adjustments for cinema management */
+            @media (max-width: 768px) {
+                #cinema-management-content .table-responsive {
+                    font-size: 0.875rem;
+                }
 
-            /* Giảm kích thước font của chart */
-            #roleChart {
-                max-height: 180px;
-                width: 100% !important;
-            }
+                #cinema-management-content .address-cell {
+                    max-width: 150px;
+                }
 
-            /* Thu nhỏ text trong activity items */
-            #statistical-content .recent-activity-item {
-                font-size: 0.85rem;
-                line-height: 1.3;
-            }
+                #cinema-management-content .btn-sm {
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.775rem;
+                }
+                
+            </style>
+        </head>
+        <body>
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Admin Panel</h3>
+                </div>
 
-            /* Đảm bảo card có chiều cao bằng nhau */
-            #statistical-content .equal-height-card {
-                display: flex;
-                flex-direction: column;
-                height: 100%;
-            }
-            #statistical-content .equal-height-card .card-body {
-                flex: 1;
-            }
-        </style>
-    </head>
-    <body>
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h3>Admin Panel</h3>
-            </div>
+                <div class="sidebar-menu">
+                    <ul>
+    <!--                    <li class="${param.section eq 'statistical' or empty param.section ? 'active' : ''}">
+                            <a href="<c:url value='/admin/dashboard?section=statistical'/>">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Statistical</span>
+                            </a>
+                        </li>-->
+                        <li class="${param.section eq 'user-management' ? 'active' : ''}">
+                            <a href="<c:url value='/adminFE/dashboard?section=user-management'/>">
+                                <i class="fas fa-users"></i>
+                                <span>User Management</span>
+                            </a>
+                        </li>
+                        <li class="${param.section eq 'cinema-management' ? 'active' : ''}">
+                            <a href="<c:url value='/adminFE/dashboard?section=cinema-management'/>">
+                                <i class="fas fa-tags"></i>
+                                <span>Cinema Management</span>
+                            </a>
+                        </li>
+    <!--                    <li class="${param.section eq 'log-history' ? 'active' : ''}">
+                            <a href="<c:url value='/admin/dashboard?section=log-history'/>">
+                                <i class="fas fa-history"></i>
+                                <span>Log History</span>
+                            </a>
+                        </li>
+                        <li class="${param.section eq 'request-management' ? 'active' : ''}">
+                            <a href="<c:url value='/admin/dashboard?section=request-management'/>">
+                                <i class="fas fa-envelope"></i>
+                                <span>Request</span>
+                            </a>
+                        </li>-->
+                    </ul>
+                </div>
 
-            <div class="sidebar-menu">
-                <ul>
-<!--                    <li class="${param.section eq 'statistical' or empty param.section ? 'active' : ''}">
-                        <a href="<c:url value='/admin/dashboard?section=statistical'/>">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Statistical</span>
-                        </a>
-                    </li>-->
-                    <li class="${param.section eq 'user-management' ? 'active' : ''}">
-                        <a href="<c:url value='/adminFE/dashboard?section=user-management'/>">
-                            <i class="fas fa-users"></i>
-                            <span>User Management</span>
-                        </a>
-                    </li>
-                    <li class="${param.section eq 'cinema-management' ? 'active' : ''}">
-                        <a href="<c:url value='/adminFE/dashboard?section=cinema-management'/>">
-                            <i class="fas fa-tags"></i>
-                            <span>Cinema Management</span>
-                        </a>
-                    </li>
-<!--                    <li class="${param.section eq 'log-history' ? 'active' : ''}">
-                        <a href="<c:url value='/admin/dashboard?section=log-history'/>">
-                            <i class="fas fa-history"></i>
-                            <span>Log History</span>
-                        </a>
-                    </li>
-                    <li class="${param.section eq 'request-management' ? 'active' : ''}">
-                        <a href="<c:url value='/admin/dashboard?section=request-management'/>">
-                            <i class="fas fa-envelope"></i>
-                            <span>Request</span>
-                        </a>
-                    </li>-->
-                </ul>
-            </div>
-
-            <div class="sidebar-footer">
-                <button class="btn btn-danger btn-block" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="header">
-                <button class="btn btn-primary d-md-none" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-
-                <div class="user-info">
-                    <!--<img src="https://via.placeholder.com/40" alt="Admin Avatar">-->
-                    <span>Welcome, <c:out value="${sessionScope.admin.name}" default="Admin"/></span>
+                <div class="sidebar-footer">
+                    <button class="btn btn-danger btn-block" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
                 </div>
             </div>
 
-            <!-- Content Area -->
-            <div class="container-fluid py-4" id="contentArea">
-                <c:choose>
-                    <c:when test="${param.section eq 'user-management'}">
-                        <jsp:include page="user_management.jsp"/>
-                    </c:when>
-                    <c:when test="${param.section eq 'cinema-management'}">
-                        <jsp:include page="cinema_management.jsp"/>
-                    </c:when>
-                    <c:when test="${param.section eq 'log-history'}">
-                        <jsp:include page="log-history.jsp"/>
-                    </c:when>
-                    <c:when test="${param.section eq 'request-management'}">
-                        <jsp:include page="request.jsp"/>
-                    </c:when>
-                    <c:otherwise> 
-                        <!-- Default section or dashboard home -->
-                        <div class="text-center py-5">
-                            <h3>Welcome to Admin Dashboard</h3>
-                            <p>Select a section from the sidebar to get started.</p>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Header -->
+                <div class="header">
+                    <button class="btn btn-primary d-md-none" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <div class="user-info">
+                        <!--<img src="https://via.placeholder.com/40" alt="Admin Avatar">-->
+                        <span>Welcome, <c:out value="${sessionScope.admin.name}" default="Admin"/></span>
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="container-fluid py-4" id="contentArea">
+                    <c:choose>
+                        <c:when test="${param.section eq 'user-management'}">
+                            <jsp:include page="user_management.jsp"/>
+                        </c:when>
+                        <c:when test="${param.section eq 'cinema-management'}">
+                            <jsp:include page="cinema_management.jsp"/>
+                        </c:when>
+                        <c:when test="${param.section eq 'log-history'}">
+                            <jsp:include page="log-history.jsp"/>
+                        </c:when>
+                        <c:when test="${param.section eq 'request-management'}">
+                            <jsp:include page="request.jsp"/>
+                        </c:when>
+                        <c:otherwise> 
+                            <!-- Default section or dashboard home -->
+                            <div class="text-center py-5">
+                                <h3>Welcome to Admin Dashboard</h3>
+                                <p>Select a section from the sidebar to get started.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
-        </div>
 
-        <!-- Bootstrap JS and dependencies -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Chart.js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <!-- Bootstrap JS and dependencies -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- Chart.js -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <script>
-                    // Logout function
-                    function logout() {
-                        if (confirm('Are you sure you want to logout?')) {
-                            window.location.href = '<c:url value="/admin/logout"/>';
+            <script>
+                        // Logout function
+                        function logout() {
+                            if (confirm('Are you sure you want to logout?')) {
+                                window.location.href = '<c:url value="/admin/logout"/>';
+                            }
                         }
-                    }
-        </script>
-    </body>
-</html>
+            </script>
+        </body>
+    </html>

@@ -15,16 +15,13 @@ import java.time.LocalDateTime;
  *
  * @author minhd
  */
-public class FoodDAO {
-
-    DBContext db = new DBContext();
-    protected Connection connection = db.connection;
+public class FoodDAO extends DBContext{
 
     public List<Food> getAllFood() {
         List<Food> foodList = new ArrayList<>();
         String sql = "SELECT * FROM Food ORDER BY FoodID";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Food food = mapResultSetToFood(rs);
@@ -44,7 +41,7 @@ public class FoodDAO {
         String sql = "SELECT * FROM Food WHERE FoodID = ?";
         Food food = null;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, foodId);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -66,7 +63,7 @@ public class FoodDAO {
         String sql = "INSERT INTO Food (FoodName, Description, Price, FoodType, ImageURL, IsAvailable, CreatedDate, LastModifiedDate) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, food.getFoodName());
             stmt.setString(2, food.getDescription());
             stmt.setBigDecimal(3, food.getPrice());
@@ -101,7 +98,7 @@ public class FoodDAO {
         String sql = "UPDATE Food SET FoodName = ?, Description = ?, Price = ?, FoodType = ?, "
                 + "ImageURL = ?, IsAvailable = ?, LastModifiedDate = ? WHERE FoodID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setString(1, food.getFoodName());
             stmt.setString(2, food.getDescription());
             stmt.setBigDecimal(3, food.getPrice());
@@ -133,7 +130,7 @@ public class FoodDAO {
 
         String sql = "DELETE FROM Food WHERE FoodID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, foodId);
 
             int affectedRows = stmt.executeUpdate();
@@ -152,7 +149,7 @@ public class FoodDAO {
     private boolean isFoodInCombo(int foodId) {
         String sql = "SELECT COUNT(*) FROM ComboFood WHERE FoodID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, foodId);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -174,7 +171,7 @@ public class FoodDAO {
         List<Food> foodList = new ArrayList<>();
         String sql = "SELECT * FROM Food WHERE FoodType = ? ORDER BY FoodName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setString(1, foodType);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -197,7 +194,7 @@ public class FoodDAO {
         List<Food> foodList = new ArrayList<>();
         String sql = "SELECT * FROM Food WHERE IsAvailable = 1 ORDER BY FoodName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Food food = mapResultSetToFood(rs);
@@ -217,7 +214,7 @@ public class FoodDAO {
         List<Food> foodList = new ArrayList<>();
         String sql = "SELECT * FROM Food WHERE FoodName LIKE ? ORDER BY FoodName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setString(1, "%" + keyword + "%");
 
             try (ResultSet rs = stmt.executeQuery()) {
