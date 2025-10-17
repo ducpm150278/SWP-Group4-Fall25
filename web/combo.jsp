@@ -1,17 +1,22 @@
+<%-- 
+    Document   : combo
+    Created on : Oct 11, 2025, 11:59:38 PM
+    Author     : minhd
+--%>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="entity.Food" %>
+<%@ page import="entity.Combo" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.math.BigDecimal" %>
 <%
-    // This would typically come from your servlet
-    List<Food> foodList = (List<Food>) request.getAttribute("foodList");
+    List<Combo> comboList = (List<Combo>) request.getAttribute("comboList");
 %>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Food Management</title>
+        <title>Combo Management</title>
         <style>
             * {
                 margin: 0;
@@ -242,32 +247,20 @@
                 color: #c62828;
             }
 
-            .food-type {
-                display: inline-block;
-                padding: 5px 10px;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                font-weight: 500;
+            .price {
+                font-weight: 600;
+                color: #2c3e50;
             }
 
-            .food-type.snack {
-                background-color: #fff3e0;
-                color: #ef6c00;
+            .discount-price {
+                color: #e74c3c;
+                font-weight: 600;
             }
 
-            .food-type.drink {
-                background-color: #e3f2fd;
-                color: #1565c0;
-            }
-
-            .food-type.dessert {
-                background-color: #f3e5f5;
-                color: #7b1fa2;
-            }
-
-            .food-type.combo {
-                background-color: #e8f5e9;
-                color: #2e7d32;
+            .original-price {
+                text-decoration: line-through;
+                color: #7f8c8d;
+                font-size: 0.9rem;
             }
 
             .action-btn {
@@ -280,6 +273,7 @@
                 font-size: 0.85rem;
                 transition: background-color 0.3s;
                 margin-right: 5px;
+                margin-bottom: 5px;
             }
 
             .action-btn:hover {
@@ -294,17 +288,20 @@
                 background-color: #e67e22;
             }
 
+            .action-btn.manage {
+                background-color: #27ae60;
+            }
+
+            .action-btn.manage:hover {
+                background-color: #219653;
+            }
+
             .action-btn.delete {
                 background-color: #e74c3c;
             }
 
             .action-btn.delete:hover {
                 background-color: #c0392b;
-            }
-
-            .price {
-                font-weight: 600;
-                color: #2c3e50;
             }
 
             /* Responsive Design */
@@ -358,6 +355,12 @@
 
                 .filter-container select {
                     width: 100%;
+                }
+
+                .action-btn {
+                    display: block;
+                    width: 100%;
+                    margin-right: 0;
                 }
             }
 
@@ -416,6 +419,15 @@
             .form-group {
                 margin-bottom: 15px;
             }
+
+            .price-container {
+                display: flex;
+                gap: 15px;
+            }
+
+            .price-container .form-group {
+                flex: 1;
+            }
         </style>
     </head>
     <body>
@@ -428,10 +440,10 @@
                 <a href="users.jsp" class="nav-item">
                     <i>👥</i> User Management
                 </a>
-                <a href="food-management" class="nav-item active">
+                <a href="food-management" class="nav-item">
                     <i>🍿</i> Food Management
                 </a>
-                <a href="combo-management" class="nav-item">
+                <a href="combo-management" class="nav-item active">
                     <i>📦</i> Combo Management
                 </a>
                 <a href="movies.jsp" class="nav-item">
@@ -456,27 +468,23 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h2>Food Management</h2>
+                <h2>Combo Management</h2>
                 <div class="header-controls">
                     <div class="search-container">
                         <span class="search-icon">🔍</span>
-                        <input type="text" id="searchInput" placeholder="Search food items..." onkeyup="searchFood()">
+                        <input type="text" id="searchInput" placeholder="Search combos..." onkeyup="searchCombo()">
                     </div>
 
                     <div class="filter-container">
-                        <select id="filterSelect" onchange="filterFood()">
-                            <option value="all">All Categories & Status</option>
-                            <option value="category:Snack">Category: Snack</option>
-                            <option value="category:Drink">Category: Drink</option>
-                            <option value="category:Dessert">Category: Dessert</option>
-                            <option value="category:Combo">Category: Combo</option>
+                        <select id="filterSelect" onchange="filterCombo()">
+                            <option value="all">All Status</option>
                             <option value="status:available">Status: Available</option>
                             <option value="status:unavailable">Status: Unavailable</option>
                         </select>
                     </div>
 
-                    <button class="btn btn-primary" onclick="openAddFoodModal()">
-                        <i>➕</i> Add New Food
+                    <button class="btn btn-primary" onclick="openAddComboModal()">
+                        <i>➕</i> Add New Combo
                     </button>
                 </div>
             </div>
@@ -486,49 +494,56 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Food Name</th>
+                            <th>Combo Name</th>
                             <th>Description</th>
-                            <th>Type</th>
-                            <th>Price</th>
+                            <th>Prices</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="foodTableBody">
-                        <% if (foodList != null && !foodList.isEmpty()) { 
-                            for (Food food : foodList) { 
-                                String foodTypeClass = food.getFoodType() != null ? food.getFoodType().toLowerCase() : "snack";
+                    <tbody id="comboTableBody">
+                        <% if (comboList != null && !comboList.isEmpty()) { 
+                            for (Combo combo : comboList) { 
+                                BigDecimal savings = null;
+                                if (combo.getDiscountPrice() != null && combo.getTotalPrice() != null) {
+                                    savings = combo.getTotalPrice().subtract(combo.getDiscountPrice());
+                                }
                         %>
                         <tr>
-                            <td><%= food.getFoodID() != null ? food.getFoodID() : "N/A" %></td>
-                            <td><%= food.getFoodName() != null ? food.getFoodName() : "N/A" %></td>
-                            <td><%= food.getDescription() != null ? food.getDescription() : "N/A" %></td>
+                            <td><%= combo.getComboID() != null ? combo.getComboID() : "N/A" %></td>
+                            <td><%= combo.getComboName() != null ? combo.getComboName() : "N/A" %></td>
+                            <td><%= combo.getDescription() != null ? combo.getDescription() : "N/A" %></td>
                             <td>
-                                <span class="food-type <%= foodTypeClass %>">
-                                    <%= food.getFoodType() != null ? food.getFoodType() : "N/A" %>
-                                </span>
-                            </td>
-                            <td class="price"><%= formatPrice(food.getPrice()) %></td>
-                            <td>
-                                <span class="status <%= food.getIsAvailable() != null && food.getIsAvailable() ? "available" : "unavailable" %>">
-                                    <%= food.getIsAvailable() != null && food.getIsAvailable() ? "Available" : "Unavailable" %>
-                                </span>
+                                <% if (combo.getDiscountPrice() != null) { %>
+                                <div class="discount-price"><%= formatPrice(combo.getDiscountPrice()) %></div>
+                                <div class="original-price"><%= formatPrice(combo.getTotalPrice()) %></div>
+                                <% } else { %>
+                                <div class="price"><%= formatPrice(combo.getTotalPrice()) %></div>
+                                <% } %>
                             </td>
                             <td>
-                                <button class="action-btn edit" onclick="editFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
+                                <span class="status <%= combo.getIsAvailable() != null && combo.getIsAvailable() ? "available" : "unavailable" %>">
+                                    <%= combo.getIsAvailable() != null && combo.getIsAvailable() ? "Available" : "Unavailable" %>
+                                </span>
+                            </td>
+                            <td>
+                                <button class="action-btn edit" onclick="editCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
                                     Edit
                                 </button>
-                                <button class="action-btn delete" onclick="deleteFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
+                                <button class="action-btn manage" onclick="manageComboFood(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
+                                    Manage Food
+                                </button>
+                                <button class="action-btn delete" onclick="deleteCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
                                     Delete
                                 </button>
                             </td>
                         </tr>
                         <% } 
-    } else { %>
+                    } else { %>
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px;">
+                            <td colspan="6" style="text-align: center; padding: 40px;">
                                 <div style="color: #7f8c8d; font-size: 1.1rem;">
-                                    No food items found.
+                                    No combos found.
                                 </div>
                             </td>
                         </tr>
@@ -537,58 +552,7 @@
                 </table>
             </div>
         </div>
-        <div id="addFoodModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeAddFoodModal()">&times;</span>
-                <h3 style="margin-bottom: 20px; color: #2c3e50;">Add New Food</h3>
-                <form id="addFoodForm" action="food-management" method="POST">
-                    <input type="hidden" name="action" value="create">
 
-                    <div class="form-group">
-                        <label for="foodName">Food Name:</label>
-                        <input type="text" id="foodName" name="foodName" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea id="description" name="description" rows="3"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="price">Price (VND):</label>
-                        <input type="number" id="price" name="price" step="1000" min="0" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="foodType">Food Type:</label>
-                        <select id="foodType" name="foodType" required>
-                            <option value="Snack">Snack</option>
-                            <option value="Drink">Drink</option>
-                            <option value="Dessert">Dessert</option>
-                            <option value="Combo">Combo</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="imageURL">Image URL:</label>
-                        <input type="text" id="imageURL" name="imageURL" placeholder="https://example.com/image.jpg">
-                    </div>
-
-                    <div class="form-group">
-                        <label style="display: inline-flex; align-items: center;">
-                            <input type="checkbox" name="isAvailable" value="true" checked style="width: auto; margin-right: 8px;">
-                            Available
-                        </label>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary" style="flex: 1;">Add Food</button>
-                        <button type="button" class="btn" onclick="closeAddFoodModal()" 
-                                style="flex: 1; background-color: #95a5a6; color: white;">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
         <script>
             // Check for success/error messages from URL parameters
             window.addEventListener('DOMContentLoaded', function () {
@@ -607,30 +571,31 @@
                 }
             });
 
+
             // Modal functions
-            function openAddFoodModal() {
-                document.getElementById('addFoodModal').style.display = 'block';
+            function openAddComboModal() {
+                window.location.href = 'combo-management?action=showAddForm';
             }
 
-            function closeAddFoodModal() {
-                document.getElementById('addFoodModal').style.display = 'none';
+            function closeAddComboModal() {
+                document.getElementById('addComboModal').style.display = 'none';
             }
 
             // Close modal when clicking outside
             window.onclick = function (event) {
-                const modal = document.getElementById('addFoodModal');
+                const modal = document.getElementById('addComboModal');
                 if (event.target === modal) {
-                    closeAddFoodModal();
+                    closeAddComboModal();
                 }
             }
 
             // Search functionality
-            function searchFood() {
+            function searchCombo() {
                 applyFilters();
             }
 
             // Filter functionality
-            function filterFood() {
+            function filterCombo() {
                 applyFilters();
             }
 
@@ -642,31 +607,27 @@
                 const searchTerm = searchInput.value.toLowerCase();
                 const filterValue = filterSelect.value;
 
-                const rows = document.querySelectorAll('#foodTableBody tr');
+                const rows = document.querySelectorAll('#comboTableBody tr');
 
                 rows.forEach(row => {
-                    if (row.cells.length < 6)
+                    if (row.cells.length < 5)
                         return;
 
-                    const foodName = row.cells[1].textContent.toLowerCase();
+                    const comboName = row.cells[1].textContent.toLowerCase();
                     const description = row.cells[2].textContent.toLowerCase();
-                    const foodType = row.cells[3].textContent.toLowerCase();
-                    const status = row.cells[5].textContent.toLowerCase();
+                    const status = row.cells[4].textContent.toLowerCase();
 
                     // Check search term
                     const matchesSearch = searchTerm === '' ||
-                            foodName.includes(searchTerm) ||
-                            description.includes(searchTerm) ||
-                            foodType.includes(searchTerm);
+                            comboName.includes(searchTerm) ||
+                            description.includes(searchTerm);
 
                     // Check filter
                     let matchesFilter = true;
                     if (filterValue !== 'all') {
                         const [filterType, filterValueText] = filterValue.split(':');
 
-                        if (filterType === 'category') {
-                            matchesFilter = foodType.includes(filterValueText.toLowerCase());
-                        } else if (filterType === 'status') {
+                        if (filterType === 'status') {
                             matchesFilter = status.includes(filterValueText.toLowerCase());
                         }
                     }
@@ -680,23 +641,32 @@
                 });
             }
 
-            function editFood(foodId) {
-                if (foodId === 0) {
-                    alert('Invalid food ID');
+            function editCombo(comboId) {
+                if (comboId === 0) {
+                    alert('Invalid combo ID');
                     return;
                 }
-                // Sửa thành: gửi qua servlet
-                window.location.href = 'food-management?action=getById&id=' + foodId;
+                window.location.href = 'combo-management?action=getById&id=' + comboId;
             }
 
-            function deleteFood(foodId) {
-                if (foodId === 0) {
-                    alert('Invalid food ID');
+            function manageComboFood(comboId) {
+                if (comboId === 0) {
+                    alert('Invalid combo ID');
+                    return;
+                }
+                console.log('Managing combo food for ID:', comboId); // Debug
+                window.location.href = 'combo-food-management?action=view&comboId=' + comboId;
+            }
+
+
+            function deleteCombo(comboId) {
+                if (comboId === 0) {
+                    alert('Invalid combo ID');
                     return;
                 }
 
-                if (confirm('Are you sure you want to delete this food item?')) {
-                    fetch('food-management?action=delete&foodID=' + foodId, {
+                if (confirm('Are you sure you want to delete this combo? This will also remove all food items from the combo.')) {
+                    fetch('combo-management?action=delete&comboID=' + comboId, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -707,13 +677,13 @@
                                     location.reload();
                                 } else {
                                     response.text().then(text => {
-                                        alert('Error deleting food item: ' + text);
+                                        alert('Error deleting combo: ' + text);
                                     });
                                 }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                alert('Error deleting food item: ' + error.message);
+                                alert('Error deleting combo: ' + error.message);
                             });
                 }
             }
