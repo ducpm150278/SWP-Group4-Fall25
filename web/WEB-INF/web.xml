@@ -4,6 +4,14 @@
         <servlet-name>CustomerProfileServlet</servlet-name>
         <servlet-class>controller.CustomerProfileServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ComboManagementServlet</servlet-name>
+        <servlet-class>controller.ComboManagementServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ComboFoodManagementServlet</servlet-name>
+        <servlet-class>controller.ComboFoodManagementServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>CustomerProfileServlet</servlet-name>
         <url-pattern>/CustomerProfile</url-pattern>
@@ -15,6 +23,14 @@
     <servlet-mapping>
         <servlet-name>FoodManagementServlet</servlet-name>
         <url-pattern>/food-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ComboManagementServlet</servlet-name>
+        <url-pattern>/combo-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ComboFoodManagementServlet</servlet-name>
+        <url-pattern>/combo-food-management</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
