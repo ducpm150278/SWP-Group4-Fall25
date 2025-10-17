@@ -59,6 +59,11 @@
             boolean isBlog = uri.contains("listpost") || uri.contains("addpost");
             boolean isPromo = uri.contains("promotion-list") || uri.contains("add-promotion");
         %>
+        <%
+    // Debug
+    System.out.println("Current URI: " + uri);
+%>
+
     </head>
     <body>
         <div id="layoutSidenav">
@@ -78,7 +83,7 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
                                 Quản lý tài khoản
                             </a>
-                            <a class="<%= uri.equals("/movieticket/listmovie.jsp") ? "nav-link active" : "nav-link" %>" href="list">
+                            <a class="<%= uri.equals("/swp-group4-fall25/listmovie.jsp") ? "nav-link active" : "nav-link" %>" href="list">
                                 <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
                                 Quản lý phim
                             </a>
@@ -92,7 +97,7 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-video""></i></div>
                                 Quản lý phòng chiếu
                             </a>
-                            <a class="<%= uri.equals("/movieticket/listscreening.jsp") ? "nav-link active" : "nav-link" %>" href="listScreening">
+                            <a class="<%= uri.equals("/swp-group4-fall25/listscreening.jsp") ? "nav-link active" : "nav-link" %>" href="listScreening">
                                 <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
                                 Quản lý lịch chiếu
                             </a>
