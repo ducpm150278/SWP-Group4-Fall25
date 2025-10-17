@@ -1,8 +1,10 @@
 package controller;
 
 import dal.CinemaDAO;
+import dal.ScreeningRoomDAO;
 import dal.UserDAO;
 import entity.Cinema;
+import entity.ScreeningRoom;
 import entity.User;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -139,10 +141,14 @@ public class AdminDashboardServlet extends HttpServlet {
                         // Check view list or view detail
                         if (action.equals("view")) {
                             int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
-                            Cinema cinema = cd.getCinemaByID(cinemaId);
+                            Cinema cinema = cd.getCinemaById(cinemaId);
                             if (cinema != null) {
                                 System.out.println("Cinema found: " + cinema.getCinemaName());
                             }
+
+                            ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
+                            List<ScreeningRoom> screeningRooms = roomDAO.getScreeningRoomsByCinemaId(cinemaId);
+                            request.setAttribute("screeningRooms", screeningRooms);
                             request.setAttribute("viewCinema", cinema);
                         }
                     }
@@ -153,15 +159,19 @@ public class AdminDashboardServlet extends HttpServlet {
                 // Get param for filter list
                 String search = request.getParameter("search");
                 String statusFilter = request.getParameter("status");
+                String locationFilter = request.getParameter("location"); // Thêm location filter
                 String sortBy = request.getParameter("sort");
 
-                // Set value get all in case status filter is null
+                // Set default values if filters are null
                 if (statusFilter == null) {
                     statusFilter = "all";
                 }
+                if (locationFilter == null) {
+                    locationFilter = "all";
+                }
 
-                // Get list cinema after filter và sort
-                List<Cinema> listCinemas = cd.getAllCinemas(search, statusFilter, sortBy);
+                // Get list cinema after filter và sort (cập nhật thêm locationFilter)
+                List<Cinema> listCinemas = cd.getAllCinemas(search, statusFilter, locationFilter, sortBy);
                 System.out.println("Cinemas found: " + listCinemas.size());
 
                 // Page setting
@@ -190,9 +200,15 @@ public class AdminDashboardServlet extends HttpServlet {
                     request.setAttribute("recordsPerPage", recordsPerPage);
                     request.setAttribute("noOfPages", noOfPages);
                 }
+
+                // Lấy danh sách locations để hiển thị trong dropdown
+                List<String> allLocations = cd.getAllLocations();
+                request.setAttribute("allLocations", allLocations);
+
                 request.setAttribute("currentPage", page);
                 request.setAttribute("search", search);
                 request.setAttribute("statusFilter", statusFilter);
+                request.setAttribute("locationFilter", locationFilter); // Thêm locationFilter
                 request.setAttribute("section", section);
             }
             response.setContentType("text/html;charset=UTF-8");
@@ -365,7 +381,7 @@ public class AdminDashboardServlet extends HttpServlet {
                 }
             } else if (section != null && section.equals("cinema-management")) {
                 CinemaDAO cd = new CinemaDAO();
-//                LogHistoryDAO lhd = new LogHistoryDAO();
+//  LogHistoryDAO lhd = new LogHistoryDAO();
 
                 String action = request.getParameter("action");
                 switch (action) {
@@ -374,59 +390,81 @@ public class AdminDashboardServlet extends HttpServlet {
                             // Get data
                             String cinemaName = request.getParameter("cinemaName");
                             String location = request.getParameter("location");
-                            int totalRooms = Integer.parseInt(request.getParameter("totalRooms"));
+                            String address = request.getParameter("address"); // Thêm address
                             boolean isActive = request.getParameter("isActive") != null;
 
                             // Validate input
+                            if (cinemaName == null || cinemaName.trim().isEmpty()) {
+                                request.getSession().setAttribute("showToast", "add_error");
+                                request.getSession().setAttribute("showError", "Cinema name is required");
+                                response.sendRedirect("dashboard?section=cinema-management");
+                                return;
+                            }
+
+                            if (location == null || location.trim().isEmpty()) {
+                                request.getSession().setAttribute("showToast", "add_error");
+                                request.getSession().setAttribute("showError", "Location is required");
+                                response.sendRedirect("dashboard?section=cinema-management");
+                                return;
+                            }
+
+                            if (address == null || address.trim().isEmpty()) {
+                                request.getSession().setAttribute("showToast", "add_error");
+                                request.getSession().setAttribute("showError", "Address is required");
+                                response.sendRedirect("dashboard?section=cinema-management");
+                                return;
+                            }
+
+                            // Check if cinema name already exists
                             if (cd.checkCinemaNameExists(cinemaName)) {
                                 request.getSession().setAttribute("showToast", "add_error_name");
                                 response.sendRedirect("dashboard?section=cinema-management");
                                 return;
                             }
 
-                            // Validate total rooms
-                            if (totalRooms < 1 || totalRooms > 50) {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Total rooms must be between 1 and 50");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
                             // Save cinema to database
-                            boolean isCreated = cd.addNewCinema(cinemaName, location, totalRooms, isActive);
+                            Cinema newCinema = new Cinema();
+                            newCinema.setCinemaName(cinemaName);
+                            newCinema.setLocation(location);
+                            newCinema.setAddress(address); // Set address
+                            newCinema.setActive(isActive);
+                            boolean isCreated = cd.addCinema(newCinema);
                             System.out.println("Cinema created: " + isCreated);
 
                             if (isCreated) {
                                 // Record logs
-//                                boolean addLog = lhd.addNewLog(new LogHistory(1, "CREATE", "CINEMA", null, "N/A", "N/A", "Add new cinema: <br>"
-//                                        + "Cinema Details:<br>"
-//                                        + "Name: " + cinemaName + "<br>"
-//                                        + "Location: " + location + "<br>"
-//                                        + "Total Rooms: " + totalRooms + "<br>"
-//                                        + "Status: " + (isActive ? "Active" : "Inactive"), "N/A"));
-//                                System.out.println("Log added: " + addLog);
+//                  boolean addLog = lhd.addNewLog(new LogHistory(1, "CREATE", "CINEMA", null, "N/A", "N/A", "Add new cinema: <br>"
+//                          + "Cinema Details:<br>"
+//                          + "Name: " + cinemaName + "<br>"
+//                          + "Location: " + location + "<br>"
+//                          + "Address: " + address + "<br>"
+//                          + "Status: " + (isActive ? "Active" : "Inactive"), "N/A"));
+//                  System.out.println("Log added: " + addLog);
 
                                 request.getSession().setAttribute("showToast", "add_success");
                             } else {
                                 request.getSession().setAttribute("showToast", "add_error");
                                 request.getSession().setAttribute("showError", "Failed to create cinema");
                             }
-                        } catch (NumberFormatException e) {
+                        } catch (Exception e) {
                             request.getSession().setAttribute("showToast", "add_error");
-                            request.getSession().setAttribute("showError", "Error: Invalid total rooms format");
+                            request.getSession().setAttribute("showError", "Error creating cinema: " + e.getMessage());
                             System.out.println("Error in add cinema: " + e.getMessage());
                         }
                         response.sendRedirect("dashboard?section=cinema-management");
                     }
+
                     case "delete" -> {
                         try {
                             int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
                             // Call your service to delete the cinema (soft delete)
                             boolean isDeleted = cd.deleteCinema(cinemaId);
+                            // Call your service to delete the cinema (hard delete)
+//                            boolean isDeleted = cd.deleteH_Cinema(cinemaId);
 
                             if (isDeleted) {
-//                                boolean addLog = lhd.addNewLog(new LogHistory(1, "DELETE", "CINEMA", cinemaId, "N/A", "N/A", "Delete cinema for testing", "N/A"));
-//                                System.out.println("Delete log added: " + addLog);
+//                  boolean addLog = lhd.addNewLog(new LogHistory(1, "DELETE", "CINEMA", cinemaId, "N/A", "N/A", "Delete cinema for testing", "N/A"));
+//                  System.out.println("Delete log added: " + addLog);
                                 request.getSession().setAttribute("showToast", "delete_success");
                             } else {
                                 request.getSession().setAttribute("showToast", "delete_error");
@@ -447,14 +485,36 @@ public class AdminDashboardServlet extends HttpServlet {
                             int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
                             String cinemaName = request.getParameter("cinemaName");
                             String location = request.getParameter("location");
-                            int totalRooms = Integer.parseInt(request.getParameter("totalRooms"));
+                            String address = request.getParameter("address"); // Thêm address
                             boolean isActive = request.getParameter("isActive") != null;
 
-                            Cinema cinema = cd.getCinemaByID(cinemaId);
+                            Cinema cinema = cd.getCinemaById(cinemaId);
 
                             if (cinema == null) {
                                 request.getSession().setAttribute("showToast", "update_error");
                                 request.getSession().setAttribute("showError", "Error update cinema: Cinema not found");
+                                response.sendRedirect("dashboard?section=cinema-management");
+                                return;
+                            }
+
+                            // Validate required fields
+                            if (cinemaName == null || cinemaName.trim().isEmpty()) {
+                                request.getSession().setAttribute("showToast", "update_error");
+                                request.getSession().setAttribute("showError", "Cinema name is required");
+                                response.sendRedirect("dashboard?section=cinema-management");
+                                return;
+                            }
+
+                            if (location == null || location.trim().isEmpty()) {
+                                request.getSession().setAttribute("showToast", "update_error");
+                                request.getSession().setAttribute("showError", "Location is required");
+                                response.sendRedirect("dashboard?section=cinema-management");
+                                return;
+                            }
+
+                            if (address == null || address.trim().isEmpty()) {
+                                request.getSession().setAttribute("showToast", "update_error");
+                                request.getSession().setAttribute("showError", "Address is required");
                                 response.sendRedirect("dashboard?section=cinema-management");
                                 return;
                             }
@@ -467,47 +527,41 @@ public class AdminDashboardServlet extends HttpServlet {
                                 return;
                             }
 
-                            // Validate total rooms
-                            if (totalRooms < 1 || totalRooms > 50) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Total rooms must be between 1 and 50");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
                             // Log get input
                             System.out.println("Current Cinema: " + cinema.getCinemaName());
                             System.out.println("New Cinema Name: " + cinemaName);
                             System.out.println("Current Location: " + cinema.getLocation());
                             System.out.println("New Location: " + location);
-                            System.out.println("Current Rooms: " + cinema.getTotalRooms());
-                            System.out.println("New Rooms: " + totalRooms);
-                            System.out.println("Current Status: " + cinema.getIsActive());
+                            System.out.println("Current Address: " + cinema.getAddress()); // Thêm address
+                            System.out.println("New Address: " + address);
+                            System.out.println("Current Status: " + cinema.isActive());
                             System.out.println("New Status: " + isActive);
 
                             // Set value for log (commented out for now)
-//                            String old_value = "Name: " + cinema.getCinemaName() + ", Location: " + cinema.getLocation() + 
-//                                    ", Rooms: " + cinema.getTotalRooms() + ", Status: " + cinema.getIsActive() + ".";
-//                            String new_value = "Name: " + cinemaName + ", Location: " + location + 
-//                                    ", Rooms: " + totalRooms + ", Status: " + isActive + ".";
-                            boolean isUpdated = cd.updateCinema(cinemaId, cinemaName, location, totalRooms, isActive);
+//              String old_value = "Name: " + cinema.getCinemaName() + ", Location: " + cinema.getLocation() + 
+//                      ", Address: " + cinema.getAddress() + ", Status: " + cinema.isActive() + ".";
+//              String new_value = "Name: " + cinemaName + ", Location: " + location + 
+//                      ", Address: " + address + ", Status: " + isActive + ".";
+                            // Gọi phương thức update mới (không có totalRooms)
+                            boolean isUpdated = cd.updateCinema(cinemaId, cinemaName, location, address, isActive);
 
                             if (isUpdated) {
                                 request.getSession().setAttribute("showToast", "update_success");
 
-//                                boolean addLog = lhd.addNewLog(new LogHistory(1, "UPDATE", "CINEMA", cinemaId, old_value, new_value, "Update cinema information.", "N/A"));
-//                                System.out.println("Update log added: " + addLog);
+//                  boolean addLog = lhd.addNewLog(new LogHistory(1, "UPDATE", "CINEMA", cinemaId, old_value, new_value, "Update cinema information.", "N/A"));
+//                  System.out.println("Update log added: " + addLog);
                             } else {
                                 request.getSession().setAttribute("showToast", "update_error");
                                 request.getSession().setAttribute("showError", "Error update cinema: Update failed");
                             }
-                        } catch (NumberFormatException e) {
+                        } catch (IOException | NumberFormatException e) {
                             request.getSession().setAttribute("showToast", "update_error");
                             request.getSession().setAttribute("showError", "Error update cinema: " + e.getMessage());
                             System.out.println("Error in update cinema: " + e.getMessage());
                         }
                         response.sendRedirect("dashboard?section=cinema-management");
                     }
+
                     default ->
                         response.sendRedirect("dashboard?section=cinema-management");
                 }

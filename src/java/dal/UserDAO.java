@@ -4,22 +4,22 @@
  */
 package dal;
 
+import entity.User;
+import java.security.SecureRandom;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Date;
-import entity.User;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -27,13 +27,10 @@ import java.util.regex.Pattern;
  *
  * @author dungv
  */
-public class UserDAO {
-
-    DBContext db = new DBContext();
-    protected Connection connection = db.connection;
+public class UserDAO extends DBContext {
 
     // Test function
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         UserDAO ud = new UserDAO();
 
         // Test get all user infor
@@ -261,7 +258,7 @@ public class UserDAO {
                 + "      ,[LastModifiedDate]\n"
                 + "  FROM [dbo].[Users]";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(new User(
@@ -301,7 +298,7 @@ public class UserDAO {
                 + "     VALUES"
                 + "           (?,?,?,?,?,?,?,?,?)";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, fullname);
             ps.setString(2, email);
             ps.setString(3, phonenumber);
@@ -323,7 +320,7 @@ public class UserDAO {
     public boolean deleteUser(int user_id) {
         String sql = "DELETE FROM [dbo].[Users] WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, user_id);
             ps.executeUpdate();
             return true;
@@ -338,7 +335,7 @@ public class UserDAO {
         String sql = "UPDATE [dbo].[Users] SET [Role] = ?,"
                 + "[AccountStatus] = ?, [LastModifiedDate] = GETDATE() WHERE [UserID] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, role);
             ps.setString(2, status);
             ps.setInt(3, user_id);
@@ -366,7 +363,7 @@ public class UserDAO {
                 + "      ,[LastModifiedDate]\n"
                 + "  FROM [dbo].[Users] WHERE [UserID] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, user_Id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -395,7 +392,7 @@ public class UserDAO {
     public boolean checkExistedEmail(String email) {
         String sql = "SELECT 1 FROM dbo.Users WHERE [Email] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -409,7 +406,7 @@ public class UserDAO {
     public boolean checkExistedPhone(String phone) {
         String sql = "SELECT 1 FROM dbo.Users WHERE [PhoneNumber] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, phone);
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -454,7 +451,7 @@ public class UserDAO {
         }
 
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             int paramIndex = 1;
 
             // Set parameters cho search
@@ -516,7 +513,7 @@ public class UserDAO {
                 + "      ,[LastModifiedDate]\n"
                 + "  FROM [dbo].[Users] WHERE [Email] = ? AND [Password] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, email);
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
@@ -546,7 +543,7 @@ public class UserDAO {
     public boolean updatePasswordTempAcc(int userId, String newPassword) {
         String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, newPassword);
             ps.setInt(2, userId);
             int rowsAffected = ps.executeUpdate();
@@ -561,7 +558,7 @@ public class UserDAO {
     public boolean updateProfileTempAcc(int userId, String gender, String address, Date dob) {
         String sql = "UPDATE Users SET Gender = ?, Address = ?, DateOfBirth = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, gender);
             ps.setString(2, address);
             ps.setDate(3, dob);
@@ -578,7 +575,7 @@ public class UserDAO {
     public boolean updateStatusForTempAcc(int userId, String status) {
         String sql = "UPDATE Users SET AccountStatus = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, status);
             ps.setInt(2, userId);
             int rowsAffected = ps.executeUpdate();
@@ -594,7 +591,7 @@ public class UserDAO {
         User user = null;
         String sql = "SELECT * FROM Users WHERE Email = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -614,64 +611,136 @@ public class UserDAO {
         return user;
     }
     // Customer
-public boolean updateUser(User user) {
-    String sql = "UPDATE Users SET FullName=?, PhoneNumber=?, Gender=?, DateOfBirth=?, Address=? WHERE UserID=?";
-    try {
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, user.getFullName());
-        ps.setString(2, user.getPhoneNumber());
-        ps.setString(3, user.getGender());
-        ps.setDate(4, user.getDateOfBirth());
-        ps.setString(5, user.getAddress());
-        ps.setInt(6, user.getUserID());
 
-        System.out.println("🧠 DEBUG — Updating user:");
-        System.out.println("ID: " + user.getUserID());
-        System.out.println("FullName: " + user.getFullName());
-        System.out.println("Phone: " + user.getPhoneNumber());
-        System.out.println("Gender: " + user.getGender());
-        System.out.println("DateOfBirth: " + user.getDateOfBirth());
-        System.out.println("Address: " + user.getAddress());
+    public boolean updateUser(User user) {
+        String sql = "UPDATE Users SET FullName=?, PhoneNumber=?, Gender=?, DateOfBirth=?, Address=? WHERE UserID=?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhoneNumber());
+            ps.setString(3, user.getGender());
+            ps.setDate(4, user.getDateOfBirth());
+            ps.setString(5, user.getAddress());
+            ps.setInt(6, user.getUserID());
 
-        int rows = ps.executeUpdate();
-        System.out.println("➡️ Rows affected: " + rows);
-        return rows > 0;
-    } catch (Exception e) {
-        System.out.println("❌ DAO Exception: " + e);
+            System.out.println("🧠 DEBUG — Updating user:");
+            System.out.println("ID: " + user.getUserID());
+            System.out.println("FullName: " + user.getFullName());
+            System.out.println("Phone: " + user.getPhoneNumber());
+            System.out.println("Gender: " + user.getGender());
+            System.out.println("DateOfBirth: " + user.getDateOfBirth());
+            System.out.println("Address: " + user.getAddress());
+
+            int rows = ps.executeUpdate();
+            System.out.println("➡️ Rows affected: " + rows);
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println("❌ DAO Exception: " + e);
+        }
+        return false;
     }
-    return false;
-}
-
 
 // Customer
-public boolean updatePassword(int userId, String newPassword) {
-    String sql = "UPDATE Users SET Password = ? WHERE UserID = ?";
-    try {
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, newPassword);
-        ps.setInt(2, userId);
-        int rows = ps.executeUpdate();
-        System.out.println("Password updated for userID: " + userId);
-        return rows > 0;
-    } catch (Exception e) {
-        System.out.println("Error updating password: " + e);
+    public boolean updatePassword(int userId, String newPassword) {
+        String sql = "UPDATE Users SET Password = ? WHERE UserID = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setInt(2, userId);
+            int rows = ps.executeUpdate();
+            System.out.println("Password updated for userID: " + userId);
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println("Error updating password: " + e);
+        }
+        return false;
     }
-    return false;
-}
 
 // Customer
-public boolean updateEmail(int userId, String newEmail) {
-    String sql = "UPDATE Users SET Email = ? WHERE UserID = ?";
-    try {
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, newEmail);
-        ps.setInt(2, userId);
-        int rows = ps.executeUpdate();
-        System.out.println("Email updated for userID: " + userId);
-        return rows > 0;
-    } catch (Exception e) {
-        System.out.println("Error updating email: " + e);
+    public boolean updateEmail(int userId, String newEmail) {
+        String sql = "UPDATE Users SET Email = ? WHERE UserID = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, newEmail);
+            ps.setInt(2, userId);
+            int rows = ps.executeUpdate();
+            System.out.println("Email updated for userID: " + userId);
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println("Error updating email: " + e);
+        }
+        return false;
     }
-    return false;
-}
+
+    // Password reset functionality
+    public boolean storePasswordResetToken(String email, String token) {
+        String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE Email = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, token); // Store token temporarily in password field
+            ps.setString(2, email);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public User getUserByResetToken(String token) {
+        String sql = "SELECT * FROM Users WHERE Password = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, token);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new User(
+                        rs.getInt("UserID"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("PhoneNumber"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getDate("DateOfBirth"),
+                        rs.getString("Address"),
+                        rs.getString("AccountStatus"),
+                        rs.getString("Role"),
+                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
+                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
+                );
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    public boolean updatePasswordByToken(String token, String newPassword) {
+        String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE Password = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, newPassword);
+            ps.setString(2, token);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    public boolean updateUserStatus(int userId, String status) {
+        String sql = "UPDATE [Users] SET AccountStatus = ?, LastModifiedDate = ? WHERE UserID = ?";
+        try {
+            PreparedStatement ps = getConnection().prepareStatement(sql);
+            ps.setString(1, status);
+            ps.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(3, userId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (Exception e) {
+            System.err.println("Error updating user status: " + e.getMessage());
+        }
+        return false;
+    }
 }

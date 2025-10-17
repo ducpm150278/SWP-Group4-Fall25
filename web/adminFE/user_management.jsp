@@ -90,6 +90,9 @@
                             Status filter: ${requestScope.statusFilter}
                         </span>
                     </c:if>
+                    <a href="dashboard?section=user-management" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear All
+                    </a> 
                 </div>
             </c:if>
             <table class="table table-bordered table-hover">

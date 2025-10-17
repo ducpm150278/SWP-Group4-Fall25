@@ -5,16 +5,12 @@
         <servlet-class>controller.CustomerProfileServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>ChangePasswordServlet</servlet-name>
-        <servlet-class>controller.ChangePasswordServlet</servlet-class>
+        <servlet-name>ComboManagementServlet</servlet-name>
+        <servlet-class>controller.ComboManagementServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>VerifyCodeServlet</servlet-name>
-        <servlet-class>controller.VerifyCodeServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>SendVerificationServlet</servlet-name>
-        <servlet-class>controller.SendVerificationServlet</servlet-class>
+        <servlet-name>ComboFoodManagementServlet</servlet-name>
+        <servlet-class>controller.ComboFoodManagementServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>CustomerProfileServlet</servlet-name>
@@ -32,6 +28,18 @@
         <servlet-name>SendVerificationServlet</servlet-name>
         <url-pattern>/SendVerification</url-pattern>
     </servlet-mapping>
+        <servlet>
+        <servlet-name>ChangePasswordServlet</servlet-name>
+        <servlet-class>controller.ChangePasswordServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VerifyCodeServlet</servlet-name>
+        <servlet-class>controller.VerifyCodeServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SendVerificationServlet</servlet-name>
+        <servlet-class>controller.SendVerificationServlet</servlet-class>
+    </servlet>
     <servlet>
         <servlet-name>FoodManagementServlet</servlet-name>
         <servlet-class>controller.FoodManagementServlet</servlet-class>
@@ -39,6 +47,14 @@
     <servlet-mapping>
         <servlet-name>FoodManagementServlet</servlet-name>
         <url-pattern>/food-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ComboManagementServlet</servlet-name>
+        <url-pattern>/combo-management</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ComboFoodManagementServlet</servlet-name>
+        <url-pattern>/combo-food-management</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
