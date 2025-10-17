@@ -28,6 +28,18 @@
         <servlet-name>SendVerificationServlet</servlet-name>
         <url-pattern>/SendVerification</url-pattern>
     </servlet-mapping>
+        <servlet>
+        <servlet-name>ChangePasswordServlet</servlet-name>
+        <servlet-class>controller.ChangePasswordServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VerifyCodeServlet</servlet-name>
+        <servlet-class>controller.VerifyCodeServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SendVerificationServlet</servlet-name>
+        <servlet-class>controller.SendVerificationServlet</servlet-class>
+    </servlet>
     <servlet>
         <servlet-name>FoodManagementServlet</servlet-name>
         <servlet-class>controller.FoodManagementServlet</servlet-class>

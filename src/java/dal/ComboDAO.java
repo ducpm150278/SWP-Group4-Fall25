@@ -16,17 +16,14 @@ import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class ComboDAO {
-
-    DBContext db = new DBContext();
-    protected Connection connection = db.connection;
+public class ComboDAO extends DBContext{
 
     // GET ALL COMBOS
     public List<Combo> getAllCombos() {
         List<Combo> comboList = new ArrayList<>();
         String sql = "SELECT * FROM Combo ORDER BY ComboID";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Combo combo = mapResultSetToCombo(rs);
@@ -44,7 +41,7 @@ public class ComboDAO {
         String sql = "SELECT * FROM Combo WHERE ComboID = ?";
         Combo combo = null;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -65,7 +62,7 @@ public class ComboDAO {
                 + "ComboImage, IsAvailable, CreatedDate, LastModifiedDate) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, combo.getComboName());
             stmt.setString(2, combo.getDescription());
             stmt.setBigDecimal(3, combo.getTotalPrice());
@@ -98,7 +95,7 @@ public class ComboDAO {
                 + "DiscountPrice = ?, ComboImage = ?, IsAvailable = ?, LastModifiedDate = ? "
                 + "WHERE ComboID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setString(1, combo.getComboName());
             stmt.setString(2, combo.getDescription());
             stmt.setBigDecimal(3, combo.getTotalPrice());
@@ -127,7 +124,7 @@ public class ComboDAO {
 
         String sql = "DELETE FROM Combo WHERE ComboID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
 
             int affectedRows = stmt.executeUpdate();
@@ -144,7 +141,7 @@ public class ComboDAO {
     private boolean deleteComboFoodRelations(int comboId) {
         String sql = "DELETE FROM ComboFood WHERE ComboID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             stmt.executeUpdate();
             return true;
@@ -160,7 +157,7 @@ public class ComboDAO {
         List<Combo> comboList = new ArrayList<>();
         String sql = "SELECT * FROM Combo WHERE IsAvailable = 1 ORDER BY ComboName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Combo combo = mapResultSetToCombo(rs);
@@ -178,7 +175,7 @@ public class ComboDAO {
         List<Combo> comboList = new ArrayList<>();
         String sql = "SELECT * FROM Combo WHERE ComboName LIKE ? ORDER BY ComboName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setString(1, "%" + keyword + "%");
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -199,7 +196,7 @@ public class ComboDAO {
         List<Food> foodList = new ArrayList<>();
         String sql = "SELECT * FROM Food WHERE IsAvailable = 1 ORDER BY FoodName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Food food = mapResultSetToFood(rs);
@@ -216,7 +213,7 @@ public class ComboDAO {
     public boolean addFoodToCombo(int comboId, int foodId, int quantity) {
         String sql = "INSERT INTO ComboFood (ComboID, FoodID, Quantity) VALUES (?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             stmt.setInt(2, foodId);
             stmt.setInt(3, quantity);
@@ -238,7 +235,7 @@ public class ComboDAO {
                 + "INNER JOIN ComboFood cf ON f.FoodID = cf.FoodID "
                 + "WHERE cf.ComboID = ? ORDER BY f.FoodName";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
 
             try (ResultSet rs = stmt.executeQuery()) {

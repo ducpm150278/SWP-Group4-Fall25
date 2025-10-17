@@ -6,16 +6,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComboFoodDAO {
-    DBContext db = new DBContext();
-    protected Connection connection = db.connection;
+public class ComboFoodDAO extends DBContext{
 
     public ComboFoodDAO() {
         try {
-            if (this.connection == null) {
-                System.err.println("ERROR: Database connection is null!");
+            if (this.getConnection() == null) {
+                System.err.println("ERROR: Database getConnection() is null!");
             } else {
-                System.out.println("ComboFoodDAO: Database connection established successfully");
+                System.out.println("ComboFoodDAO: Database getConnection() established successfully");
             }
         } catch (Exception e) {
             System.err.println("Error initializing ComboFoodDAO: " + e.getMessage());
@@ -32,7 +30,7 @@ public class ComboFoodDAO {
 
         System.out.println("Executing SQL: " + sql + " with comboId: " + comboId); // Debug
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             
             try (ResultSet rs = stmt.executeQuery()) {
@@ -58,7 +56,7 @@ public class ComboFoodDAO {
 
         System.out.println("Executing SQL: " + sql + " with comboId: " + comboId); // Debug
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             
             try (ResultSet rs = stmt.executeQuery()) {
@@ -87,7 +85,7 @@ public class ComboFoodDAO {
 
         String sql = "INSERT INTO ComboFood (ComboID, FoodID, Quantity) VALUES (?, ?, ?)";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             stmt.setInt(2, foodId);
             stmt.setInt(3, quantity);
@@ -109,7 +107,7 @@ public class ComboFoodDAO {
 
         String sql = "DELETE FROM ComboFood WHERE ComboID = ? AND FoodID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             stmt.setInt(2, foodId);
 
@@ -128,7 +126,7 @@ public class ComboFoodDAO {
     public boolean isFoodInCombo(int comboId, int foodId) {
         String sql = "SELECT 1 FROM ComboFood WHERE ComboID = ? AND FoodID = ?";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setInt(1, comboId);
             stmt.setInt(2, foodId);
 
@@ -159,9 +157,9 @@ public class ComboFoodDAO {
     // TEST CONNECTION
     public boolean testConnection() {
         try {
-            return connection != null && !connection.isClosed();
+            return getConnection() != null && !getConnection().isClosed();
         } catch (SQLException e) {
-            System.err.println("Error testing connection: " + e.getMessage());
+            System.err.println("Error testing getConnection(): " + e.getMessage());
             return false;
         }
     }
