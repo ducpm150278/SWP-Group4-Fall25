@@ -6,6 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -56,7 +57,7 @@
                             <table class="table table-bordered table-hover align-middle">
                                 <thead class="table-dark text-center">
                                     <tr>
-                                        <th>ID</th>
+
                                         <th>Tiêu đề</th>
                                         <th>Thể loại</th>
                                         <th>Tóm tắt</th>
@@ -74,7 +75,7 @@
                                 <tbody>
                                     <c:forEach var="m" items="${movies}">
                                         <tr>
-                                            <td class="text-center">${m.movieID}</td>
+
                                             <td>${m.title}</td>
                                             <td>${m.genre}</td>
                                             <td>${m.summary}</td>
@@ -103,6 +104,29 @@
                                     </c:forEach>
                                 </tbody>
                             </table>
+                            <!-- Phân trang -->
+                            <div class="d-flex justify-content-center mt-3">
+                                <ul class="pagination">
+                                    <c:if test="${currentPage > 1}">
+                                        <li class="page-item">
+                                            <a class="page-link" href="list?page=${currentPage - 1}&keyword=${keyword}">« Trước</a>
+                                        </li>
+                                    </c:if>
+
+                                    <c:forEach begin="1" end="${totalPages}" var="i">
+                                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                            <a class="page-link" href="list?page=${i}&keyword=${keyword}">${i}</a>
+                                        </li>
+                                    </c:forEach>
+
+                                    <c:if test="${currentPage < totalPages}">
+                                        <li class="page-item">
+                                            <a class="page-link" href="list?page=${currentPage + 1}&keyword=${keyword}">Sau »</a>
+                                        </li>
+                                    </c:if>
+                                </ul>
+                            </div>
+
                         </div>
                     </div>
                 </main>

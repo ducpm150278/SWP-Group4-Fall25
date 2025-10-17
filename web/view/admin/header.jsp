@@ -3,7 +3,6 @@
     Created on : May 31, 2025, 1:35:12 PM
     Author     : admin
 --%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,8 +23,7 @@
             <!-- Navbar Brand-->
             <a class="navbar-brand ps-3" href="home" style="font-size: 17px !important;">MovieTicketBooking</a>
             <!-- Sidebar Toggle-->
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-            <!-- Home Button -->
+           
            
         </nav>
 
