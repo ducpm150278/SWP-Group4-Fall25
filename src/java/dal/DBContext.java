@@ -16,30 +16,41 @@ import java.util.logging.Logger;
  */
 public class DBContext {
 
-    protected Connection connection;
+    // Không lưu connection như biến instance nữa
+    // Thay vào đó, tạo connection mới mỗi lần cần
+    
+    // Thông tin kết nối
+    private static final String USER = "sa";
+    private static final String PASS = "123";
+    private static final String URL = "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=MovieTicketDB;"
+            + "sendStringParametersAsUnicode=true;"
+            + "characterEncoding=UTF-8;";
 
-    public DBContext() {
-        //@Students: You are allowed to edit user, pass, url variables to fit 
-        //your system configuration
-        //You can also add more methods for Database Interaction tasks. 
-        //But we recommend you to do it in another class
-        // For example : StudentDBContext extends DBContext , 
-        //where StudentDBContext is located in dal package, 
+    static {
         try {
-            String user = "sa";
-            String pass = "123";
-            String url = "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=MovieTicketDB;"
-                    + "sendStringParametersAsUnicode=true;"
-                    + "characterEncoding=UTF-8;";
+            // Load driver chỉ một lần
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            connection = DriverManager.getConnection(url, user, pass);
-        } catch (ClassNotFoundException | SQLException ex) {
+        } catch (ClassNotFoundException ex) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    public DBContext() {
+        // Constructor không tạo connection nữa
+    }
+
+    // Phương thức để lấy connection mới
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASS);
+    }
+
+
     public static void main(String[] args) {
         DBContext db = new DBContext();
-        System.out.println(db.connection != null ? "Connect successfull" : "Can't  connect to database");
+        try (Connection conn = db.getConnection()) {
+            System.out.println(conn != null ? "Connect successful" : "Can't connect to database");
+        } catch (SQLException ex) {
+            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

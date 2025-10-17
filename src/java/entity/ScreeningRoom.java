@@ -4,6 +4,8 @@
  */
 package entity;
 
+import java.time.LocalDateTime;
+
 /**
  *
  * @author admin
@@ -15,8 +17,27 @@ public class ScreeningRoom {
     private int seatCapacity;
     private String roomType;
     private boolean isActive;
+    private LocalDateTime createdDate;
 
     public ScreeningRoom() {
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+       public ScreeningRoom(int roomID, int cinemaID, String roomName, int seatCapacity, 
+                        String roomType, boolean isActive, LocalDateTime createdDate) {
+        this.roomID = roomID;
+        this.cinemaID = cinemaID;
+        this.roomName = roomName;
+        this.seatCapacity = seatCapacity;
+        this.roomType = roomType;
+        this.isActive = isActive;
+        this.createdDate = createdDate;
     }
 
     public ScreeningRoom(int roomID, int cinemaID, String roomName, int seatCapacity, String roomType, boolean isActive) {
@@ -68,12 +89,12 @@ public class ScreeningRoom {
         this.roomType = roomType;
     }
 
-    public boolean isIsActive() {
+    public boolean isActive() {
         return isActive;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+     public void setActive(boolean active) {
+        isActive = active;
     }
 
     @Override

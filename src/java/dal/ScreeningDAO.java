@@ -35,7 +35,7 @@ public class ScreeningDAO extends DBContext {
                                 ORDER BY s.StartTime DESC""";
 
         try {
-            PreparedStatement pre = connection.prepareStatement(sql);
+            PreparedStatement pre = getConnection().prepareStatement(sql);
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
                 int screeningID = rs.getInt("ScreeningID");
@@ -90,7 +90,7 @@ public class ScreeningDAO extends DBContext {
         }
         sql.append(" ORDER BY s.StartTime DESC");
 
-        try (PreparedStatement pre = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql.toString())) {
             int index = 1;
             if (keyword != null && !keyword.isEmpty()) {
                 pre.setString(index++, "%" + keyword + "%");
@@ -135,7 +135,7 @@ public class ScreeningDAO extends DBContext {
         INSERT INTO Screenings (MovieID, RoomID, StartTime, EndTime, TicketPrice, AvailableSeats)
         VALUES (?, ?, ?, ?, ?, ?)
     """;
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, sc.getMovieID());
             ps.setInt(2, sc.getRoomID());
             ps.setObject(3, sc.getStartTime());
@@ -163,7 +163,7 @@ public class ScreeningDAO extends DBContext {
         WHERE s.ScreeningID = ?
     """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, screeningID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -203,7 +203,7 @@ public class ScreeningDAO extends DBContext {
             ORDER BY s.StartTime
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, movieID);
             ps.setTimestamp(2, Timestamp.valueOf(from));
             ps.setTimestamp(3, Timestamp.valueOf(to));
@@ -228,7 +228,7 @@ public class ScreeningDAO extends DBContext {
     //  Lấy số ghế đã bán (nếu có bảng Tickets)
     private int getSoldSeats(int screeningID) {
         String sql = "SELECT COUNT(*) FROM Tickets WHERE ScreeningID = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, screeningID);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -242,7 +242,7 @@ public class ScreeningDAO extends DBContext {
 
     public Integer getSeatCapacityByRoomID(int roomID) {
         String sql = "SELECT SeatCapacity FROM ScreeningRooms WHERE RoomID = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             ps.setInt(1, roomID);
             if (rs.next()) {
@@ -256,7 +256,7 @@ public class ScreeningDAO extends DBContext {
 
     public int countAllScreenings() {
         String sql = "SELECT COUNT(*) FROM Screenings";
-        try (PreparedStatement pre = connection.prepareStatement(sql)) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             ResultSet rs = pre.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -284,7 +284,7 @@ public class ScreeningDAO extends DBContext {
         OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
     """;
 
-        try (PreparedStatement pre = connection.prepareStatement(sql)) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setInt(1, (page - 1) * pageSize);
             pre.setInt(2, pageSize);
             ResultSet rs = pre.executeQuery();
@@ -339,7 +339,7 @@ public class ScreeningDAO extends DBContext {
             params.add(status);
         }
 
-        try (PreparedStatement pre = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 pre.setObject(i + 1, params.get(i));
             }
@@ -391,7 +391,7 @@ public class ScreeningDAO extends DBContext {
 
         sql.append(" ORDER BY s.StartTime DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
 
-        try (PreparedStatement pre = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement pre = getConnection().prepareStatement(sql.toString())) {
             int index = 1;
             for (Object param : params) {
                 pre.setObject(index++, param);
@@ -432,7 +432,7 @@ public class ScreeningDAO extends DBContext {
         WHERE ScreeningID = ?;
         UPDATE Movies SET Status = ? WHERE MovieID = ?;
     """;
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setInt(1, movieID);
             ps.setInt(2, roomID);
             ps.setObject(3, startTime);
@@ -450,7 +450,7 @@ public class ScreeningDAO extends DBContext {
     //Hủy lịch chiếu
   public boolean cancelScreening(int screeningID) {
     String sql = "DELETE FROM Screenings WHERE ScreeningID = ?";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
         ps.setInt(1, screeningID);
         int rows = ps.executeUpdate();
         return rows > 0;

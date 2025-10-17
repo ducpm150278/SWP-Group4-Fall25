@@ -25,13 +25,10 @@ import java.util.regex.Pattern;
  *
  * @author dungv
  */
-public class UserDAO {
-
-    DBContext db = new DBContext();
-    protected Connection connection = db.connection;
+public class UserDAO extends DBContext{
 
     // Test function
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         UserDAO ud = new UserDAO();
 
         // Test get all user infor
@@ -251,7 +248,7 @@ public class UserDAO {
                 + "      ,[UpdatedAt]\n"
                 + "  FROM [dbo].[Users]";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(new User(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
@@ -280,7 +277,7 @@ public class UserDAO {
                 + "     VALUES"
                 + "           (?,?,?,?,?,?,?,?,?,GETDATE(),GETDATE())";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, fullname);
             ps.setString(2, email);
             ps.setString(3, phonenumber);
@@ -302,7 +299,7 @@ public class UserDAO {
     public boolean deleteUser(int user_id) {
         String sql = "DELETE FROM [dbo].[Users] WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, user_id);
             ps.executeUpdate();
             return true;
@@ -317,7 +314,7 @@ public class UserDAO {
         String sql = "UPDATE  [dbo].[Users] SET [role] = ?,"
                 + "[Status] = ?, UpdatedAt = GETDATE() WHERE [UserID] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, role);
             ps.setString(2, status);
             ps.setInt(3, user_id);
@@ -344,7 +341,7 @@ public class UserDAO {
                 + "      ,[UpdatedAt]\n"
                 + "  FROM [dbo].[Users] WHERE [UserID] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, user_Id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -361,7 +358,7 @@ public class UserDAO {
     public boolean checkExistedEmail(String email) {
         String sql = "SELECT 1 FROM dbo.Users WHERE [Email] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -375,7 +372,7 @@ public class UserDAO {
     public boolean checkExistedPhone(String phone) {
         String sql = "SELECT 1 FROM dbo.Users WHERE [PhoneNumber] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, phone);
             ResultSet rs = ps.executeQuery();
             return rs.next();
@@ -416,7 +413,7 @@ public class UserDAO {
         }
 
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             int paramIndex = 1;
 
             // Set parameters cho search
@@ -464,7 +461,7 @@ public class UserDAO {
                 + "      ,[Status]\n"
                 + "  FROM [dbo].[Users] WHERE [Email] = ? AND [Password] = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, email);
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
@@ -482,7 +479,7 @@ public class UserDAO {
     public boolean updatePasswordTempAcc(int userId, String newPassword) {
         String sql = "UPDATE Users SET Password = ?, UpdatedAt = GETDATE() WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, newPassword);
             ps.setInt(2, userId);
             return ps.execute();
@@ -496,7 +493,7 @@ public class UserDAO {
     public boolean updateProfileTempAcc(int userId, String gender, String address, String dob) {
         String sql = "UPDATE Users SET Gender = ?, Address = ?, DateOfBirth = ?, UpdatedAt = GETDATE() WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, gender);
             ps.setString(2, address);
             ps.setString(3, dob);
@@ -512,7 +509,7 @@ public class UserDAO {
     public boolean updateStatusForTempAcc(int userId, String status) {
         String sql = "UPDATE Users SET Status = ?, UpdatedAt = GETDATE() WHERE UserID = ?";
         try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+            PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, status);
             ps.setInt(2, userId);
             return ps.execute();

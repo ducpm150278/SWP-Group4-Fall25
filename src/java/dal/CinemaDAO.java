@@ -19,7 +19,7 @@ public class CinemaDAO extends DBContext{
      public List<Cinema> getAllCinemas() {
         List<Cinema> list = new ArrayList<>();
         String sql = "SELECT CinemaID, CinemaName, Location, TotalRooms, IsActive FROM Cinemas";
-        try (PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = getConnection().prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Cinema c = new Cinema(
