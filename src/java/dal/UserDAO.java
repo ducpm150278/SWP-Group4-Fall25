@@ -604,6 +604,8 @@ public class UserDAO extends DBContext {
                 user.setDateOfBirth(rs.getDate("DateOfBirth"));
                 user.setAddress(rs.getString("Address"));
                 user.setPassword(rs.getString("Password"));
+                user.setRole(rs.getString("Role"));
+                user.setIsEmailVerified(rs.getBoolean("IsEmailVerified"));
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -743,4 +745,26 @@ public class UserDAO extends DBContext {
         }
         return false;
     }
-}
+
+    // Customer
+    public boolean updateEmailAndVerification(int userId, String newEmail, boolean isVerified) {
+        String sql = "UPDATE Users "
+                   + "SET Email = ?, IsEmailVerified = ?, LastModifiedDate = GETDATE() "
+                   + "WHERE UserID = ?";
+        
+        try (Connection conn = new DBContext().getConnection(); // Assumes DBContext
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, newEmail);
+            ps.setBoolean(2, isVerified);
+            ps.setInt(3, userId);
+            
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0; // True if 1 row was updated
+            
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the error
+            return false;
+        }
+    }
+    }
