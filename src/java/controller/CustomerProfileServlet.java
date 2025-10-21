@@ -65,10 +65,7 @@ public class CustomerProfileServlet extends HttpServlet {
             throws ServletException, IOException {
         String email = "customer1@gmail.com";
         User user = userDAO.getUserByEmail(email);
-
-        // store in session so it persists after POST
         request.getSession().setAttribute("user", user);
-
         request.getRequestDispatcher("profile.jsp").forward(request, response);
     }
 
