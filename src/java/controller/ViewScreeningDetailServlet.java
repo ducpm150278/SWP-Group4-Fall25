@@ -5,8 +5,8 @@
 
 package controller;
 
-import dal.MovieDAO;
-import entity.Movie;
+import dal.ScreeningDAO;
+import entity.Screening;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,14 +14,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name="ListMovieServlet", urlPatterns={"/list"})
-public class ListMovieServlet extends HttpServlet {
+@WebServlet(name="ViewScreeningDetailServlet", urlPatterns={"/viewScreening"})
+public class ViewScreeningDetailServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -38,10 +39,10 @@ public class ListMovieServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ListMovieServlet</title>");  
+            out.println("<title>Servlet ViewScreeningDetailServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ListMovieServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet ViewScreeningDetailServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -55,41 +56,58 @@ public class ListMovieServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-     
-    String keyword = request.getParameter("keyword");
-    int page = 1;
-    int recordsPerPage = 6;
+   @Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-    // Lấy trang hiện tại (nếu có)
-    String pageParam = request.getParameter("page");
-    if (pageParam != null) {
-        try {
-            page = Integer.parseInt(pageParam);
-        } catch (NumberFormatException e) {
-            page = 1;
-        }
+    String idStr = request.getParameter("screeningID");
+    if (idStr == null) {
+        response.sendRedirect("listScreening");
+        return;
     }
 
-    MovieDAO dao = new MovieDAO();
+    try {
+        int screeningID = Integer.parseInt(idStr);
+        ScreeningDAO dao = new ScreeningDAO();
 
-    int totalRecords = dao.getTotalMovies(keyword);
-    int totalPages = (int) Math.ceil(totalRecords / (double) recordsPerPage);
+        Screening detail = dao.getScreeningDetail(screeningID);
+        if (detail == null) {
+            response.sendRedirect("listScreening");
+            return;
+        }
 
-    int offset = (page - 1) * recordsPerPage;
+        // Lấy các khung giờ khác của cùng phim trong khoảng từ ngày bắt đầu -> kết thúc
+        List<Screening> otherSchedules = dao.getOtherSchedulesOfMovie(
+                detail.getMovieID(),
+                detail.getStartTime().toLocalDate().atStartOfDay(),
+                detail.getEndTime().toLocalDate().atTime(23, 59, 59),
+                screeningID
+        );
 
-    List<Movie> movies = dao.getMoviesPaginated(offset, recordsPerPage, keyword);
+        // Format sẵn thời gian để hiển thị trong JSP
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
 
-    // Gửi dữ liệu sang JSP
-    request.setAttribute("movies", movies);
-    request.setAttribute("currentPage", page);
-    request.setAttribute("totalPages", totalPages);
-    request.setAttribute("keyword", keyword);
+        // Gán các chuỗi đã định dạng vào request
+        request.setAttribute("formattedStart", detail.getStartTime().format(dateFmt));
+        request.setAttribute("formattedEnd", detail.getEndTime().format(dateFmt));
 
-    request.getRequestDispatcher("listMovie.jsp").forward(request, response);
-    } 
+        // Format khung giờ khác
+        for (Screening s : otherSchedules) {
+            s.setMovieTitle(s.getStartTime().format(dateFmt) + " - " + s.getEndTime().format(timeFmt)
+                    + " (" + s.getCinemaName() + " - " + s.getRoomName() + ")");
+        }
+
+        request.setAttribute("detail", detail);
+        request.setAttribute("otherSchedules", otherSchedules);
+        request.getRequestDispatcher("viewScreening.jsp").forward(request, response);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.sendRedirect("listScreening");
+    }
+}
+
 
     /** 
      * Handles the HTTP <code>POST</code> method.
