@@ -21,7 +21,8 @@ public class User {
     private String role;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
-
+    private boolean isEmailVerified;
+    
     public User() {}
 
         public User(int userID, String fullName, String email, String phoneNumber, String password, String gender, String role, String address, Date dateOfBirth, String accountStatus) {
@@ -91,4 +92,13 @@ public class User {
 
     public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
     public void setLastModifiedDate(LocalDateTime lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; }
+
+    public boolean isIsEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public void setIsEmailVerified(boolean isEmailVerified) {
+        this.isEmailVerified = isEmailVerified;
+    }
+    
 }

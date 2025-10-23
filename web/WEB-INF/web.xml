@@ -12,6 +12,19 @@
         <servlet-name>ComboFoodManagementServlet</servlet-name>
         <servlet-class>controller.ComboFoodManagementServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>VerifyEmailServlet</servlet-name>
+        <servlet-class>controller.VerifyEmailServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VerifyCodeServlet</servlet-name>
+        <servlet-class>controller.VerifyCodeServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SendVerificationServlet</servlet-name>
+        <servlet-class>controller.SendVerificationServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>CustomerProfileServlet</servlet-name>
         <url-pattern>/CustomerProfile</url-pattern>
@@ -31,14 +44,6 @@
     <servlet>
         <servlet-name>ChangePasswordServlet</servlet-name>
         <servlet-class>controller.ChangePasswordServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>VerifyCodeServlet</servlet-name>
-        <servlet-class>controller.VerifyCodeServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>SendVerificationServlet</servlet-name>
-        <servlet-class>controller.SendVerificationServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FoodManagementServlet</servlet-name>
@@ -88,7 +93,10 @@
         <servlet-name>GoogleAuthController</servlet-name>
         <url-pattern>/auth/google</url-pattern>
     </servlet-mapping>
-
+    <servlet-mapping>
+        <servlet-name>VerifyEmailServlet</servlet-name>
+        <url-pattern>/VerifyEmail</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
