@@ -53,7 +53,11 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Thời lượng (phút)</label>
-                                    <input type="number" name="duration" class="form-control" value="${movie.duration}" required>
+                                    <input type="number" name="duration" min="1" class="form-control"
+                                           value="${movie.duration}" required>
+                                    <c:if test="${not empty errorDuration}">
+                                        <div class="text-danger mt-1">${errorDuration}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">

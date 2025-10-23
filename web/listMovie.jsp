@@ -31,6 +31,19 @@
                 <main class="p-4">
                     <div class="container-fluid">
                         <h2 class="mb-4">📽️ Danh sách phim</h2>
+                        <c:if test="${param.addSuccess == '1'}">
+                            <div class="alert alert-success">Thêm phim mới thành công!</div>
+                        </c:if>
+                        <c:if test="${param.updateSuccess == '1'}">
+                            <div class="alert alert-success">Cập nhật phim thành công!</div>
+                        </c:if>
+                        <c:if test="${param.deleteSuccess == '1'}">
+                            <div class="alert alert-success">Xóa phim thành công!</div>
+                        </c:if>
+
+                        <c:if test="${param.deleteFail == '1'}">
+                            <div class="alert alert-danger">Không thể xóa phim. Vui lòng thử lại.</div>
+                        </c:if>
 
                         <!-- Thanh search -->
                         <form action="list" method="get" class="row g-2 mb-3">
@@ -96,9 +109,9 @@
                                             </td>
                                             <td class="text-center">${m.languageName}</td>
                                             <td class="text-center">
-                                                <a href="edit?movieID=${m.movieID}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                                                <a href="edit?movieID=${m.movieID}" class="btn btn-sm btn-warning">Edit</a>
                                                 <a href="delete?movieID=${m.movieID}" class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bạn có chắc muốn xóa phim này?');">🗑️ Delete</a>
+                                                   onclick="return confirm('Bạn có chắc muốn xóa phim này?');">Delete</a>
                                             </td>
                                         </tr>
                                     </c:forEach>

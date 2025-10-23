@@ -29,15 +29,26 @@
                         <h2 class="mb-4">🎬 Quản lý lịch chiếu</h2>
                         <c:if test="${param.addSuccess == '1'}">
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                ✅ Thêm lịch chiếu mới thành công!
+                                Thêm lịch chiếu mới thành công!
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         </c:if>
 
                         <c:if test="${param.addFail == '1'}">
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                ❌ Có lỗi xảy ra khi thêm lịch chiếu. Vui lòng thử lại!
+                                Có lỗi xảy ra khi thêm lịch chiếu. Vui lòng thử lại!
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </c:if>
+                        <c:if test="${param.success == '1'}">
+                            <div class="alert alert-success" role="alert">
+                                Cập nhật lịch chiếu thành công!
+                            </div>
+                        </c:if>
+
+                        <c:if test="${param.error == '1'}">
+                            <div class="alert alert-danger" role="alert">
+                                Cập nhật thất bại! Vui lòng thử lại.
                             </div>
                         </c:if>
                         <c:if test="${param.cancelSuccess == '1'}">

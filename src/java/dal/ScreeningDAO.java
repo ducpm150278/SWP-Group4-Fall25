@@ -149,13 +149,13 @@ public class ScreeningDAO extends DBContext {
     }
 //xem chi tiết lịch phim
 
-    public Screening getScreeningDetail(int screeningID) {
-        Screening sc = null;
-        String sql = """
+   public Screening getScreeningDetail(int screeningID) {
+    Screening sc = null;
+    String sql = """
         SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime,
                s.TicketPrice, s.AvailableSeats,
                m.Title AS MovieTitle, m.Status AS MovieStatus,
-               c.CinemaName, r.RoomName
+               c.CinemaName, r.RoomName, r.RoomType
         FROM Screenings s
         JOIN Movies m ON s.MovieID = m.MovieID
         JOIN ScreeningRooms r ON s.RoomID = r.RoomID
@@ -163,29 +163,31 @@ public class ScreeningDAO extends DBContext {
         WHERE s.ScreeningID = ?
     """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, screeningID);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                sc = new Screening(
-                        rs.getInt("ScreeningID"),
-                        rs.getInt("MovieID"),
-                        rs.getInt("RoomID"),
-                        rs.getTimestamp("StartTime").toLocalDateTime(),
-                        rs.getTimestamp("EndTime").toLocalDateTime(),
-                        rs.getDouble("TicketPrice"),
-                        rs.getInt("AvailableSeats"),
-                        rs.getString("MovieTitle"),
-                        rs.getString("CinemaName"),
-                        rs.getString("RoomName"),
-                        rs.getString("MovieStatus")
-                );
-            }
-        } catch (SQLException e) {
-            System.out.println("Error getScreeningDetail: " + e.getMessage());
+    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        ps.setInt(1, screeningID);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            sc = new Screening(
+                    rs.getInt("ScreeningID"),
+                    rs.getInt("MovieID"),
+                    rs.getInt("RoomID"),
+                    rs.getTimestamp("StartTime").toLocalDateTime(),
+                    rs.getTimestamp("EndTime").toLocalDateTime(),
+                    rs.getDouble("TicketPrice"),
+                    rs.getInt("AvailableSeats"),
+                    rs.getString("MovieTitle"),
+                    rs.getString("CinemaName"),
+                    rs.getString("RoomName"),
+                    rs.getString("MovieStatus"),
+                    rs.getString("RoomType")
+            );
         }
-        return sc;
+    } catch (SQLException e) {
+        System.out.println("Error getScreeningDetail: " + e.getMessage());
     }
+    return sc;
+}
+
 
     // Lấy các suất chiếu khác của cùng phim trong khoảng thời gian
     public List<Screening> getOtherSchedulesOfMovie(int movieID, LocalDateTime from, LocalDateTime to, int excludeID) {
@@ -242,17 +244,22 @@ public class ScreeningDAO extends DBContext {
 
     public Integer getSeatCapacityByRoomID(int roomID) {
         String sql = "SELECT SeatCapacity FROM ScreeningRooms WHERE RoomID = ?";
-        try (PreparedStatement ps = getConnection().prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
 
             ps.setInt(1, roomID);
-            if (rs.next()) {
-                return rs.getInt("SeatCapacity");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("SeatCapacity");
+                }
             }
+
         } catch (SQLException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
         }
-        return 0; 
+        return 0;
     }
+   
 
     public int countAllScreenings() {
         String sql = "SELECT COUNT(*) FROM Screenings";
@@ -447,20 +454,19 @@ public class ScreeningDAO extends DBContext {
             return false;
         }
     }
+
     //Hủy lịch chiếu
-  public boolean cancelScreening(int screeningID) {
-    String sql = "DELETE FROM Screenings WHERE ScreeningID = ?";
-    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-        ps.setInt(1, screeningID);
-        int rows = ps.executeUpdate();
-        return rows > 0;
-    } catch (SQLException e) {
-        System.out.println("Error cancelScreening: " + e.getMessage());
+    public boolean cancelScreening(int screeningID) {
+        String sql = "DELETE FROM Screenings WHERE ScreeningID = ?";
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, screeningID);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            System.out.println("Error cancelScreening: " + e.getMessage());
+        }
+        return false;
     }
-    return false;
-}
-
-
 
     public static void main(String[] args) {
 //        ScreeningDAO dao = new ScreeningDAO();

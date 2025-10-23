@@ -63,7 +63,7 @@ public class AddScreeningServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
+     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -129,11 +129,10 @@ public class AddScreeningServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/listScreening?addSuccess=1");
         } catch (Exception ex) {
             ex.printStackTrace();
-            request.setAttribute("error", "Lỗi khi thêm lịch chiếu: " + ex.getMessage());
+            request.setAttribute("error", "❌ Lỗi khi thêm lịch chiếu: " + ex.getMessage());
             request.getRequestDispatcher("addScreening.jsp").forward(request, response);
         }
     }
-
     /** 
      * Returns a short description of the servlet.
      * @return a String containing servlet description

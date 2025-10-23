@@ -33,66 +33,81 @@
                             <form action="add" method="post" class="needs-validation" novalidate>
                                 <div class="mb-3">
                                     <label class="form-label">Tiêu đề</label>
-                                    <input type="text" name="title" class="form-control" required>
+                                    <input type="text" name="title" class="form-control" 
+                                           value="${title}" required>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Thể loại</label>
-                                    <input type="text" name="genre" class="form-control" required>
+                                    <input type="text" name="genre" class="form-control" 
+                                           value="${genre}" required>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Tóm tắt</label>
-                                    <textarea name="summary" class="form-control" rows="4"></textarea>
+                                    <textarea name="summary" class="form-control" rows="4">${summary}</textarea>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Trailer URL</label>
-                                    <input type="url" name="trailerURL" class="form-control">
+                                    <input type="url" name="trailerURL" class="form-control" 
+                                           value="${trailerURL}">
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Dàn diễn viên</label>
-                                        <input type="text" name="cast" class="form-control">
+                                        <input type="text" name="cast" class="form-control" value="${cast}">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Đạo diễn</label>
-                                        <input type="text" name="director" class="form-control">
+                                        <input type="text" name="director" class="form-control" value="${director}">
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Thời lượng (phút)</label>
-                                        <input type="number" name="duration" min="1" class="form-control" required>
+                                        <input type="number" name="duration" min="1" class="form-control" 
+                                               value="${duration}" required>
+                                        <c:if test="${not empty errorDuration}">
+                                            <div class="text-danger mt-1">${errorDuration}</div>
+                                        </c:if>
                                     </div>
+
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Ngày công chiếu</label>
-                                        <input type="date" name="releasedDate" class="form-control" required>
+                                        <input type="date" name="releasedDate" class="form-control" 
+                                               value="${releasedDate}" required>
                                     </div>
+
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Trạng thái</label>
                                         <select name="status" class="form-select" required>
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
-                                            <option value="Upcoming">Upcoming</option>
-                                            <option value="Cancelled">Cancelled</option>
+                                            <option value="Active" ${status == 'Active' ? 'selected' : ''}>Active</option>
+                                            <option value="Inactive" ${status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                            <option value="Upcoming" ${status == 'Upcoming' ? 'selected' : ''}>Upcoming</option>
+                                            <option value="Cancelled" ${status == 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="mb-3">
                                     <label class="form-label">Ngôn ngữ</label>
                                     <select name="languageName" class="form-select" required>
                                         <c:forEach var="lang" items="${listLanguage}">
-                                            <option value="${lang.languageID}">${lang.languageName}</option>
+                                            <option value="${lang.languageID}" 
+                                                    ${selectedLanguage == lang.languageID ? 'selected' : ''}>
+                                                ${lang.languageName}
+                                            </option>
                                         </c:forEach>
-
                                     </select>
                                 </div>
+
                                 <div class="mb-3">
                                     <label class="form-label">Poster URL</label>
-                                    <input type="url" name="posterURL" class="form-control">
+                                    <input type="url" name="posterURL" class="form-control" 
+                                           value="${posterURL}">
                                 </div>
 
                                 <div class="d-flex justify-content-between">
@@ -101,6 +116,7 @@
                                     <a href="list" class="btn btn-secondary">Hủy</a>
                                 </div>
                             </form>
+
                         </div>
                     </div>
                 </div>

@@ -102,9 +102,9 @@
                                 Quản lý lịch chiếu
                             </a>
 
-                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="listapprovebooking">
+                            <a class="<%= uri.contains("/swp-group4-fall25/listdiscount.jsp") ? "nav-link active" : "nav-link" %>" href="listDiscount">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                Quản lý khuyến mãi
+                                Quản lý khuyến mại
                             </a>
 
 

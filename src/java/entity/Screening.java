@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
  * @author admin
  */
 public class Screening {
-     private int screeningID;
+
+    private int screeningID;
     private int movieID;
     private int roomID;
     private LocalDateTime startTime;
@@ -24,7 +25,27 @@ public class Screening {
     private String cinemaName;
     private String roomName;
     private String movieStatus;
-private int soldSeats; 
+    private String roomType;
+    private int soldSeats;
+
+    public Screening(int screeningID, int movieID, int roomID,
+            LocalDateTime startTime, LocalDateTime endTime,
+            double ticketPrice, int availableSeats,
+            String movieTitle, String cinemaName, String roomName,
+            String movieStatus, String roomType) { // 👈 thêm roomType
+        this.screeningID = screeningID;
+        this.movieID = movieID;
+        this.roomID = roomID;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.ticketPrice = ticketPrice;
+        this.availableSeats = availableSeats;
+        this.movieTitle = movieTitle;
+        this.cinemaName = cinemaName;
+        this.roomName = roomName;
+        this.movieStatus = movieStatus;
+        this.roomType = roomType;
+    }
 
     public Screening(int screeningID, int movieID, int roomID, LocalDateTime startTime, LocalDateTime endTime, double ticketPrice, int availableSeats, String movieTitle, String cinemaName, String roomName, String movieStatus, int soldSeats) {
         this.screeningID = screeningID;
@@ -48,6 +69,7 @@ private int soldSeats;
     public void setSoldSeats(int soldSeats) {
         this.soldSeats = soldSeats;
     }
+
     public Screening() {
     }
 
@@ -72,8 +94,6 @@ private int soldSeats;
         this.roomName = roomName;
         this.movieStatus = movieStatus;
     }
-
- 
 
     public int getScreeningID() {
         return screeningID;
@@ -155,9 +175,17 @@ private int soldSeats;
         this.roomName = roomName;
     }
 
+    public String getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(String roomType) {
+        this.roomType = roomType;
+    }
+
     @Override
     public String toString() {
         return "Screening{" + "screeningID=" + screeningID + ", movieID=" + movieID + ", roomID=" + roomID + ", startTime=" + startTime + ", endTime=" + endTime + ", ticketPrice=" + ticketPrice + ", availableSeats=" + availableSeats + ", movieTitle=" + movieTitle + ", cinemaName=" + cinemaName + ", roomName=" + roomName + ", movieStatus=" + movieStatus + '}';
     }
-    
+
 }

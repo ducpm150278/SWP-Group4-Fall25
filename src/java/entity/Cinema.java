@@ -18,7 +18,7 @@ public class Cinema {
     public Cinema() {
     }
 
-    public Cinema(int cinemaID, String cinemaName, String location, String address, 
+    public Cinema(int cinemaID, String cinemaName, String location, String address,
             boolean isActive, LocalDateTime createdDate) {
         this.cinemaID = cinemaID;
         this.cinemaName = cinemaName;
@@ -29,7 +29,7 @@ public class Cinema {
         this.createdDate = createdDate;
     }
 
-    public Cinema(int cinemaID, String cinemaName, String location, String address, 
+    public Cinema(int cinemaID, String cinemaName, String location, String address,
             int totalRooms, boolean isActive, LocalDateTime createdDate) {
         this.cinemaID = cinemaID;
         this.cinemaName = cinemaName;
@@ -125,14 +125,14 @@ public class Cinema {
 
     @Override
     public String toString() {
-        return "Cinema{" +
-                "cinemaID=" + cinemaID +
-                ", cinemaName='" + cinemaName + '\'' +
-                ", location='" + location + '\'' +
-                ", address='" + address + '\'' +
-                ", totalRooms=" + totalRooms +
-                ", isActive=" + isActive +
-                ", createdDate=" + createdDate +
-                '}';
+        return "Cinema{"
+                + "cinemaID=" + cinemaID
+                + ", cinemaName='" + cinemaName + '\''
+                + ", location='" + location + '\''
+                + ", address='" + address + '\''
+                + ", totalRooms=" + totalRooms
+                + ", isActive=" + isActive
+                + ", createdDate=" + createdDate
+                + '}';
     }
 }
