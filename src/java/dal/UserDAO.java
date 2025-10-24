@@ -749,22 +749,51 @@ public class UserDAO extends DBContext {
     // Customer
     public boolean updateEmailAndVerification(int userId, String newEmail, boolean isVerified) {
         String sql = "UPDATE Users "
-                   + "SET Email = ?, IsEmailVerified = ?, LastModifiedDate = GETDATE() "
-                   + "WHERE UserID = ?";
-        
+                + "SET Email = ?, IsEmailVerified = ?, LastModifiedDate = GETDATE() "
+                + "WHERE UserID = ?";
+
         try (Connection conn = new DBContext().getConnection(); // Assumes DBContext
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, newEmail);
             ps.setBoolean(2, isVerified);
             ps.setInt(3, userId);
-            
+
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0; // True if 1 row was updated
-            
+
         } catch (Exception e) {
             e.printStackTrace(); // Log the error
             return false;
         }
     }
+
+    // Customr
+    public User getUserById(int userId) {
+        String sql = "SELECT * FROM Users WHERE UserID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUserID(rs.getInt("UserID"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPhoneNumber(rs.getString("PhoneNumber"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setGender(rs.getString("Gender"));
+                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
+                    user.setAddress(rs.getString("Address"));
+                    user.setAccountStatus(rs.getString("AccountStatus"));
+                    user.setRole(rs.getString("Role"));
+                    user.setIsEmailVerified(rs.getBoolean("IsEmailVerified"));
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
+}

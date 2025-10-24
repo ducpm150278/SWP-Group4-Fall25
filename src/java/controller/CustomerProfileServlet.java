@@ -63,30 +63,41 @@ public class CustomerProfileServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String email = "customer1@gmail.com";
-        User user = userDAO.getUserByEmail(email);
-        request.getSession().setAttribute("user", user);
+        HttpSession session = request.getSession();
+        User userFromSession = (User) session.getAttribute("user");
+        if (userFromSession == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        User freshUser = userDAO.getUserById(userFromSession.getUserID());
+        if (freshUser != null) {
+            request.setAttribute("user", freshUser);
+        } else {
+            request.setAttribute("error", "Logged in user not found in database.");
+        }
+        if (session.getAttribute("message") != null) {
+            request.setAttribute("message", session.getAttribute("message"));
+            session.removeAttribute("message");
+        }
+
         request.getRequestDispatcher("profile.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String userIdParam = request.getParameter("userId");
-        if (userIdParam == null || userIdParam.isEmpty()) {
-            System.out.println("⚠️ userId is missing in POST request!");
-            request.setAttribute("error", "Thiếu thông tin người dùng (userId).");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
-            return; // stop here, don’t continue
+        HttpSession session = request.getSession();
+        User userFromSession = (User) session.getAttribute("user");
+        if (userFromSession == null) {
+            response.sendRedirect("login.jsp");
+            return;
         }
-
-        int userId = Integer.parseInt(userIdParam);
+        int userId = userFromSession.getUserID();
         String fullName = request.getParameter("fullName");
         String phone = request.getParameter("phone");
         String gender = request.getParameter("gender");
         String dob = request.getParameter("birthdate");
         String address = request.getParameter("address");
-
         User updatedUser = new User();
         updatedUser.setUserID(userId);
         updatedUser.setFullName(fullName);
@@ -96,23 +107,19 @@ public class CustomerProfileServlet extends HttpServlet {
         updatedUser.setAddress(address);
 
         boolean success = userDAO.updateUser(updatedUser);
-
         if (success) {
-            // fetch lai user cho dung voi field
-            User refreshedUser = userDAO.getUserByEmail("customer1@gmail.com");
-
-            // Update lai session 
-            HttpSession session = request.getSession();
+            User refreshedUser = userDAO.getUserById(userId);
             session.setAttribute("user", refreshedUser);
+            session.setAttribute("userName", refreshedUser.getFullName());
+            session.setAttribute("userEmail", refreshedUser.getEmail());
+            session.setAttribute("message", "Cập nhật thành công!");
+            response.sendRedirect("CustomerProfile");
 
-            // Show confirm / re-display updated info
-            request.setAttribute("message", "Cập nhật thành công!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Cập nhật thất bại!");
+            request.setAttribute("user", updatedUser);
             request.getRequestDispatcher("profile.jsp").forward(request, response);
         }
-
     }
 
     /**
