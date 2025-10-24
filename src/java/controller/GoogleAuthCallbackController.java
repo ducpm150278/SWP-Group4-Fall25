@@ -92,7 +92,7 @@ public class GoogleAuthCallbackController extends HttpServlet {
                     
                     // Redirect based on role
                     if ("Admin".equals(existingUser.getRole())) {
-                        response.sendRedirect(request.getContextPath() + "/admin.jsp");
+                        response.sendRedirect(request.getContextPath() + "/list");
                     } else {
                         response.sendRedirect(request.getContextPath() + "/index.jsp");
                     }

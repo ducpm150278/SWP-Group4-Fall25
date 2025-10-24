@@ -55,7 +55,6 @@ public class MovieDAO extends DBContext {
         return list;
     }
 
-
     public void addMovie(String title, String genre, String summary, String trailerURL,
             String cast, String director, int duration, LocalDate releasedDate,
             String posterURL, int languageID, String status, LocalDateTime createdDate) {
@@ -120,7 +119,6 @@ public class MovieDAO extends DBContext {
         return list;
     }
 
-
     public void updateMovie(int movieID, String title, String genre, String summary,
             String trailerURL, String cast, String director,
             int duration, LocalDate releasedDate, String posterURL,
@@ -152,15 +150,15 @@ public class MovieDAO extends DBContext {
         }
     }
 
-    public void delete(int movieID) {
+    public boolean delete(int movieID) {
         String sql = "DELETE FROM Movies WHERE MovieID = ?";
-        try {
-            PreparedStatement pre = getConnection().prepareStatement(sql);
-            pre.setInt(1, movieID);
-            pre.executeUpdate();
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, movieID);
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e);
+            System.out.println("Lỗi khi xóa phim: " + e.getMessage());
         }
+        return false;
     }
 
     public Movie getMovieById(int id) {
@@ -213,6 +211,97 @@ public class MovieDAO extends DBContext {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Movie> getMoviesPaginated(int offset, int limit, String keyword) {
+        List<Movie> list = new ArrayList<>();
+
+        String sql = """
+        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+               m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
+               m.status, m.createdDate, l.languageName
+        FROM Movies m 
+        JOIN Language l ON m.languageID = l.languageID
+        WHERE 1=1
+    """;
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql += " AND m.title LIKE ? ";
+        }
+
+        sql += " ORDER BY m.createdDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
+
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
+            int index = 1;
+            if (keyword != null && !keyword.isBlank()) {
+                pre.setString(index++, "%" + keyword + "%");
+            }
+            pre.setInt(index++, offset);
+            pre.setInt(index, limit);
+
+            ResultSet rs = pre.executeQuery();
+            while (rs.next()) {
+                int movieID = rs.getInt("movieID");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
+                String summary = rs.getString("summary");
+                String trailerURL = rs.getString("trailerURL");
+                String cast = rs.getString("cast");
+                String director = rs.getString("director");
+                int duration = rs.getInt("duration");
+                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
+                String posterURL = rs.getString("posterURL");
+                String status = rs.getString("status");
+                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
+                String languageName = rs.getString("languageName");
+
+                list.add(new Movie(movieID, title, genre, summary, trailerURL,
+                        cast, director, duration, releasedDate, posterURL,
+                        status, createdDate, languageName));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getMoviesPaginated: " + e.getMessage());
+        }
+
+        return list;
+    }
+    //lay so ban ghi
+
+    public int getTotalMovies(String keyword) {
+        String sql = "SELECT COUNT(*) FROM Movies WHERE 1=1 ";
+        if (keyword != null && !keyword.isBlank()) {
+            sql += " AND title LIKE ? ";
+        }
+
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
+            if (keyword != null && !keyword.isBlank()) {
+                pre.setString(1, "%" + keyword + "%");
+            }
+            ResultSet rs = pre.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getTotalMovies: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public List<Movie> getActiveMovies() {
+        List<Movie> list = new ArrayList<>();
+        String sql = "SELECT MovieID, Title FROM Movies WHERE Status IN ('Active', 'Upcoming', 'Inactive', 'Cancelled')";
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Movie m = new Movie();
+                m.setMovieID(rs.getInt("MovieID"));
+                m.setTitle(rs.getString("Title"));
+                list.add(m);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getActiveMovies: " + e.getMessage());
         }
         return list;
     }

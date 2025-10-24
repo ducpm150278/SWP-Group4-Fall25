@@ -59,6 +59,11 @@
             boolean isBlog = uri.contains("listpost") || uri.contains("addpost");
             boolean isPromo = uri.contains("promotion-list") || uri.contains("add-promotion");
         %>
+        <%
+    // Debug
+    System.out.println("Current URI: " + uri);
+%>
+
     </head>
     <body>
         <div id="layoutSidenav">
@@ -74,76 +79,44 @@
                             </a>
 
                             <div class="sb-sidenav-menu-heading">Quản lý</div>
-                            <a class="<%= uri.contains("adminFE/dashboard") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard">
-                                <div class="sb-nav-link-icon"><i class="fas fa-bed"></i></div>
+                            <a class="<%= uri.equals("/hotelrentalmanagement/views/dashboard/room.jsp") ? "nav-link active" : "nav-link" %>" href="listRoom">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
                                 Quản lý tài khoản
                             </a>
-                            <a class="<%= uri.contains("list") ? "nav-link active" : "nav-link" %>" href="list">
-                                <div class="sb-nav-link-icon"><i class="fas fa-layer-group"></i></div>
+                            <a class="<%= uri.equals("/swp-group4-fall25/listmovie.jsp") ? "nav-link active" : "nav-link" %>" href="list">
+                                <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
                                 Quản lý phim
                             </a>
 
                             <a class="<%= uri.contains("feedbackmanager") ? "nav-link active" : "nav-link" %>" href="feedbackmanager">
-                                <div class="sb-nav-link-icon"><i class="fas fa-comments"></i></div>
+                                <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
                                 Quản lý rạp chiếu
                             </a>
 
                             <a class="<%= uri.contains("management-feedback-room.jsp") ? "nav-link active" : "nav-link" %>" href="feedbackroommanagement">
-                                <div class="sb-nav-link-icon"><i class="fas fa-comment-dots"></i></div>
+                                <div class="sb-nav-link-icon"><i class="fas fa-video""></i></div>
                                 Quản lý phòng chiếu
                             </a>
-
-                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="listapprovebooking">
-                                <div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>
-                                Quản lý khuyến mãi
+                            <a class="<%= uri.equals("/swp-group4-fall25/listscreening.jsp") ? "nav-link active" : "nav-link" %>" href="listScreening">
+                                <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
+                                Quản lý lịch chiếu
                             </a>
-                          
+
+                            <a class="<%= uri.contains("/swp-group4-fall25/listdiscount.jsp") ? "nav-link active" : "nav-link" %>" href="listDiscount">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                Quản lý khuyến mại
+                            </a>
+
 
                             <!-- Quản lý đồ ăn -->
-                            <a class="nav-link collapsed <%= isFood ? "active" : "" %>" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFood" aria-expanded="<%= isFood ? "true" : "false" %>">
+                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="listapprovebooking">
                                 <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
                                 Quản lý đồ ăn
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
-                            <div class="collapse <%= isFood ? "show" : "" %>" id="collapseFood">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="<%= uri.contains("managerfood") ? "nav-link active" : "nav-link" %>" href="managerfood">Món ăn</a>
-                                    <a class="<%= uri.contains("managerorder") ? "nav-link active" : "nav-link" %>" href="managerorder">Đơn đặt món</a>
-                                </nav>
-                            </div>
-
-                            <!-- Blog -->
-                            <a class="nav-link collapsed <%= isBlog ? "active" : "" %>" href="#" data-bs-toggle="collapse" data-bs-target="#collapseBlog" aria-expanded="<%= isBlog ? "true" : "false" %>">
-                                <div class="sb-nav-link-icon"><i class="fas fa-blog"></i></div>
-                                Bài viết
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse <%= isBlog ? "show" : "" %>" id="collapseBlog">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="<%= uri.contains("listpost") ? "nav-link active" : "nav-link" %>" href="listpost">Danh sách bài viết</a>
-                                    <a class="<%= uri.contains("addpost") ? "nav-link active" : "nav-link" %>" href="addpost">Thêm bài viết</a>
-                                </nav>
-                            </div>
-
-                            <%
-// Debug: kiểm tra uri bạn đang thấy thực tế
-System.out.println("URI: " + uri); // Xem trong console/log Tomcat
-                            %>
-                            <!-- Mã giảm giá -->
-                            <a class="nav-link collapsed <%= isPromo ? "active" : "" %>" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePromo" aria-expanded="<%= isPromo ? "true" : "false" %>">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                Mã giảm giá
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse <%= isPromo ? "show" : "" %>" id="collapsePromo">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="<%= uri.contains("promotion-list") ? "nav-link active" : "nav-link" %>" href="listPromotion">Danh sách mã</a>
-                                    <a class="<%= uri.contains("add-promotion") ? "nav-link active" : "nav-link" %>" href="addPromotion">Thêm mã</a>
-                                </nav>
-                            </div>
+                           
                             <!-- Tài khoản -->
                             <div class="sb-sidenav-menu-heading">Tài khoản</div>
-                            <a class="nav-link text-danger" href="${pageContext.request.contextPath}/auth/logout">
+                            <a class="nav-link text-danger" href="logout">
                                 <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                                 Đăng xuất
                             </a>

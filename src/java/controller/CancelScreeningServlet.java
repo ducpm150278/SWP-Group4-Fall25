@@ -5,7 +5,7 @@
 
 package controller;
 
-import dal.MovieDAO;
+import dal.ScreeningDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -18,8 +18,8 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author admin
  */
-@WebServlet(name="DeleteMovieServlet", urlPatterns={"/delete"})
-public class DeleteMovieServlet extends HttpServlet {
+@WebServlet(name="CancelScreeningServlet", urlPatterns={"/cancelScreening"})
+public class CancelScreeningServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -36,10 +36,10 @@ public class DeleteMovieServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet DeleteMovieServlet</title>");  
+            out.println("<title>Servlet CancelScreeningServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet DeleteMovieServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet CancelScreeningServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -53,27 +53,31 @@ public class DeleteMovieServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            int movieID = Integer.parseInt(request.getParameter("movieID"));
-            MovieDAO dao = new MovieDAO();
-            boolean deleted = dao.delete(movieID); // giả sử hàm delete trả về true/false
 
-            if (deleted) {
-                response.sendRedirect("list?deleteSuccess=1");
-            } else {
-                response.sendRedirect("list?deleteFail=1");
+        try {
+            String idStr = request.getParameter("screeningID");
+            if (idStr == null || idStr.isEmpty()) {
+                response.sendRedirect("listScreening?error=invalid_id");
+                return;
             }
 
-        } catch (NumberFormatException e) {
-            System.out.println("MovieID không hợp lệ: " + e.getMessage());
-            response.sendRedirect("list?deleteFail=1");
+            int screeningID = Integer.parseInt(idStr);
+            ScreeningDAO dao = new ScreeningDAO();
+
+            boolean deleted = dao.cancelScreening(screeningID);
+
+            if (deleted) {
+                response.sendRedirect("listScreening?cancelSuccess=1");
+            } else {
+                response.sendRedirect("listScreening?cancelFail=1");
+            }
+
         } catch (Exception e) {
-            System.out.println("Lỗi khi xóa phim: " + e.getMessage());
-            response.sendRedirect("list?deleteFail=1");
+            e.printStackTrace();
+            response.sendRedirect("listScreening?error=exception");
         }
     }
 

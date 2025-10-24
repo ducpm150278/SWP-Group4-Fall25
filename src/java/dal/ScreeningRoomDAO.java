@@ -9,7 +9,35 @@ import java.util.List;
 public class ScreeningRoomDAO {
 
     DBContext db = new DBContext();
+public List<ScreeningRoom> getAllRooms() {
+        List<ScreeningRoom> list = new ArrayList<>();
+        String sql = """
+            SELECT r.RoomID, r.CinemaID, r.RoomName, r.SeatCapacity
+            FROM ScreeningRooms r
+            JOIN Cinemas c ON r.CinemaID = c.CinemaID
+            WHERE r.IsActive = 1
+            ORDER BY r.RoomName
+        """;
 
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                ScreeningRoom room = new ScreeningRoom();
+                room.setRoomID(rs.getInt("RoomID"));
+                room.setCinemaID(rs.getInt("CinemaID"));
+                room.setRoomName(rs.getString("RoomName"));
+                room.setSeatCapacity(rs.getInt("SeatCapacity"));
+                list.add(room);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error getAllRooms: " + e.getMessage());
+        }
+
+        return list;
+    }
     // Chuyển đổi Timestamp sang LocalDateTime
     private LocalDateTime toLocalDateTime(Timestamp timestamp) {
         try {

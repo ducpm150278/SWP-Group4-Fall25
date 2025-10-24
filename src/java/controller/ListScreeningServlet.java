@@ -5,8 +5,8 @@
 
 package controller;
 
-import dal.MovieDAO;
-import entity.Movie;
+import dal.ScreeningDAO;
+import entity.Screening;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,14 +14,17 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name="ListMovieServlet", urlPatterns={"/list"})
-public class ListMovieServlet extends HttpServlet {
+@WebServlet(name="ListScreeningServlet", urlPatterns={"/listScreening"})
+public class ListScreeningServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -38,10 +41,10 @@ public class ListMovieServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet ListMovieServlet</title>");  
+            out.println("<title>Servlet ListScreeningServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet ListMovieServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet ListScreeningServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -56,40 +59,61 @@ public class ListMovieServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-     
-    String keyword = request.getParameter("keyword");
-    int page = 1;
-    int recordsPerPage = 6;
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-    // Lấy trang hiện tại (nếu có)
-    String pageParam = request.getParameter("page");
-    if (pageParam != null) {
-        try {
-            page = Integer.parseInt(pageParam);
-        } catch (NumberFormatException e) {
-            page = 1;
-        }
+    String keyword = request.getParameter("keyword");
+    String fromStr = request.getParameter("from");
+    String toStr = request.getParameter("to");
+    String status = request.getParameter("status");
+    String pageStr = request.getParameter("page");
+
+    int page = 1;
+    int pageSize = 6; // số bản ghi mỗi trang
+    if (pageStr != null && !pageStr.isEmpty()) {
+        page = Integer.parseInt(pageStr);
     }
 
-    MovieDAO dao = new MovieDAO();
+    LocalDateTime from = null;
+    LocalDateTime to = null;
+    try {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        if (fromStr != null && !fromStr.isEmpty()) {
+            from = LocalDate.parse(fromStr, formatter).atStartOfDay();
+        }
+        if (toStr != null && !toStr.isEmpty()) {
+            to = LocalDate.parse(toStr, formatter).atTime(23, 59, 59);
+        }
+    } catch (Exception e) {
+        System.out.println("Error parsing datetime: " + e.getMessage());
+    }
 
-    int totalRecords = dao.getTotalMovies(keyword);
-    int totalPages = (int) Math.ceil(totalRecords / (double) recordsPerPage);
+    ScreeningDAO dao = new ScreeningDAO();
+    List<Screening> list;
+    int totalRecords;
 
-    int offset = (page - 1) * recordsPerPage;
+    // Nếu có điều kiện tìm kiếm
+    if ((keyword != null && !keyword.isEmpty()) || from != null || to != null || (status != null && !status.isEmpty())) {
+        list = dao.searchScreeningsWithPaging(keyword, from, to, status, page, pageSize);
+        totalRecords = dao.countSearchScreenings(keyword, from, to, status);
+    } else {
+        list = dao.getAllScreeningWithPaging(page, pageSize);
+        totalRecords = dao.countAllScreenings();
+    }
 
-    List<Movie> movies = dao.getMoviesPaginated(offset, recordsPerPage, keyword);
+    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
-    // Gửi dữ liệu sang JSP
-    request.setAttribute("movies", movies);
+    request.setAttribute("screenings", list);
+    request.setAttribute("keyword", keyword);
+    request.setAttribute("from", fromStr);
+    request.setAttribute("to", toStr);
+    request.setAttribute("status", status);
     request.setAttribute("currentPage", page);
     request.setAttribute("totalPages", totalPages);
-    request.setAttribute("keyword", keyword);
 
-    request.getRequestDispatcher("listMovie.jsp").forward(request, response);
-    } 
+    request.getRequestDispatcher("listScreening.jsp").forward(request, response);
+}
+
 
     /** 
      * Handles the HTTP <code>POST</code> method.

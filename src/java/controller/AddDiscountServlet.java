@@ -5,7 +5,7 @@
 
 package controller;
 
-import dal.MovieDAO;
+import dal.DiscountDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -13,13 +13,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name="DeleteMovieServlet", urlPatterns={"/delete"})
-public class DeleteMovieServlet extends HttpServlet {
+@WebServlet(name="AddDiscountServlet", urlPatterns={"/addDiscount"})
+public class AddDiscountServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -36,10 +37,10 @@ public class DeleteMovieServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet DeleteMovieServlet</title>");  
+            out.println("<title>Servlet AddDiscountServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet DeleteMovieServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet AddDiscountServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -57,37 +58,38 @@ public class DeleteMovieServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            int movieID = Integer.parseInt(request.getParameter("movieID"));
-            MovieDAO dao = new MovieDAO();
-            boolean deleted = dao.delete(movieID); // giả sử hàm delete trả về true/false
-
-            if (deleted) {
-                response.sendRedirect("list?deleteSuccess=1");
-            } else {
-                response.sendRedirect("list?deleteFail=1");
-            }
-
-        } catch (NumberFormatException e) {
-            System.out.println("MovieID không hợp lệ: " + e.getMessage());
-            response.sendRedirect("list?deleteFail=1");
-        } catch (Exception e) {
-            System.out.println("Lỗi khi xóa phim: " + e.getMessage());
-            response.sendRedirect("list?deleteFail=1");
-        }
+        request.getRequestDispatcher("addDiscount.jsp").forward(request, response);
     }
 
-    /** 
-     * Handles the HTTP <code>POST</code> method.
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-        processRequest(request, response);
+            throws ServletException, IOException {
+        try {
+            String code = request.getParameter("code");
+            int maxUsage = Integer.parseInt(request.getParameter("maxUsage"));
+            int usageCount = Integer.parseInt(request.getParameter("usageCount"));
+            double discountPercentage = Double.parseDouble(request.getParameter("discountPercentage"));
+            String status = request.getParameter("status");
+            LocalDate startDate = LocalDate.parse(request.getParameter("startDate"));
+            LocalDate endDate = LocalDate.parse(request.getParameter("endDate"));
+
+            if (endDate.isBefore(startDate)) {
+                request.setAttribute("error", "Ngày kết thúc phải sau ngày bắt đầu!");
+                request.getRequestDispatcher("addDiscount.jsp").forward(request, response);
+                return;
+            }
+
+            DiscountDAO dao = new DiscountDAO();
+            dao.insertDiscount(code, maxUsage, usageCount, startDate, endDate, status, discountPercentage, 1); // CreatedBy = 1 (Admin)
+
+            // ✅ Sau khi thêm thành công -> quay về danh sách + thông báo
+            response.sendRedirect("listDiscount?addSuccess=1");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "❌ Lỗi khi thêm CTKM: " + e.getMessage());
+            request.getRequestDispatcher("addDiscount.jsp").forward(request, response);
+        }
     }
 
     /** 

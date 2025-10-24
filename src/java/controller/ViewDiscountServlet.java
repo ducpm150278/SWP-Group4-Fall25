@@ -5,7 +5,8 @@
 
 package controller;
 
-import dal.MovieDAO;
+import dal.DiscountDAO;
+import entity.Discount;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -13,13 +14,16 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name="DeleteMovieServlet", urlPatterns={"/delete"})
-public class DeleteMovieServlet extends HttpServlet {
+@WebServlet(name="ViewDiscountServlet", urlPatterns={"/viewDiscount"})
+public class ViewDiscountServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -36,10 +40,10 @@ public class DeleteMovieServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet DeleteMovieServlet</title>");  
+            out.println("<title>Servlet ViewDiscountServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet DeleteMovieServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet ViewDiscountServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -57,23 +61,38 @@ public class DeleteMovieServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            int movieID = Integer.parseInt(request.getParameter("movieID"));
-            MovieDAO dao = new MovieDAO();
-            boolean deleted = dao.delete(movieID); // giả sử hàm delete trả về true/false
 
-            if (deleted) {
-                response.sendRedirect("list?deleteSuccess=1");
-            } else {
-                response.sendRedirect("list?deleteFail=1");
+        try {
+            String idStr = request.getParameter("discountID");
+            if (idStr == null || !idStr.matches("\\d+")) {
+                response.sendRedirect("listDiscount");
+                return;
             }
 
-        } catch (NumberFormatException e) {
-            System.out.println("MovieID không hợp lệ: " + e.getMessage());
-            response.sendRedirect("list?deleteFail=1");
+            int discountID = Integer.parseInt(idStr);
+            DiscountDAO dao = new DiscountDAO();
+            Discount d = dao.getDiscountById(discountID);
+
+            if (d == null) {
+                response.sendRedirect("listDiscount");
+                return;
+            }
+
+            // Chuyển LocalDateTime → Date để JSP dùng fmt:formatDate
+            Date startDate = Date.from(d.getStartDate().atZone(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(d.getEndDate().atZone(ZoneId.systemDefault()).toInstant());
+            long duration = ChronoUnit.DAYS.between(d.getStartDate().toLocalDate(), d.getEndDate().toLocalDate());
+
+            request.setAttribute("discount", d);
+            request.setAttribute("startDate", startDate);
+            request.setAttribute("endDate", endDate);
+            request.setAttribute("duration", duration);
+
+            request.getRequestDispatcher("viewDiscount.jsp").forward(request, response);
+
         } catch (Exception e) {
-            System.out.println("Lỗi khi xóa phim: " + e.getMessage());
-            response.sendRedirect("list?deleteFail=1");
+            e.printStackTrace();
+            response.sendRedirect("listDiscount");
         }
     }
 
