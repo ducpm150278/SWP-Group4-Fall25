@@ -1,49 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+    
+    <!-- USER PROFILE & ACCOUNT MANAGEMENT -->
+    
+    <!-- Customer profile management -->
     <servlet>
         <servlet-name>CustomerProfileServlet</servlet-name>
         <servlet-class>controller.CustomerProfileServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ComboManagementServlet</servlet-name>
-        <servlet-class>controller.ComboManagementServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ComboFoodManagementServlet</servlet-name>
-        <servlet-class>controller.ComboFoodManagementServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>VerifyEmailServlet</servlet-name>
-        <servlet-class>controller.VerifyEmailServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>CustomerProfileServlet</servlet-name>
         <url-pattern>/CustomerProfile</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ChangePasswordServlet</servlet-name>
-        <url-pattern>/ChangePassword</url-pattern>
-    </servlet-mapping>
+    
+    <!-- Change password functionality -->
     <servlet>
         <servlet-name>ChangePasswordServlet</servlet-name>
         <servlet-class>controller.ChangePasswordServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>FoodManagementServlet</servlet-name>
-        <servlet-class>controller.FoodManagementServlet</servlet-class>
-    </servlet>
     <servlet-mapping>
-        <servlet-name>FoodManagementServlet</servlet-name>
-        <url-pattern>/food-management</url-pattern>
+        <servlet-name>ChangePasswordServlet</servlet-name>
+        <url-pattern>/ChangePassword</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ComboManagementServlet</servlet-name>
-        <url-pattern>/combo-management</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ComboFoodManagementServlet</servlet-name>
-        <url-pattern>/combo-food-management</url-pattern>
-    </servlet-mapping>
+    
+    <!-- User logout -->
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
         <servlet-class>controller.LogoutServlet</servlet-class>
@@ -52,14 +32,42 @@
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/logout</url-pattern>
     </servlet-mapping>
+    
+    <!-- FOOD & COMBO MANAGEMENT -->
+    
+    <!-- Food management -->
     <servlet>
-        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
-        <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
+        <servlet-name>FoodManagementServlet</servlet-name>
+        <servlet-class>controller.FoodManagementServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
-        <url-pattern>/GoogleAuthCallback</url-pattern>
+        <servlet-name>FoodManagementServlet</servlet-name>
+        <url-pattern>/food-management</url-pattern>
     </servlet-mapping>
+    
+    <!-- Combo management -->
+    <servlet>
+        <servlet-name>ComboManagementServlet</servlet-name>
+        <servlet-class>controller.ComboManagementServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ComboManagementServlet</servlet-name>
+        <url-pattern>/combo-management</url-pattern>
+    </servlet-mapping>
+    
+    <!-- ComboFood relationships -->
+    <servlet>
+        <servlet-name>ComboFoodManagementServlet</servlet-name>
+        <servlet-class>controller.ComboFoodManagementServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ComboFoodManagementServlet</servlet-name>
+        <url-pattern>/combo-food-management</url-pattern>
+    </servlet-mapping>
+    
+    <!-- AUTHENTICATION & EMAIL VERIFICATION -->
+    
+    <!-- Main authentication controller -->
     <servlet>
         <servlet-name>AuthController</servlet-name>
         <servlet-class>controller.AuthController</servlet-class>
@@ -68,6 +76,8 @@
         <servlet-name>AuthController</servlet-name>
         <url-pattern>/auth/*</url-pattern>
     </servlet-mapping>
+    
+    <!-- Google OAuth authentication -->
     <servlet>
         <servlet-name>GoogleAuthController</servlet-name>
         <servlet-class>controller.GoogleAuthController</servlet-class>
@@ -76,18 +86,51 @@
         <servlet-name>GoogleAuthController</servlet-name>
         <url-pattern>/auth/google</url-pattern>
     </servlet-mapping>
+    
+    <!-- Google OAuth callback -->
+    <servlet>
+        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <url-pattern>/GoogleAuthCallback</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Email verification -->
+    <servlet>
+        <servlet-name>VerifyEmailServlet</servlet-name>
+        <servlet-class>controller.VerifyEmailServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>VerifyEmailServlet</servlet-name>
         <url-pattern>/VerifyEmail</url-pattern>
     </servlet-mapping>
+    
+    <!-- GUEST MOVIE BROWSING -->
+    
+    <!-- Guest movie list -->
+    <servlet>
+        <servlet-name>GuestMovieListServlet</servlet-name>
+        <servlet-class>controller.GuestMovieListServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>LogoutServlet</servlet-name>
-        <url-pattern>/logout</url-pattern>
+        <servlet-name>GuestMovieListServlet</servlet-name>
+        <url-pattern>/guest-movies</url-pattern>
     </servlet-mapping>
+    
+    <!-- Guest movie detail -->
+    <servlet>
+        <servlet-name>GuestMovieDetailServlet</servlet-name>
+        <servlet-class>controller.GuestMovieDetailServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>AuthController</servlet-name>
-        <url-pattern>/auth/*</url-pattern>
+        <servlet-name>GuestMovieDetailServlet</servlet-name>
+        <url-pattern>/guest-movie-detail</url-pattern>
     </servlet-mapping>
+    
+    <!-- SESSION CONFIGURATION -->
+    
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
