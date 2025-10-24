@@ -7,28 +7,31 @@
     <title>Login - Cinema Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/css/modern-theme.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--secondary-color);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-family-primary);
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
             overflow: hidden;
             max-width: 400px;
             width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--bg-tertiary) 50%, var(--secondary-dark) 100%);
+            color: var(--text-white);
             padding: 40px;
             text-align: center;
         }
@@ -46,6 +49,30 @@
         
         .login-content {
             padding: 40px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        }
+        
+        .login-content label {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .login-content .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(247, 239, 231, 0.084);
+            color: var(--accent-color);
+            border-radius: 12px;
+        }
+        
+        .login-content .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(rgba(247, 239, 231, 0.084));
+            box-shadow: 0 0 0 3px rgba(247, 239, 231, 0.084);
+            color: var(--accent-color);
+        }
+        
+        .login-content .form-control::placeholder {
+            color: rgba(247, 239, 231, 0.6);
         }
         
         .form-group {
@@ -54,57 +81,65 @@
         
         .form-label {
             font-weight: 600;
-            color: #333;
+            color: #f7efe7;
             margin-bottom: 8px;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .form-control {
-            border: 2px solid #e1e5e9;
+            background: #f7efe7;
+            border: 2px solid #f7efe7;
+            color: #333;
             border-radius: 10px;
             padding: 12px 15px;
             font-size: 16px;
             transition: all 0.3s ease;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .form-control:focus {
-            border-color: #667eea;
+            border-color: #f7efe7;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
         
         .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%);
+            border: 2px solid var(--primary-color);
+            border-radius: 16px;
             padding: 12px 30px;
             font-size: 16px;
             font-weight: 600;
-            color: white;
+            color: var(--text-white);
             width: 100%;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 0;
         }
         
         .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(92, 190, 143, 0.4);
+            color: var(--text-white);
         }
         
         .btn-google {
-            background: #4285f4;
-            border: none;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: 2px solid #e74c3c;
+            border-radius: 16px;
             padding: 12px 30px;
             font-size: 16px;
             font-weight: 600;
-            color: white;
+            color: var(--text-white);
             width: 100%;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 0;
             margin-top: 10px;
         }
         
         .btn-google:hover {
-            background: #3367d6;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(66, 133, 244, 0.3);
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4);
+            color: var(--text-white);
         }
         
         .divider {
@@ -153,13 +188,24 @@
         }
         
         .links a {
-            color: #667eea;
+            color: var(--accent-color);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 5px 0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .links a:hover {
-            text-decoration: underline;
+            color: var(--primary-color);
+            background: rgba(92, 190, 143, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 190, 143, 0.2);
         }
     </style>
 </head>
@@ -210,9 +256,6 @@
                 </button>
             </form>
             
-            <div class="divider">
-                <span class="divider-text">OR</span>
-            </div>
             
             <a href="${pageContext.request.contextPath}/auth/google?action=login" class="btn btn-google">
                 <i class="fab fa-google"></i> Continue with Google

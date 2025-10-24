@@ -7,116 +7,189 @@
     <title>Sign Up - Cinema Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/css/modern-theme.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #334457;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px 0;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 0;
         }
         
         .signup-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            max-width: 500px;
+            background: rgba(44, 62, 80, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            overflow-y: auto;
+            max-width: 700px;
+            max-height: 95vh;
             width: 100%;
-            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(92, 190, 143, 0.5) rgba(255, 255, 255, 0.1);
+        }
+        
+        .signup-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .signup-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .signup-container::-webkit-scrollbar-thumb {
+            background: rgba(92, 190, 143, 0.5);
+            border-radius: 10px;
+        }
+        
+        .signup-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(92, 190, 143, 0.7);
         }
         
         .signup-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
+            background: linear-gradient(135deg, #334457 0%, #4a5a6b 50%, #2a3744 100%);
+            color: #ffffff;
+            padding: 25px 30px;
             text-align: center;
         }
         
         .signup-header h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 300;
         }
         
         .signup-header p {
-            margin: 10px 0 0 0;
+            margin: 8px 0 0 0;
             opacity: 0.9;
+            font-size: 0.9rem;
         }
         
         .signup-content {
-            padding: 40px;
+            padding: 25px 30px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        }
+        
+        .signup-content label {
+            color: #f7efe7;
+            font-weight: 600;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .signup-content .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(247, 239, 231, 0.084);
+            color: #f7efe7;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .signup-content .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(247, 239, 231, 0.084);
+            box-shadow: 0 0 0 3px rgba(247, 239, 231, 0.084);
+            color: #f7efe7;
+        }
+        
+        .signup-content .form-control::placeholder {
+            color: rgba(247, 239, 231, 0.6);
+        }
+        
+        .signup-content .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(247, 239, 231, 0.084);
+            color: rgba(247, 239, 231, 0.6);
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .signup-content .form-select:valid {
+            color: #f7efe7;
+        }
+        
+        .signup-content .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(247, 239, 231, 0.084);
+            box-shadow: 0 0 0 3px rgba(247, 239, 231, 0.084);
+            color: #f7efe7;
+        }
+        
+        .signup-content .form-select option {
+            color: #333;
+            background: white;
+        }
+        
+        .signup-content .form-select option:first-child {
+            color: #999;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
         
         .form-label {
             font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
+            color: #f7efe7;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .form-control {
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            padding: 12px 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .form-select {
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            padding: 12px 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
         
         .btn-signup {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 12px 30px;
-            font-size: 16px;
+            background: linear-gradient(135deg, #5cbe8f 0%, #5cbe8f 100%);
+            border: 2px solid #5cbe8f;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-size: 15px;
             font-weight: 600;
-            color: white;
+            color: #ffffff;
             width: 100%;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 0;
+            margin-top: 8px;
         }
         
         .btn-signup:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 6px 20px rgba(92, 190, 143, 0.4);
+            color: #ffffff;
         }
         
         .btn-google {
-            background: #4285f4;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 30px;
-            font-size: 16px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: 2px solid #e74c3c;
+            border-radius: 12px;
+            padding: 10px 24px;
+            font-size: 15px;
             font-weight: 600;
-            color: white;
+            color: #ffffff;
             width: 100%;
-            transition: all 0.3s ease;
-            margin-top: 10px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 0;
+            margin-top: 8px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
         }
         
         .btn-google:hover {
-            background: #3367d6;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(66, 133, 244, 0.3);
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+            color: #ffffff;
+            text-decoration: none;
         }
         
         .divider {
@@ -161,17 +234,28 @@
         
         .links {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 12px;
         }
         
         .links a {
-            color: #667eea;
+            color: #f7efe7;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 5px 0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .links a:hover {
-            text-decoration: underline;
+            color: #5cbe8f;
+            background: rgba(92, 190, 143, 0.1);
+            border-color: #5cbe8f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(92, 190, 143, 0.2);
         }
         
         .row {
@@ -246,7 +330,7 @@
                                 <i class="fas fa-venus-mars"></i> Gender
                             </label>
                             <select class="form-select" id="gender" name="gender">
-                                <option value="Other">Select Gender</option>
+                                <option value="" disabled selected style="color: #999;">Select Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                                 <option value="Other">Other</option>
@@ -296,9 +380,6 @@
                 </button>
             </form>
             
-            <div class="divider">
-                <span class="divider-text">OR</span>
-            </div>
             
             <a href="${pageContext.request.contextPath}/auth/google?action=signup" class="btn btn-google">
                 <i class="fab fa-google"></i> Sign up with Google
