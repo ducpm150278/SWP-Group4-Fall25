@@ -89,6 +89,12 @@
         <% if (isLoggedIn) { %>
             <!-- Logged-in Navigation -->
             <div class="navbar-nav ms-auto">
+                <a href="${pageContext.request.contextPath}/booking/select-screening" class="nav-link">
+                    <i class="fas fa-ticket-alt"></i> Đặt Vé
+                </a>
+                <a href="${pageContext.request.contextPath}/profile" class="nav-link">
+                    <i class="fas fa-user"></i> Hồ Sơ
+                </a>
                 <span class="navbar-text">
                     Welcome, <%= userName != null ? userName : "Customer" %>!
                 </span>

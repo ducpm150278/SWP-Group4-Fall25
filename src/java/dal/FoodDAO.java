@@ -206,6 +206,13 @@ public class FoodDAO extends DBContext{
         }
         return foodList;
     }
+    
+    /**
+     * Alias for getAvailableFood() - for booking system
+     */
+    public List<Food> getAllAvailableFood() {
+        return getAvailableFood();
+    }
 
     /**
      * Tìm kiếm food theo tên

@@ -661,9 +661,25 @@
                         <% } %>
                         
                         <div class="action-buttons">
-                            <a href="#" class="btn-book" onclick="alert('Vui lòng đăng nhập để đặt vé!')">
-                                <i class="fas fa-ticket-alt"></i> Đặt vé
-                            </a>
+                            <% 
+                                // Check if user is logged in (using existing isLoggedIn variable from page scope)
+                                // Session attribute is "userId" with lowercase 'i'
+                                Integer userId = (Integer) session.getAttribute("userId");
+                                boolean userAuthenticated = (userId != null) || (userObj != null);
+                                
+                                if (userAuthenticated) {
+                                    // User is logged in - redirect to booking
+                            %>
+                                <a href="${pageContext.request.contextPath}/booking/select-screening" class="btn-book">
+                                    <i class="fas fa-ticket-alt"></i> Đặt vé ngay
+                                </a>
+                            <% } else { 
+                                // User not logged in - redirect to login
+                            %>
+                                <a href="${pageContext.request.contextPath}/login.jsp" class="btn-book">
+                                    <i class="fas fa-sign-in-alt"></i> Đăng nhập để đặt vé
+                                </a>
+                            <% } %>
                             <a href="guest-movies" class="btn-back">
                                 <i class="fas fa-arrow-left"></i> Quay lại
                             </a>

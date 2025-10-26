@@ -187,6 +187,56 @@ public class ScreeningDAO extends DBContext {
     }
     return sc;
 }
+    
+    /**
+     * Get available screenings filtered by cinema, movie, and date
+     */
+    public List<Screening> getAvailableScreenings(int cinemaID, int movieID, java.time.LocalDate date) {
+        List<Screening> list = new ArrayList<>();
+        String sql = """
+            SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime,
+                   s.TicketPrice, s.AvailableSeats,
+                   m.Title AS MovieTitle, m.Status AS MovieStatus,
+                   c.CinemaName, r.RoomName
+            FROM Screenings s
+            JOIN Movies m ON s.MovieID = m.MovieID
+            JOIN ScreeningRooms r ON s.RoomID = r.RoomID
+            JOIN Cinemas c ON r.CinemaID = c.CinemaID
+            WHERE r.CinemaID = ?
+              AND s.MovieID = ?
+              AND CAST(s.StartTime AS DATE) = ?
+              AND s.AvailableSeats > 0
+              AND s.StartTime > GETDATE()
+            ORDER BY s.StartTime ASC
+        """;
+
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, cinemaID);
+            ps.setInt(2, movieID);
+            ps.setObject(3, date);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Screening sc = new Screening(
+                        rs.getInt("ScreeningID"),
+                        rs.getInt("MovieID"),
+                        rs.getInt("RoomID"),
+                        rs.getTimestamp("StartTime").toLocalDateTime(),
+                        rs.getTimestamp("EndTime").toLocalDateTime(),
+                        rs.getDouble("TicketPrice"),
+                        rs.getInt("AvailableSeats"),
+                        rs.getString("MovieTitle"),
+                        rs.getString("CinemaName"),
+                        rs.getString("RoomName"),
+                        rs.getString("MovieStatus")
+                );
+                list.add(sc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
 
     // Lấy các suất chiếu khác của cùng phim trong khoảng thời gian

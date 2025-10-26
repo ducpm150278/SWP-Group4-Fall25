@@ -50,12 +50,12 @@ public class CinemaDAO {
         List<Cinema> list = new ArrayList<>();
         
         // Query lấy tất cả cinemas và số lượng phòng trong một lần
-        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], "
                    + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as TotalRooms "
                    + "FROM [dbo].[Cinemas] c "
                    + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
-                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], c.[IsActive], c.[CreatedDate] "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
         try (Connection conn = db.getConnection();
@@ -67,7 +67,7 @@ public class CinemaDAO {
                     rs.getInt("CinemaID"),
                     rs.getString("CinemaName"),
                     rs.getString("Location"),
-                    rs.getString("Address"),
+                    null,  // Address column doesn't exist in database
                     rs.getBoolean("IsActive"),
                     toLocalDateTime(rs.getTimestamp("CreatedDate"))
                 );
@@ -79,6 +79,7 @@ public class CinemaDAO {
             }
         } catch (SQLException e) {
             System.out.println("Error in getAllCinemas: " + e.getMessage());
+            e.printStackTrace();
         }
         return list;
     }
@@ -86,7 +87,7 @@ public class CinemaDAO {
     // Get cinema by ID
     public Cinema getCinemaById(int cinemaId) {
         Cinema cinema = null;
-        String sql = "SELECT CinemaID, CinemaName, Location, Address, IsActive, CreatedDate FROM Cinemas WHERE CinemaID = ?";
+        String sql = "SELECT CinemaID, CinemaName, Location, IsActive, CreatedDate FROM Cinemas WHERE CinemaID = ?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -99,7 +100,7 @@ public class CinemaDAO {
                 cinema.setCinemaID(rs.getInt("CinemaID"));
                 cinema.setCinemaName(rs.getString("CinemaName"));
                 cinema.setLocation(rs.getString("Location"));
-                cinema.setAddress(rs.getString("Address"));
+                cinema.setAddress(null);  // Address column doesn't exist in database
                 cinema.setActive(rs.getBoolean("IsActive"));
                 cinema.setCreatedDate(toLocalDateTime(rs.getTimestamp("CreatedDate")));
 
@@ -118,15 +119,14 @@ public class CinemaDAO {
 
     // Add new cinema
     public boolean addCinema(Cinema cinema) {
-        String sql = "INSERT INTO Cinemas (CinemaName, Location, Address, IsActive) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Cinemas (CinemaName, Location, IsActive) VALUES (?, ?, ?)";
         
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, cinema.getCinemaName());
             stmt.setString(2, cinema.getLocation());
-            stmt.setString(3, cinema.getAddress());
-            stmt.setBoolean(4, cinema.isActive());
+            stmt.setBoolean(3, cinema.isActive());
             
             int affectedRows = stmt.executeUpdate();
             
@@ -149,7 +149,6 @@ public class CinemaDAO {
         String sql = "UPDATE [dbo].[Cinemas]\n"
                 + "   SET [CinemaName] = ?\n"
                 + "      ,[Location] = ?\n"
-                + "      ,[Address] = ?\n"
                 + "      ,[IsActive] = ?\n"
                 + " WHERE [CinemaID] = ?";
 
@@ -158,9 +157,8 @@ public class CinemaDAO {
             
             ps.setString(1, cinemaName);
             ps.setString(2, location);
-            ps.setString(3, address);
-            ps.setBoolean(4, isActive);
-            ps.setInt(5, cinemaID);
+            ps.setBoolean(3, isActive);
+            ps.setInt(4, cinemaID);
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
@@ -209,7 +207,7 @@ public class CinemaDAO {
         List<Cinema> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], ")
+        sql.append("SELECT c.[CinemaID], c.[CinemaName], c.[Location], ")
            .append("c.[IsActive], c.[CreatedDate], ")
            .append("COUNT(sr.RoomID) as TotalRooms ")
            .append("FROM [dbo].[Cinemas] c ")
@@ -218,7 +216,7 @@ public class CinemaDAO {
 
         // Thêm điều kiện search
         if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND (c.[CinemaName] LIKE ? OR c.[Address] LIKE ?)");
+            sql.append(" AND (c.[CinemaName] LIKE ? OR c.[Location] LIKE ?)");
         }
 
         // Thêm điều kiện filter status
@@ -235,7 +233,7 @@ public class CinemaDAO {
             sql.append(" AND c.[Location] = ?");
         }
 
-        sql.append(" GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], c.[IsActive], c.[CreatedDate]");
+        sql.append(" GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[IsActive], c.[CreatedDate]");
 
         // Thêm điều kiện sort
         if (sortBy != null) {
@@ -277,7 +275,7 @@ public class CinemaDAO {
                     rs.getInt("CinemaID"),
                     rs.getString("CinemaName"),
                     rs.getString("Location"),
-                    rs.getString("Address"),
+                    null,  // Address column doesn't exist in database
                     rs.getBoolean("IsActive"),
                     toLocalDateTime(rs.getTimestamp("CreatedDate"))
                 );
@@ -289,6 +287,7 @@ public class CinemaDAO {
             }
         } catch (SQLException e) {
             System.out.println("Error in getAllCinemas with filters: " + e.getMessage());
+            e.printStackTrace();
         }
         return list;
     }
@@ -301,7 +300,7 @@ public class CinemaDAO {
 
         // Thêm điều kiện search
         if (search != null && !search.trim().isEmpty()) {
-            sql += " AND ([CinemaName] LIKE ? OR [Address] LIKE ?)";
+            sql += " AND ([CinemaName] LIKE ? OR [Location] LIKE ?)";
         }
 
         // Thêm điều kiện filter status
@@ -349,13 +348,13 @@ public class CinemaDAO {
     // Get active cinemas only
     public List<Cinema> getActiveCinemas() {
         List<Cinema> list = new ArrayList<>();
-        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], "
                    + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as TotalRooms "
                    + "FROM [dbo].[Cinemas] c "
                    + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
                    + "WHERE c.[IsActive] = 1 "
-                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], c.[IsActive], c.[CreatedDate] "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
         try (Connection conn = db.getConnection();
@@ -367,7 +366,7 @@ public class CinemaDAO {
                     rs.getInt("CinemaID"),
                     rs.getString("CinemaName"),
                     rs.getString("Location"),
-                    rs.getString("Address"),
+                    null,  // Address column doesn't exist in database
                     rs.getBoolean("IsActive"),
                     toLocalDateTime(rs.getTimestamp("CreatedDate"))
                 );
@@ -377,6 +376,7 @@ public class CinemaDAO {
             }
         } catch (SQLException e) {
             System.out.println("Error in getActiveCinemas: " + e.getMessage());
+            e.printStackTrace();
         }
         return list;
     }
@@ -453,13 +453,13 @@ public class CinemaDAO {
     // Get cinemas by location
     public List<Cinema> getCinemasByLocation(String location) {
         List<Cinema> list = new ArrayList<>();
-        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], "
                    + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as TotalRooms "
                    + "FROM [dbo].[Cinemas] c "
                    + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
                    + "WHERE c.[Location] = ? AND c.[IsActive] = 1 "
-                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], c.[IsActive], c.[CreatedDate] "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
         try (Connection conn = db.getConnection();
@@ -473,7 +473,7 @@ public class CinemaDAO {
                     rs.getInt("CinemaID"),
                     rs.getString("CinemaName"),
                     rs.getString("Location"),
-                    rs.getString("Address"),
+                    null,  // Address column doesn't exist in database
                     rs.getBoolean("IsActive"),
                     toLocalDateTime(rs.getTimestamp("CreatedDate"))
                 );
@@ -483,6 +483,7 @@ public class CinemaDAO {
             }
         } catch (SQLException e) {
             System.out.println("Error in getCinemasByLocation: " + e.getMessage());
+            e.printStackTrace();
         }
         return list;
     }
