@@ -150,9 +150,11 @@ public class AuthController extends HttpServlet {
         
         // Redirect based on role
         if ("Admin".equals(user.getRole())) {
-            response.sendRedirect(request.getContextPath() + "/list");
+            response.sendRedirect(request.getContextPath() + "/adminFE/dashboard");
+        } else if ("Staff".equals(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/list"); // Staff goes to movie management
         } else {
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            response.sendRedirect(request.getContextPath() + "/index.jsp"); // Customers go to homepage
         }
     }
 
