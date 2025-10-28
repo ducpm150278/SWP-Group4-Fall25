@@ -98,7 +98,7 @@
                                             <td>${m.cast}</td>
                                             <td>${m.director}</td>
                                             <td class="text-center">${m.duration} phút</td>
-                                            <td class="text-center">${m.releasedDate}</td>
+                                            <td class="text-center">${m.formattedReleasedDate}</td>
                                             <td class="text-center">
                                                 <img src="${m.posterURL}" alt="Poster" width="80" class="rounded shadow-sm">
                                             </td>
