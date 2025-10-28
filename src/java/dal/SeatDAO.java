@@ -2,7 +2,6 @@ package dal;
 
 import entity.Seat;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class SeatDAO extends DBContext {
      */
     public List<Seat> getSeatsByRoomID(int roomID) {
         List<Seat> seats = new ArrayList<>();
-        String sql = "SELECT SeatID, RoomID, SeatRow, SeatNumber, SeatType, Status " +
+        String sql = "SELECT SeatID, RoomID, SeatRow, SeatNumber, SeatType, PriceMultiplier, Status " +
                      "FROM Seats WHERE RoomID = ? ORDER BY SeatRow, SeatNumber";
         
         try (Connection conn = getConnection();
@@ -30,8 +29,9 @@ public class SeatDAO extends DBContext {
                     rs.getInt("SeatID"),
                     rs.getInt("RoomID"),
                     rs.getString("SeatRow"),
-                    rs.getString("SeatNumber"),
+                    rs.getInt("SeatNumber"),
                     rs.getString("SeatType"),
+                    rs.getDouble("PriceMultiplier"),
                     rs.getString("Status")
                 );
                 seats.add(seat);
@@ -95,31 +95,81 @@ public class SeatDAO extends DBContext {
     
     /**
      * Reserve seats temporarily for a session (15 minutes)
+     * Uses transaction to ensure atomicity and handles race conditions
      */
     public boolean reserveSeats(List<Integer> seatIDs, int screeningID, String sessionID) {
-        // First, release any existing reservations for this session
-        releaseReservationsBySession(sessionID);
+        Connection conn = null;
+        PreparedStatement psRelease = null;
+        PreparedStatement psInsert = null;
         
-        String sql = "INSERT INTO SeatReservations (SeatID, ScreeningID, SessionID, ReservedAt, ExpiresAt) " +
-                     "VALUES (?, ?, ?, GETDATE(), DATEADD(MINUTE, 15, GETDATE()))";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            conn = getConnection();
+            // Start transaction with appropriate isolation level
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            
+            // Step 1: Release existing reservations for this session
+            String sqlRelease = "DELETE FROM SeatReservations WHERE SessionID = ?";
+            psRelease = conn.prepareStatement(sqlRelease);
+            psRelease.setString(1, sessionID);
+            psRelease.executeUpdate();
+            
+            // Step 2: Attempt to insert new reservations atomically
+            String sqlInsert = "INSERT INTO SeatReservations (SeatID, ScreeningID, SessionID, ReservedAt, ExpiresAt) " +
+                               "VALUES (?, ?, ?, GETDATE(), DATEADD(MINUTE, 15, GETDATE()))";
+            psInsert = conn.prepareStatement(sqlInsert);
             
             for (Integer seatID : seatIDs) {
-                ps.setInt(1, seatID);
-                ps.setInt(2, screeningID);
-                ps.setString(3, sessionID);
-                ps.addBatch();
+                psInsert.setInt(1, seatID);
+                psInsert.setInt(2, screeningID);
+                psInsert.setString(3, sessionID);
+                psInsert.addBatch();
             }
             
-            int[] results = ps.executeBatch();
-            return results.length == seatIDs.size();
+            int[] results = psInsert.executeBatch();
+            
+            // Verify all inserts succeeded
+            if (results.length != seatIDs.size()) {
+                conn.rollback();
+                return false;
+            }
+            
+            // Commit transaction
+            conn.commit();
+            return true;
             
         } catch (SQLException e) {
-            System.err.println("Error reserving seats: " + e.getMessage());
-            e.printStackTrace();
+            // Handle constraint violation (duplicate seat reservation)
+            if (e.getErrorCode() == 2601 || e.getErrorCode() == 2627) {
+                // SQL Server unique constraint violation
+                System.err.println("Seat reservation conflict - seats already taken: " + e.getMessage());
+            } else {
+                System.err.println("Error reserving seats: " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            // Rollback on any error
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    System.err.println("Error rolling back transaction: " + rollbackEx.getMessage());
+                }
+            }
             return false;
+            
+        } finally {
+            // Clean up resources
+            try {
+                if (psRelease != null) psRelease.close();
+                if (psInsert != null) psInsert.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error closing resources: " + e.getMessage());
+            }
         }
     }
     
@@ -186,7 +236,7 @@ public class SeatDAO extends DBContext {
      * Get seat by ID
      */
     public Seat getSeatByID(int seatID) {
-        String sql = "SELECT SeatID, RoomID, SeatRow, SeatNumber, SeatType, Status " +
+        String sql = "SELECT SeatID, RoomID, SeatRow, SeatNumber, SeatType, PriceMultiplier, Status " +
                      "FROM Seats WHERE SeatID = ?";
         
         try (Connection conn = getConnection();
@@ -200,8 +250,9 @@ public class SeatDAO extends DBContext {
                     rs.getInt("SeatID"),
                     rs.getInt("RoomID"),
                     rs.getString("SeatRow"),
-                    rs.getString("SeatNumber"),
+                    rs.getInt("SeatNumber"),
                     rs.getString("SeatType"),
+                    rs.getDouble("PriceMultiplier"),
                     rs.getString("Status")
                 );
             }
@@ -215,46 +266,124 @@ public class SeatDAO extends DBContext {
     
     /**
      * Check if seats are available for booking
+     * More efficient version that checks all seats in a single query
      */
     public boolean areSeatsAvailable(List<Integer> seatIDs, int screeningID, String excludeSessionID) {
         if (seatIDs == null || seatIDs.isEmpty()) {
             return false;
         }
         
-        // Check if any seat is already booked
-        List<Integer> bookedSeats = getBookedSeatsForScreening(screeningID);
-        for (Integer seatID : seatIDs) {
-            if (bookedSeats.contains(seatID)) {
-                return false;
-            }
-        }
+        // Build parameter placeholders for IN clause
+        String placeholders = String.join(",", seatIDs.stream().map(id -> "?").toArray(String[]::new));
         
-        // Check if any seat is reserved by another session
-        String sql = "SELECT COUNT(*) FROM SeatReservations " +
-                     "WHERE ScreeningID = ? AND SeatID = ? AND SessionID != ? AND ExpiresAt > GETDATE()";
+        // Check both booked seats (from Tickets) and reserved seats (from SeatReservations)
+        String sql = "SELECT COUNT(DISTINCT SeatID) as UnavailableCount FROM ( " +
+                     "  SELECT SeatID FROM Tickets WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
+                     "  UNION " +
+                     "  SELECT SeatID FROM SeatReservations " +
+                     "  WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
+                     "    AND SessionID != ? AND ExpiresAt > GETDATE() " +
+                     ") AS UnavailableSeats";
         
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
-            ps.setInt(1, screeningID);
-            ps.setString(3, excludeSessionID != null ? excludeSessionID : "");
+            int paramIndex = 1;
             
+            // Set screeningID for Tickets check
+            ps.setInt(paramIndex++, screeningID);
+            
+            // Set seatIDs for Tickets check
             for (Integer seatID : seatIDs) {
-                ps.setInt(2, seatID);
-                ResultSet rs = ps.executeQuery();
-                
-                if (rs.next() && rs.getInt(1) > 0) {
-                    return false; // Seat is reserved by another session
-                }
+                ps.setInt(paramIndex++, seatID);
             }
             
-            return true;
+            // Set screeningID for SeatReservations check
+            ps.setInt(paramIndex++, screeningID);
+            
+            // Set seatIDs for SeatReservations check
+            for (Integer seatID : seatIDs) {
+                ps.setInt(paramIndex++, seatID);
+            }
+            
+            // Set excludeSessionID
+            ps.setString(paramIndex++, excludeSessionID != null ? excludeSessionID : "");
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                int unavailableCount = rs.getInt("UnavailableCount");
+                return unavailableCount == 0; // All seats must be available
+            }
+            
+            return false;
             
         } catch (SQLException e) {
             System.err.println("Error checking seat availability: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
+    }
+    
+    /**
+     * Get list of unavailable seats from the requested seats
+     * Useful for providing specific feedback to users
+     */
+    public List<Integer> getUnavailableSeats(List<Integer> seatIDs, int screeningID, String excludeSessionID) {
+        List<Integer> unavailableSeats = new ArrayList<>();
+        
+        if (seatIDs == null || seatIDs.isEmpty()) {
+            return unavailableSeats;
+        }
+        
+        // Build parameter placeholders for IN clause
+        String placeholders = String.join(",", seatIDs.stream().map(id -> "?").toArray(String[]::new));
+        
+        // Get unavailable seat IDs
+        String sql = "SELECT DISTINCT SeatID FROM ( " +
+                     "  SELECT SeatID FROM Tickets WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
+                     "  UNION " +
+                     "  SELECT SeatID FROM SeatReservations " +
+                     "  WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
+                     "    AND SessionID != ? AND ExpiresAt > GETDATE() " +
+                     ") AS UnavailableSeats";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            int paramIndex = 1;
+            
+            // Set screeningID for Tickets check
+            ps.setInt(paramIndex++, screeningID);
+            
+            // Set seatIDs for Tickets check
+            for (Integer seatID : seatIDs) {
+                ps.setInt(paramIndex++, seatID);
+            }
+            
+            // Set screeningID for SeatReservations check
+            ps.setInt(paramIndex++, screeningID);
+            
+            // Set seatIDs for SeatReservations check
+            for (Integer seatID : seatIDs) {
+                ps.setInt(paramIndex++, seatID);
+            }
+            
+            // Set excludeSessionID
+            ps.setString(paramIndex++, excludeSessionID != null ? excludeSessionID : "");
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                unavailableSeats.add(rs.getInt("SeatID"));
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting unavailable seats: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return unavailableSeats;
     }
 }
 
