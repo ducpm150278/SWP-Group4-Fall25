@@ -244,37 +244,12 @@ public class UserDAO extends DBContext {
 // Get all user infor
     public List<User> getAllUser() {
         List<User> list = new ArrayList<>();
-        String sql = "SELECT [UserID]\n"
-                + "      ,[FullName]\n"
-                + "      ,[Email]\n"
-                + "      ,[PhoneNumber]\n"
-                + "      ,[Password]\n"
-                + "      ,[Gender]\n"
-                + "      ,[DateOfBirth]\n"
-                + "      ,[Address]\n"
-                + "      ,[AccountStatus]\n"
-                + "      ,[Role]\n"
-                + "      ,[CreatedDate]\n"
-                + "      ,[LastModifiedDate]\n"
-                + "  FROM [dbo].[Users]";
+        String sql = "SELECT * FROM [dbo].[Users]";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                list.add(new User(
-                        rs.getInt("UserID"),
-                        rs.getString("FullName"),
-                        rs.getString("Email"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getDate("DateOfBirth"),
-                        rs.getString("Address"),
-                        rs.getString("AccountStatus"),
-                        rs.getString("Role"),
-                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
-                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
-                ));
+                list.add(extractUserFromResultSet(rs));
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -349,38 +324,13 @@ public class UserDAO extends DBContext {
 
     // Get user by input ID 
     public User getUserByID(int user_Id) {
-        String sql = "SELECT [UserID]\n"
-                + "      ,[FullName]\n"
-                + "      ,[Email]\n"
-                + "      ,[PhoneNumber]\n"
-                + "      ,[Password]\n"
-                + "      ,[Gender]\n"
-                + "      ,[DateOfBirth]\n"
-                + "      ,[Address]\n"
-                + "      ,[AccountStatus]\n"
-                + "      ,[Role]\n"
-                + "      ,[CreatedDate]\n"
-                + "      ,[LastModifiedDate]\n"
-                + "  FROM [dbo].[Users] WHERE [UserID] = ?";
+        String sql = "SELECT * FROM [dbo].[Users] WHERE [UserID] = ?";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setInt(1, user_Id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new User(
-                        rs.getInt("UserID"),
-                        rs.getString("FullName"),
-                        rs.getString("Email"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getDate("DateOfBirth"),
-                        rs.getString("Address"),
-                        rs.getString("AccountStatus"),
-                        rs.getString("Role"),
-                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
-                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
-                );
+                return extractUserFromResultSet(rs);
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -475,20 +425,7 @@ public class UserDAO extends DBContext {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                list.add(new User(
-                        rs.getInt("UserID"),
-                        rs.getString("FullName"),
-                        rs.getString("Email"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getDate("DateOfBirth"),
-                        rs.getString("Address"),
-                        rs.getString("AccountStatus"),
-                        rs.getString("Role"),
-                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
-                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
-                ));
+                list.add(extractUserFromResultSet(rs));
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -499,39 +436,14 @@ public class UserDAO extends DBContext {
 
     // Get account by email and pass 
     public User authenticate(String email, String password) {
-        String sql = "SELECT [UserID]\n"
-                + "      ,[FullName]\n"
-                + "      ,[Email]\n"
-                + "      ,[PhoneNumber]\n"
-                + "      ,[Password]\n"
-                + "      ,[Gender]\n"
-                + "      ,[DateOfBirth]\n"
-                + "      ,[Address]\n"
-                + "      ,[AccountStatus]\n"
-                + "      ,[Role]\n"
-                + "      ,[CreatedDate]\n"
-                + "      ,[LastModifiedDate]\n"
-                + "  FROM [dbo].[Users] WHERE [Email] = ? AND [Password] = ?";
+        String sql = "SELECT * FROM [dbo].[Users] WHERE [Email] = ? AND [Password] = ?";
         try {
             PreparedStatement ps = getConnection().prepareStatement(sql);
             ps.setString(1, email);
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new User(
-                        rs.getInt("UserID"),
-                        rs.getString("FullName"),
-                        rs.getString("Email"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getDate("DateOfBirth"),
-                        rs.getString("Address"),
-                        rs.getString("AccountStatus"),
-                        rs.getString("Role"),
-                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
-                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
-                );
+                return extractUserFromResultSet(rs);
             }
         } catch (SQLException e) {
             System.out.println(e);
@@ -595,17 +507,7 @@ public class UserDAO extends DBContext {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                user = new User();
-                user.setUserID(rs.getInt("UserID"));
-                user.setFullName(rs.getString("FullName"));
-                user.setEmail(rs.getString("Email"));
-                user.setPhoneNumber(rs.getString("PhoneNumber"));
-                user.setGender(rs.getString("Gender"));
-                user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                user.setAddress(rs.getString("Address"));
-                user.setPassword(rs.getString("Password"));
-                user.setRole(rs.getString("Role"));
-                user.setIsEmailVerified(rs.getBoolean("IsEmailVerified"));
+                user = extractUserFromResultSet(rs);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -696,20 +598,7 @@ public class UserDAO extends DBContext {
             ps.setString(1, token);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new User(
-                        rs.getInt("UserID"),
-                        rs.getString("FullName"),
-                        rs.getString("Email"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getDate("DateOfBirth"),
-                        rs.getString("Address"),
-                        rs.getString("AccountStatus"),
-                        rs.getString("Role"),
-                        toLocalDateTime(rs.getTimestamp("CreatedDate")),
-                        toLocalDateTime(rs.getTimestamp("LastModifiedDate"))
-                );
+                return extractUserFromResultSet(rs);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -776,24 +665,36 @@ public class UserDAO extends DBContext {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    User user = new User();
-                    user.setUserID(rs.getInt("UserID"));
-                    user.setFullName(rs.getString("FullName"));
-                    user.setEmail(rs.getString("Email"));
-                    user.setPhoneNumber(rs.getString("PhoneNumber"));
-                    user.setPassword(rs.getString("Password"));
-                    user.setGender(rs.getString("Gender"));
-                    user.setDateOfBirth(rs.getDate("DateOfBirth"));
-                    user.setAddress(rs.getString("Address"));
-                    user.setAccountStatus(rs.getString("AccountStatus"));
-                    user.setRole(rs.getString("Role"));
-                    user.setIsEmailVerified(rs.getBoolean("IsEmailVerified"));
-                    return user;
+                    return extractUserFromResultSet(rs);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    /**
+     * Helper method to extract User object from ResultSet
+     * Includes all fields from the simplified schema
+     */
+    private User extractUserFromResultSet(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUserID(rs.getInt("UserID"));
+        user.setFullName(rs.getString("FullName"));
+        user.setEmail(rs.getString("Email"));
+        user.setPhoneNumber(rs.getString("PhoneNumber"));
+        user.setPassword(rs.getString("Password"));
+        user.setGender(rs.getString("Gender"));
+        user.setDateOfBirth(rs.getDate("DateOfBirth"));
+        user.setAddress(rs.getString("Address"));
+        user.setAccountStatus(rs.getString("AccountStatus"));
+        user.setRole(rs.getString("Role"));
+        user.setEmailVerified(rs.getBoolean("EmailVerified"));
+        user.setProfileImageURL(rs.getString("ProfileImageURL"));
+        user.setLoyaltyPoints(rs.getInt("LoyaltyPoints"));
+        user.setCreatedDate(toLocalDateTime(rs.getTimestamp("CreatedDate")));
+        user.setLastModifiedDate(toLocalDateTime(rs.getTimestamp("LastModifiedDate")));
+        return user;
     }
 }

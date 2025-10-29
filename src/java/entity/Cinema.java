@@ -7,9 +7,11 @@ public class Cinema {
 
     private int cinemaID;
     private String cinemaName;
-    private String location;
-    private String address; // Thêm trường address
-    private int totalRooms; // Sẽ được tính từ số lượng ScreeningRoom
+    private String location; // Full address
+    private String city; // e.g., "Hồ Chí Minh"
+    private String district; // e.g., "Quận 1"
+    private int totalRooms;
+    private String phoneNumber;
     private boolean isActive;
     private LocalDateTime createdDate;
     private List<ScreeningRoom> screeningRooms; // Danh sách phòng chiếu
@@ -18,24 +20,15 @@ public class Cinema {
     public Cinema() {
     }
 
-    public Cinema(int cinemaID, String cinemaName, String location, String address,
-            boolean isActive, LocalDateTime createdDate) {
+    public Cinema(int cinemaID, String cinemaName, String location, String city, String district,
+            int totalRooms, String phoneNumber, boolean isActive, LocalDateTime createdDate) {
         this.cinemaID = cinemaID;
         this.cinemaName = cinemaName;
         this.location = location;
-        this.address = address;
-        this.totalRooms = 0; // Mặc định 0, sẽ được tính sau
-        this.isActive = isActive;
-        this.createdDate = createdDate;
-    }
-
-    public Cinema(int cinemaID, String cinemaName, String location, String address,
-            int totalRooms, boolean isActive, LocalDateTime createdDate) {
-        this.cinemaID = cinemaID;
-        this.cinemaName = cinemaName;
-        this.location = location;
-        this.address = address;
+        this.city = city;
+        this.district = district;
         this.totalRooms = totalRooms;
+        this.phoneNumber = phoneNumber;
         this.isActive = isActive;
         this.createdDate = createdDate;
     }
@@ -65,12 +58,20 @@ public class Cinema {
         this.location = location;
     }
 
-    public String getAddress() {
-        return address;
+    public String getCity() {
+        return city;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
     }
 
     public int getTotalRooms() {
@@ -79,6 +80,14 @@ public class Cinema {
 
     public void setTotalRooms(int totalRooms) {
         this.totalRooms = totalRooms;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public boolean isActive() {
@@ -129,8 +138,10 @@ public class Cinema {
                 + "cinemaID=" + cinemaID
                 + ", cinemaName='" + cinemaName + '\''
                 + ", location='" + location + '\''
-                + ", address='" + address + '\''
+                + ", city='" + city + '\''
+                + ", district='" + district + '\''
                 + ", totalRooms=" + totalRooms
+                + ", phoneNumber='" + phoneNumber + '\''
                 + ", isActive=" + isActive
                 + ", createdDate=" + createdDate
                 + '}';

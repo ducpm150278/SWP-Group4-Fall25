@@ -129,6 +129,78 @@
         <url-pattern>/guest-movie-detail</url-pattern>
     </servlet-mapping>
     
+    <!-- BOOKING SYSTEM -->
+    
+    <!-- Test servlet for booking system -->
+    <servlet>
+        <servlet-name>BookingTestServlet</servlet-name>
+        <servlet-class>controller.BookingTestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookingTestServlet</servlet-name>
+        <url-pattern>/booking/test</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Step 1: Select screening -->
+    <servlet>
+        <servlet-name>BookingSelectScreeningServlet</servlet-name>
+        <servlet-class>controller.BookingSelectScreeningServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookingSelectScreeningServlet</servlet-name>
+        <url-pattern>/booking/select-screening</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Step 2: Select seats -->
+    <servlet>
+        <servlet-name>BookingSeatSelectionServlet</servlet-name>
+        <servlet-class>controller.BookingSeatSelectionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookingSeatSelectionServlet</servlet-name>
+        <url-pattern>/booking/select-seats</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Step 3: Select food (optional) -->
+    <servlet>
+        <servlet-name>BookingFoodSelectionServlet</servlet-name>
+        <servlet-class>controller.BookingFoodSelectionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookingFoodSelectionServlet</servlet-name>
+        <url-pattern>/booking/select-food</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Step 4: Payment -->
+    <servlet>
+        <servlet-name>BookingPaymentServlet</servlet-name>
+        <servlet-class>controller.BookingPaymentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BookingPaymentServlet</servlet-name>
+        <url-pattern>/booking/payment</url-pattern>
+    </servlet-mapping>
+    
+    <!-- VNPay callback -->
+    <servlet>
+        <servlet-name>VNPayCallbackServlet</servlet-name>
+        <servlet-class>controller.VNPayCallbackServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VNPayCallbackServlet</servlet-name>
+        <url-pattern>/vnpay-callback</url-pattern>
+    </servlet-mapping>
+    
+    <!-- VNPay IPN (Instant Payment Notification) -->
+    <servlet>
+        <servlet-name>VNPayIPNServlet</servlet-name>
+        <servlet-class>controller.VNPayIPNServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>VNPayIPNServlet</servlet-name>
+        <url-pattern>/vnpay-ipn</url-pattern>
+    </servlet-mapping>
+    
     <!-- SESSION CONFIGURATION -->
     
     <session-config>

@@ -403,6 +403,44 @@ public class MovieDAO extends DBContext {
         return list;
     }
 
+    /**
+     * Get all active movies for booking
+     */
+    public List<Movie> getAllActiveMovies() {
+        List<Movie> list = new ArrayList<>();
+        String sql = """
+                      SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+                             m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
+                             m.status, m.createdDate, l.languageName 
+                      FROM Movies m 
+                      JOIN Language l ON m.languageID = l.languageID
+                      WHERE m.status = 'Active'
+                      ORDER BY m.title ASC""";
+        try {
+            PreparedStatement pre = getConnection().prepareStatement(sql);
+            ResultSet rs = pre.executeQuery();
+            while (rs.next()) {
+                int movieID = rs.getInt("movieID");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
+                String summary = rs.getString("summary");
+                String trailerURL = rs.getString("trailerURL");
+                String cast = rs.getString("cast");
+                String director = rs.getString("director");
+                int duration = rs.getInt("duration");
+                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
+                String posterURL = rs.getString("posterURL");
+                String status = rs.getString("status");
+                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
+                String languageName = rs.getString("languageName");
+                list.add(new Movie(movieID, title, genre, summary, trailerURL, cast, director, duration, releasedDate, posterURL, status, createdDate, languageName));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getAllActiveMovies: " + e.getMessage());
+        }
+        return list;
+    }
+
     public static void main(String[] args) {
 //    MovieDAO dao = new MovieDAO();
 //    List<Movie> list = dao.getAll();

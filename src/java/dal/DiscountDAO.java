@@ -24,10 +24,11 @@ public class DiscountDAO extends DBContext {
                 Discount d = new Discount();
                 d.setDiscountID(rs.getInt("DiscountID"));
                 d.setCode(rs.getString("Code"));
+                d.setDiscountType(rs.getString("DiscountType"));
+                d.setDiscountValue(rs.getDouble("DiscountValue"));
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
-                d.setDiscountPercentage(rs.getDouble("DiscountPercentage"));
                 list.add(d);
             }
         } catch (SQLException e) {
@@ -101,10 +102,11 @@ public class DiscountDAO extends DBContext {
                 Discount d = new Discount();
                 d.setDiscountID(rs.getInt("DiscountID"));
                 d.setCode(rs.getString("Code"));
+                d.setDiscountType(rs.getString("DiscountType"));
+                d.setDiscountValue(rs.getDouble("DiscountValue"));
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
-                d.setDiscountPercentage(rs.getDouble("DiscountPercentage"));
                 list.add(d);
             }
         } catch (SQLException e) {
@@ -123,15 +125,43 @@ public class DiscountDAO extends DBContext {
                 Discount d = new Discount();
                 d.setDiscountID(rs.getInt("DiscountID"));
                 d.setCode(rs.getString("Code"));
+                d.setDiscountType(rs.getString("DiscountType"));
+                d.setDiscountValue(rs.getDouble("DiscountValue"));
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
-                d.setDiscountPercentage(rs.getDouble("DiscountPercentage"));
                 d.setMaxUsage(rs.getInt("MaxUsage"));
                 d.setUsageCount(rs.getInt("UsageCount"));
                 return d;
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    //lấy discount theo mã code (dùng cho booking)
+    public Discount getDiscountByCode(String code) {
+        // Trim và uppercase để tránh lỗi khoảng trắng và case sensitivity
+        String sql = "SELECT * FROM Discounts WHERE UPPER(LTRIM(RTRIM(Code))) = UPPER(?)";
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setString(1, code.trim());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Discount d = new Discount();
+                d.setDiscountID(rs.getInt("DiscountID"));
+                d.setCode(rs.getString("Code"));
+                d.setDiscountType(rs.getString("DiscountType"));
+                d.setDiscountValue(rs.getDouble("DiscountValue"));
+                d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
+                d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
+                d.setStatus(rs.getString("Status"));
+                d.setMaxUsage(rs.getInt("MaxUsage"));
+                d.setUsageCount(rs.getInt("UsageCount"));
+                return d;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting discount by code: " + code);
             e.printStackTrace();
         }
         return null;

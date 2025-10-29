@@ -19,9 +19,11 @@ public class User {
     private String address;
     private String accountStatus;
     private String role;
+    private boolean emailVerified;
+    private String profileImageURL;
+    private int loyaltyPoints;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
-    private boolean isEmailVerified;
     
     public User() {}
 
@@ -93,12 +95,13 @@ public class User {
     public LocalDateTime getLastModifiedDate() { return lastModifiedDate; }
     public void setLastModifiedDate(LocalDateTime lastModifiedDate) { this.lastModifiedDate = lastModifiedDate; }
 
-    public boolean isIsEmailVerified() {
-        return isEmailVerified;
-    }
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
 
-    public void setIsEmailVerified(boolean isEmailVerified) {
-        this.isEmailVerified = isEmailVerified;
-    }
+    public String getProfileImageURL() { return profileImageURL; }
+    public void setProfileImageURL(String profileImageURL) { this.profileImageURL = profileImageURL; }
+
+    public int getLoyaltyPoints() { return loyaltyPoints; }
+    public void setLoyaltyPoints(int loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; }
     
 }

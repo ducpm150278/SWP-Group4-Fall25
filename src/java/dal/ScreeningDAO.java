@@ -23,7 +23,7 @@ public class ScreeningDAO extends DBContext {
         List<Screening> list = new ArrayList<>();
         String sql = """
                      SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime, 
-                                s.TicketPrice, s.AvailableSeats, 
+                                s.BaseTicketPrice, s.AvailableSeats, 
                                 m.Title AS MovieTitle, 
                                 m.Status AS MovieStatus, 
                                 c.CinemaName, 
@@ -43,7 +43,7 @@ public class ScreeningDAO extends DBContext {
                 int roomID = rs.getInt("RoomID");
                 LocalDateTime startTime = rs.getTimestamp("StartTime").toLocalDateTime();
                 LocalDateTime endTime = rs.getTimestamp("EndTime").toLocalDateTime();
-                double ticketPrice = rs.getDouble("TicketPrice");
+                double ticketPrice = rs.getDouble("BaseTicketPrice");
                 int availableSeats = rs.getInt("AvailableSeats");
                 String movieTitle = rs.getString("MovieTitle");
                 String movieStatus = rs.getString("MovieStatus");
@@ -64,7 +64,7 @@ public class ScreeningDAO extends DBContext {
         List<Screening> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime, 
-               s.TicketPrice, s.AvailableSeats, 
+               s.BaseTicketPrice, s.AvailableSeats, 
                m.Title AS MovieTitle, 
                m.Status AS MovieStatus, 
                c.CinemaName, 
@@ -113,7 +113,7 @@ public class ScreeningDAO extends DBContext {
                         rs.getInt("RoomID"),
                         rs.getTimestamp("StartTime").toLocalDateTime(),
                         rs.getTimestamp("EndTime").toLocalDateTime(),
-                        rs.getDouble("TicketPrice"),
+                        rs.getDouble("BaseTicketPrice"),
                         rs.getInt("AvailableSeats"),
                         rs.getString("MovieTitle"),
                         rs.getString("CinemaName"),
@@ -132,7 +132,7 @@ public class ScreeningDAO extends DBContext {
     //Thêm lịch chiếu
     public void insertScreening(Screening sc) {
         String sql = """
-        INSERT INTO Screenings (MovieID, RoomID, StartTime, EndTime, TicketPrice, AvailableSeats)
+        INSERT INTO Screenings (MovieID, RoomID, StartTime, EndTime, BaseTicketPrice, AvailableSeats)
         VALUES (?, ?, ?, ?, ?, ?)
     """;
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
@@ -153,7 +153,7 @@ public class ScreeningDAO extends DBContext {
     Screening sc = null;
     String sql = """
         SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime,
-               s.TicketPrice, s.AvailableSeats,
+               s.BaseTicketPrice, s.AvailableSeats,
                m.Title AS MovieTitle, m.Status AS MovieStatus,
                c.CinemaName, r.RoomName, r.RoomType
         FROM Screenings s
@@ -173,7 +173,7 @@ public class ScreeningDAO extends DBContext {
                     rs.getInt("RoomID"),
                     rs.getTimestamp("StartTime").toLocalDateTime(),
                     rs.getTimestamp("EndTime").toLocalDateTime(),
-                    rs.getDouble("TicketPrice"),
+                    rs.getDouble("BaseTicketPrice"),
                     rs.getInt("AvailableSeats"),
                     rs.getString("MovieTitle"),
                     rs.getString("CinemaName"),
@@ -187,6 +187,56 @@ public class ScreeningDAO extends DBContext {
     }
     return sc;
 }
+    
+    /**
+     * Get available screenings filtered by cinema, movie, and date
+     */
+    public List<Screening> getAvailableScreenings(int cinemaID, int movieID, java.time.LocalDate date) {
+        List<Screening> list = new ArrayList<>();
+        String sql = """
+            SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime,
+                   s.BaseTicketPrice, s.AvailableSeats,
+                   m.Title AS MovieTitle, m.Status AS MovieStatus,
+                   c.CinemaName, r.RoomName
+            FROM Screenings s
+            JOIN Movies m ON s.MovieID = m.MovieID
+            JOIN ScreeningRooms r ON s.RoomID = r.RoomID
+            JOIN Cinemas c ON r.CinemaID = c.CinemaID
+            WHERE r.CinemaID = ?
+              AND s.MovieID = ?
+              AND CAST(s.StartTime AS DATE) = ?
+              AND s.AvailableSeats > 0
+              AND s.StartTime > GETDATE()
+            ORDER BY s.StartTime ASC
+        """;
+
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, cinemaID);
+            ps.setInt(2, movieID);
+            ps.setObject(3, date);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Screening sc = new Screening(
+                        rs.getInt("ScreeningID"),
+                        rs.getInt("MovieID"),
+                        rs.getInt("RoomID"),
+                        rs.getTimestamp("StartTime").toLocalDateTime(),
+                        rs.getTimestamp("EndTime").toLocalDateTime(),
+                        rs.getDouble("BaseTicketPrice"),
+                        rs.getInt("AvailableSeats"),
+                        rs.getString("MovieTitle"),
+                        rs.getString("CinemaName"),
+                        rs.getString("RoomName"),
+                        rs.getString("MovieStatus")
+                );
+                list.add(sc);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
 
     // Lấy các suất chiếu khác của cùng phim trong khoảng thời gian
@@ -278,7 +328,7 @@ public class ScreeningDAO extends DBContext {
         List<Screening> list = new ArrayList<>();
         String sql = """
         SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime, 
-               s.TicketPrice, s.AvailableSeats, 
+               s.BaseTicketPrice, s.AvailableSeats, 
                m.Title AS MovieTitle, 
                m.Status AS MovieStatus, 
                c.CinemaName, 
@@ -301,7 +351,7 @@ public class ScreeningDAO extends DBContext {
                 int roomID = rs.getInt("RoomID");
                 LocalDateTime startTime = rs.getTimestamp("StartTime").toLocalDateTime();
                 LocalDateTime endTime = rs.getTimestamp("EndTime").toLocalDateTime();
-                double ticketPrice = rs.getDouble("TicketPrice");
+                double ticketPrice = rs.getDouble("BaseTicketPrice");
                 int availableSeats = rs.getInt("AvailableSeats");
                 String movieTitle = rs.getString("MovieTitle");
                 String movieStatus = rs.getString("MovieStatus");
@@ -365,7 +415,7 @@ public class ScreeningDAO extends DBContext {
         List<Screening> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT s.ScreeningID, s.MovieID, s.RoomID, s.StartTime, s.EndTime, 
-               s.TicketPrice, s.AvailableSeats, 
+               s.BaseTicketPrice, s.AvailableSeats, 
                m.Title AS MovieTitle, 
                m.Status AS MovieStatus, 
                c.CinemaName, 
@@ -413,7 +463,7 @@ public class ScreeningDAO extends DBContext {
                 int roomID = rs.getInt("RoomID");
                 LocalDateTime startTime = rs.getTimestamp("StartTime").toLocalDateTime();
                 LocalDateTime endTime = rs.getTimestamp("EndTime").toLocalDateTime();
-                double ticketPrice = rs.getDouble("TicketPrice");
+                double ticketPrice = rs.getDouble("BaseTicketPrice");
                 int availableSeats = rs.getInt("AvailableSeats");
                 String movieTitle = rs.getString("MovieTitle");
                 String movieStatus = rs.getString("MovieStatus");

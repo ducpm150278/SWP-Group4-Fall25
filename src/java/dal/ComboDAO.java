@@ -59,8 +59,8 @@ public class ComboDAO extends DBContext{
     // CREATE COMBO
     public boolean createCombo(Combo combo) {
         String sql = "INSERT INTO Combo (ComboName, Description, TotalPrice, DiscountPrice, "
-                + "ComboImage, IsAvailable, CreatedDate, LastModifiedDate) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "ComboImage, IsAvailable) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, combo.getComboName());
@@ -69,8 +69,6 @@ public class ComboDAO extends DBContext{
             stmt.setBigDecimal(4, combo.getDiscountPrice());
             stmt.setString(5, combo.getComboImage());
             stmt.setBoolean(6, combo.getIsAvailable());
-            stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
 
             int affectedRows = stmt.executeUpdate();
 
@@ -92,7 +90,7 @@ public class ComboDAO extends DBContext{
     // UPDATE COMBO
     public boolean updateCombo(Combo combo) {
         String sql = "UPDATE Combo SET ComboName = ?, Description = ?, TotalPrice = ?, "
-                + "DiscountPrice = ?, ComboImage = ?, IsAvailable = ?, LastModifiedDate = ? "
+                + "DiscountPrice = ?, ComboImage = ?, IsAvailable = ? "
                 + "WHERE ComboID = ?";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
@@ -102,8 +100,7 @@ public class ComboDAO extends DBContext{
             stmt.setBigDecimal(4, combo.getDiscountPrice());
             stmt.setString(5, combo.getComboImage());
             stmt.setBoolean(6, combo.getIsAvailable());
-            stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.setInt(8, combo.getComboID());
+            stmt.setInt(7, combo.getComboID());
 
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0;
@@ -267,11 +264,6 @@ public class ComboDAO extends DBContext{
             combo.setCreatedDate(createdTimestamp.toLocalDateTime());
         }
 
-        Timestamp modifiedTimestamp = rs.getTimestamp("LastModifiedDate");
-        if (modifiedTimestamp != null) {
-            combo.setLastModifiedDate(modifiedTimestamp.toLocalDateTime());
-        }
-
         return combo;
     }
 
@@ -291,11 +283,6 @@ public class ComboDAO extends DBContext{
             Timestamp createdTimestamp = rs.getTimestamp("CreatedDate");
             if (createdTimestamp != null) {
                 food.setCreatedDate(createdTimestamp.toLocalDateTime());
-            }
-
-            Timestamp modifiedTimestamp = rs.getTimestamp("LastModifiedDate");
-            if (modifiedTimestamp != null) {
-                food.setLastModifiedDate(modifiedTimestamp.toLocalDateTime());
             }
         } catch (SQLException e) {
             // Ignore if these columns don't exist in the result set
