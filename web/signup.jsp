@@ -1,36 +1,41 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Cinema Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Đăng Ký - Cinema Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/css/modern-theme.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background: #334457;
+            background: #0f1014;
             min-height: 100vh;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px 0;
+            padding: 30px 15px;
         }
         
         .signup-container {
-            background: rgba(44, 62, 80, 0.9);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            background: #1a1d24;
+            border-radius: 16px;
+            border: 1px solid #2a2d35;
             overflow-y: auto;
-            max-width: 700px;
+            max-width: 750px;
             max-height: 95vh;
             width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             scrollbar-width: thin;
-            scrollbar-color: rgba(92, 190, 143, 0.5) rgba(255, 255, 255, 0.1);
+            scrollbar-color: #e50914 #2a2d35;
         }
         
         .signup-container::-webkit-scrollbar {
@@ -38,164 +43,132 @@
         }
         
         .signup-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
+            background: #2a2d35;
             border-radius: 10px;
         }
         
         .signup-container::-webkit-scrollbar-thumb {
-            background: rgba(92, 190, 143, 0.5);
+            background: #e50914;
             border-radius: 10px;
         }
         
         .signup-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(92, 190, 143, 0.7);
+            background: #ff2030;
         }
         
         .signup-header {
-            background: linear-gradient(135deg, #334457 0%, #4a5a6b 50%, #2a3744 100%);
-            color: #ffffff;
-            padding: 25px 30px;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            padding: 35px 30px;
             text-align: center;
         }
         
         .signup-header h1 {
             margin: 0;
-            font-size: 1.6rem;
-            font-weight: 300;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .signup-header p {
-            margin: 8px 0 0 0;
-            opacity: 0.9;
-            font-size: 0.9rem;
+            margin: 10px 0 0 0;
+            opacity: 0.95;
+            color: #fff;
+            font-size: 15px;
         }
         
         .signup-content {
-            padding: 25px 30px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-        }
-        
-        .signup-content label {
-            color: #f7efe7;
-            font-weight: 600;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .signup-content .form-control {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(247, 239, 231, 0.084);
-            color: #f7efe7;
-            border-radius: 12px;
-            padding: 12px 15px;
-            font-size: 16px;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: all 0.3s ease;
-        }
-        
-        .signup-content .form-control:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(247, 239, 231, 0.084);
-            box-shadow: 0 0 0 3px rgba(247, 239, 231, 0.084);
-            color: #f7efe7;
-        }
-        
-        .signup-content .form-control::placeholder {
-            color: rgba(247, 239, 231, 0.6);
-        }
-        
-        .signup-content .form-select {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(247, 239, 231, 0.084);
-            color: rgba(247, 239, 231, 0.6);
-            border-radius: 12px;
-            padding: 12px 15px;
-            font-size: 16px;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: all 0.3s ease;
-        }
-        
-        .signup-content .form-select:valid {
-            color: #f7efe7;
-        }
-        
-        .signup-content .form-select:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(247, 239, 231, 0.084);
-            box-shadow: 0 0 0 3px rgba(247, 239, 231, 0.084);
-            color: #f7efe7;
-        }
-        
-        .signup-content .form-select option {
-            color: #333;
-            background: white;
-        }
-        
-        .signup-content .form-select option:first-child {
-            color: #999;
+            padding: 30px;
         }
         
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 18px;
         }
         
         .form-label {
             font-weight: 600;
-            color: #f7efe7;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
+        .form-label i {
+            color: #e50914;
+        }
+        
+        .form-control,
+        .form-select {
+            background: #2a2d35;
+            border: 1px solid #3a3d45;
+            color: #fff;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            background: #2a2d35;
+            border-color: #e50914;
+            color: #fff;
+            box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+            outline: none;
+        }
+        
+        .form-control::placeholder {
+            color: #8b92a7;
+        }
+        
+        .form-select {
+            color: #8b92a7;
+        }
+        
+        .form-select:valid {
+            color: #fff;
+        }
+        
+        .form-select option {
+            background: #2a2d35;
+            color: #fff;
+        }
+        
+        .form-select option:first-child {
+            color: #8b92a7;
+        }
         
         .btn-signup {
-            background: linear-gradient(135deg, #5cbe8f 0%, #5cbe8f 100%);
-            border: 2px solid #5cbe8f;
-            border-radius: 12px;
-            padding: 10px 24px;
-            font-size: 15px;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 30px;
+            font-size: 16px;
             font-weight: 600;
-            color: #ffffff;
+            color: #fff;
             width: 100%;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 0;
-            margin-top: 8px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-signup:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 6px 20px rgba(92, 190, 143, 0.4);
-            color: #ffffff;
-        }
-        
-        .btn-google {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            border: 2px solid #e74c3c;
-            border-radius: 12px;
-            padding: 10px 24px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #ffffff;
-            width: 100%;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 0;
-            margin-top: 8px;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-        }
-        
-        .btn-google:hover {
-            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-            color: #ffffff;
-            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
         }
         
         .divider {
             position: relative;
             text-align: center;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         
         .divider::before {
@@ -205,57 +178,83 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: #e1e5e9;
+            background: #2a2d35;
         }
         
         .divider-text {
-            background: white;
-            padding: 0 20px;
-            color: #666;
+            background: #1a1d24;
+            padding: 0 15px;
+            color: #8b92a7;
             font-weight: 500;
+            position: relative;
+            font-size: 13px;
+        }
+        
+        .btn-google {
+            background: #fff;
+            border: 1px solid #2a2d35;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-google:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: #333;
+        }
+        
+        .btn-google i {
+            color: #4285f4;
         }
         
         .alert {
-            border-radius: 10px;
+            border-radius: 8px;
             border: none;
-            padding: 15px;
+            padding: 12px 15px;
             margin-bottom: 20px;
+            font-size: 14px;
         }
         
         .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(229, 9, 20, 0.2);
+            color: #ff6b6b;
+            border-left: 4px solid #e50914;
         }
         
         .alert-success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(46, 160, 67, 0.2);
+            color: #3fb950;
+            border-left: 4px solid #2ea043;
         }
         
         .links {
             text-align: center;
-            margin-top: 12px;
+            margin-top: 20px;
         }
         
         .links a {
-            color: #f7efe7;
+            color: #e50914;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s ease;
             display: inline-block;
-            margin: 5px 0;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
         }
         
         .links a:hover {
-            color: #5cbe8f;
-            background: rgba(92, 190, 143, 0.1);
-            border-color: #5cbe8f;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(92, 190, 143, 0.2);
+            color: #ff2030;
+            text-decoration: underline;
         }
         
         .row {
@@ -265,13 +264,27 @@
         .col-md-6 {
             padding: 0 10px;
         }
+        
+        @media (max-width: 768px) {
+            .signup-header h1 {
+                font-size: 24px;
+            }
+            
+            .signup-content {
+                padding: 25px 20px;
+            }
+            
+            .col-md-6 {
+                padding: 0;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="signup-container">
         <div class="signup-header">
-            <h1><i class="fas fa-user-plus"></i> Sign Up</h1>
-            <p>Create your Cinema Management account</p>
+            <h1><i class="fas fa-user-plus"></i> Đăng Ký</h1>
+            <p>Tạo tài khoản Cinema Booking của bạn</p>
         </div>
         
         <div class="signup-content">
@@ -297,19 +310,19 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="fullName" class="form-label">
-                                <i class="fas fa-user"></i> Full Name *
+                                <i class="fas fa-user"></i> Họ và tên *
                             </label>
                             <input type="text" class="form-control" id="fullName" name="fullName" 
-                                   placeholder="Enter your full name" required>
+                                   placeholder="Nhập họ và tên" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="email" class="form-label">
-                                <i class="fas fa-envelope"></i> Email Address *
+                                <i class="fas fa-envelope"></i> Địa chỉ Email *
                             </label>
                             <input type="email" class="form-control" id="email" name="email" 
-                                   placeholder="Enter your email" required>
+                                   placeholder="Nhập email của bạn" required>
                         </div>
                     </div>
                 </div>
@@ -318,22 +331,22 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="phoneNumber" class="form-label">
-                                <i class="fas fa-phone"></i> Phone Number
+                                <i class="fas fa-phone"></i> Số điện thoại
                             </label>
                             <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" 
-                                   placeholder="Enter your phone number">
+                                   placeholder="Nhập số điện thoại">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="gender" class="form-label">
-                                <i class="fas fa-venus-mars"></i> Gender
+                                <i class="fas fa-venus-mars"></i> Giới tính
                             </label>
                             <select class="form-select" id="gender" name="gender">
-                                <option value="" disabled selected style="color: #999;">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
+                                <option value="" disabled selected>Chọn giới tính</option>
+                                <option value="Male">Nam</option>
+                                <option value="Female">Nữ</option>
+                                <option value="Other">Khác</option>
                             </select>
                         </div>
                     </div>
@@ -341,15 +354,15 @@
                 
                 <div class="form-group">
                     <label for="address" class="form-label">
-                        <i class="fas fa-map-marker-alt"></i> Address
+                        <i class="fas fa-map-marker-alt"></i> Địa chỉ
                     </label>
                     <input type="text" class="form-control" id="address" name="address" 
-                           placeholder="Enter your address">
+                           placeholder="Nhập địa chỉ của bạn">
                 </div>
                 
                 <div class="form-group">
                     <label for="dateOfBirth" class="form-label">
-                        <i class="fas fa-calendar"></i> Date of Birth
+                        <i class="fas fa-calendar"></i> Ngày sinh
                     </label>
                     <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
                 </div>
@@ -358,39 +371,42 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="password" class="form-label">
-                                <i class="fas fa-lock"></i> Password *
+                                <i class="fas fa-lock"></i> Mật khẩu *
                             </label>
                             <input type="password" class="form-control" id="password" name="password" 
-                                   placeholder="Enter password" required>
+                                   placeholder="Nhập mật khẩu" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="confirmPassword" class="form-label">
-                                <i class="fas fa-lock"></i> Confirm Password *
+                                <i class="fas fa-lock"></i> Xác nhận mật khẩu *
                             </label>
                             <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
-                                   placeholder="Confirm password" required>
+                                   placeholder="Nhập lại mật khẩu" required>
                         </div>
                     </div>
                 </div>
                 
                 <button type="submit" class="btn btn-signup">
-                    <i class="fas fa-user-plus"></i> Create Account
+                    <i class="fas fa-user-plus"></i> Tạo Tài Khoản
                 </button>
             </form>
             
+            <div class="divider">
+                <span class="divider-text">HOẶC</span>
+            </div>
             
             <a href="${pageContext.request.contextPath}/auth/google?action=signup" class="btn btn-google">
-                <i class="fab fa-google"></i> Sign up with Google
+                <i class="fab fa-google"></i> Đăng ký với Google
             </a>
             
             <div class="links">
-                <a href="${pageContext.request.contextPath}/auth/login">Already have an account? Login</a>
+                <a href="${pageContext.request.contextPath}/auth/login">Đã có tài khoản? Đăng nhập ngay</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

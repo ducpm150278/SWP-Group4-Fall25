@@ -1,51 +1,66 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Cinema Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Đặt Lại Mật Khẩu - Cinema Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0f1014;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         
         .reset-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: #1a1d24;
+            border-radius: 16px;
+            border: 1px solid #2a2d35;
             overflow: hidden;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
         
         .reset-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            padding: 40px 30px;
             text-align: center;
         }
         
         .reset-header h1 {
             margin: 0;
-            font-size: 2rem;
-            font-weight: 300;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .reset-header p {
             margin: 10px 0 0 0;
-            opacity: 0.9;
+            opacity: 0.95;
+            color: #fff;
+            font-size: 15px;
         }
         
         .reset-content {
-            padding: 40px;
+            padding: 35px 30px;
         }
         
         .form-group {
@@ -54,92 +69,137 @@
         
         .form-label {
             font-weight: 600;
-            color: #333;
+            color: #fff;
             margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-label i {
+            color: #e50914;
         }
         
         .form-control {
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
+            background: #2a2d35;
+            border: 1px solid #3a3d45;
+            color: #fff;
+            border-radius: 8px;
             padding: 12px 15px;
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.3s ease;
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: #2a2d35;
+            border-color: #e50914;
+            color: #fff;
+            box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+            outline: none;
+        }
+        
+        .form-control::placeholder {
+            color: #8b92a7;
         }
         
         .btn-reset {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
             border: none;
-            border-radius: 10px;
-            padding: 12px 30px;
+            border-radius: 8px;
+            padding: 14px 30px;
             font-size: 16px;
             font-weight: 600;
-            color: white;
+            color: #fff;
             width: 100%;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-reset:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
         }
         
         .alert {
-            border-radius: 10px;
+            border-radius: 8px;
             border: none;
-            padding: 15px;
+            padding: 12px 15px;
             margin-bottom: 20px;
+            font-size: 14px;
         }
         
         .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(229, 9, 20, 0.2);
+            color: #ff6b6b;
+            border-left: 4px solid #e50914;
         }
         
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .links {
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .links a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .links a:hover {
-            text-decoration: underline;
+            background: rgba(46, 160, 67, 0.2);
+            color: #3fb950;
+            border-left: 4px solid #2ea043;
         }
         
         .password-requirements {
-            background: #f8f9fa;
-            border-radius: 10px;
+            background: rgba(229, 9, 20, 0.1);
+            border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
             font-size: 14px;
-            color: #666;
+            border-left: 4px solid #e50914;
+        }
+        
+        .password-requirements strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 8px;
         }
         
         .password-requirements ul {
             margin: 0;
             padding-left: 20px;
+            color: #8b92a7;
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .links a {
+            color: #e50914;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-size: 14px;
+        }
+        
+        .links a:hover {
+            color: #ff2030;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 480px) {
+            .reset-header h1 {
+                font-size: 24px;
+            }
+            
+            .reset-content {
+                padding: 25px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="reset-container">
         <div class="reset-header">
-            <h1><i class="fas fa-lock"></i> Reset Password</h1>
-            <p>Enter your new password</p>
+            <h1><i class="fas fa-lock"></i> Đặt Lại Mật Khẩu</h1>
+            <p>Nhập mật khẩu mới của bạn</p>
         </div>
         
         <div class="reset-content">
@@ -162,11 +222,11 @@
             <% } %>
             
             <div class="password-requirements">
-                <strong>Password Requirements:</strong>
+                <strong>Yêu cầu mật khẩu:</strong>
                 <ul>
-                    <li>At least 6 characters long</li>
-                    <li>Use a combination of letters and numbers</li>
-                    <li>Avoid common passwords</li>
+                    <li>Ít nhất 6 ký tự</li>
+                    <li>Sử dụng kết hợp chữ cái và số</li>
+                    <li>Tránh sử dụng mật khẩu phổ biến</li>
                 </ul>
             </div>
             
@@ -175,32 +235,32 @@
                 
                 <div class="form-group">
                     <label for="newPassword" class="form-label">
-                        <i class="fas fa-lock"></i> New Password
+                        <i class="fas fa-lock"></i> Mật khẩu mới
                     </label>
                     <input type="password" class="form-control" id="newPassword" name="newPassword" 
-                           placeholder="Enter new password" required>
+                           placeholder="Nhập mật khẩu mới" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="confirmPassword" class="form-label">
-                        <i class="fas fa-lock"></i> Confirm New Password
+                        <i class="fas fa-lock"></i> Xác nhận mật khẩu mới
                     </label>
                     <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
-                           placeholder="Confirm new password" required>
+                           placeholder="Nhập lại mật khẩu mới" required>
                 </div>
                 
                 <button type="submit" class="btn btn-reset">
-                    <i class="fas fa-save"></i> Reset Password
+                    <i class="fas fa-save"></i> Đặt Lại Mật Khẩu
                 </button>
             </form>
             
             <div class="links">
-                <a href="${pageContext.request.contextPath}/auth/login">Back to Login</a>
+                <a href="${pageContext.request.contextPath}/auth/login">← Quay lại Đăng nhập</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Password confirmation validation
         document.getElementById('confirmPassword').addEventListener('input', function() {
@@ -208,7 +268,7 @@
             const confirmPassword = this.value;
             
             if (password !== confirmPassword) {
-                this.setCustomValidity('Passwords do not match');
+                this.setCustomValidity('Mật khẩu không khớp');
             } else {
                 this.setCustomValidity('');
             }

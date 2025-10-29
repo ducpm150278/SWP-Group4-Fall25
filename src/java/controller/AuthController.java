@@ -148,6 +148,14 @@ public class AuthController extends HttpServlet {
         session.setAttribute("userRole", user.getRole());
         session.setAttribute("userId", user.getUserID());
         
+        // Check if there's a redirect URL from before login
+        String redirectAfterLogin = (String) session.getAttribute("redirectAfterLogin");
+        if (redirectAfterLogin != null) {
+            session.removeAttribute("redirectAfterLogin");
+            response.sendRedirect(redirectAfterLogin);
+            return;
+        }
+        
         // Redirect based on role
         if ("Admin".equals(user.getRole())) {
             response.sendRedirect(request.getContextPath() + "/adminFE/dashboard");

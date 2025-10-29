@@ -1,78 +1,66 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Cinema Management System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Đăng Nhập - Cinema Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/css/modern-theme.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background: var(--secondary-color);
+            background: #0f1014;
             min-height: 100vh;
-            font-family: var(--font-family-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         
         .login-container {
-            background: rgba(44, 62, 80, 0.9);
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
-            box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            background: #1a1d24;
+            border-radius: 16px;
+            border: 1px solid #2a2d35;
             overflow: hidden;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
         
         .login-header {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--bg-tertiary) 50%, var(--secondary-dark) 100%);
-            color: var(--text-white);
-            padding: 40px;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            padding: 40px 30px;
             text-align: center;
         }
         
         .login-header h1 {
             margin: 0;
-            font-size: 2rem;
-            font-weight: 300;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .login-header p {
             margin: 10px 0 0 0;
-            opacity: 0.9;
+            opacity: 0.95;
+            color: #fff;
+            font-size: 15px;
         }
         
         .login-content {
-            padding: 40px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-        }
-        
-        .login-content label {
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-        
-        .login-content .form-control {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(247, 239, 231, 0.084);
-            color: var(--accent-color);
-            border-radius: 12px;
-        }
-        
-        .login-content .form-control:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(rgba(247, 239, 231, 0.084));
-            box-shadow: 0 0 0 3px rgba(247, 239, 231, 0.084);
-            color: var(--accent-color);
-        }
-        
-        .login-content .form-control::placeholder {
-            color: rgba(247, 239, 231, 0.6);
+            padding: 35px 30px;
         }
         
         .form-group {
@@ -81,71 +69,65 @@
         
         .form-label {
             font-weight: 600;
-            color: #f7efe7;
+            color: #fff;
             margin-bottom: 8px;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-label i {
+            color: #e50914;
         }
         
         .form-control {
-            background: #f7efe7;
-            border: 2px solid #f7efe7;
-            color: #333;
-            border-radius: 10px;
+            background: #2a2d35;
+            border: 1px solid #3a3d45;
+            color: #fff;
+            border-radius: 8px;
             padding: 12px 15px;
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.3s ease;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .form-control:focus {
-            border-color: #f7efe7;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: #2a2d35;
+            border-color: #e50914;
+            color: #fff;
+            box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+            outline: none;
+        }
+        
+        .form-control::placeholder {
+            color: #8b92a7;
         }
         
         .btn-login {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%);
-            border: 2px solid var(--primary-color);
-            border-radius: 16px;
-            padding: 12px 30px;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 30px;
             font-size: 16px;
             font-weight: 600;
-            color: var(--text-white);
+            color: #fff;
             width: 100%;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-login:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 24px rgba(92, 190, 143, 0.4);
-            color: var(--text-white);
-        }
-        
-        .btn-google {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            border: 2px solid #e74c3c;
-            border-radius: 16px;
-            padding: 12px 30px;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-white);
-            width: 100%;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 0;
-            margin-top: 10px;
-        }
-        
-        .btn-google:hover {
-            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4);
-            color: var(--text-white);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
         }
         
         .divider {
             position: relative;
             text-align: center;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         
         .divider::before {
@@ -155,74 +137,119 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: #e1e5e9;
+            background: #2a2d35;
         }
         
         .divider-text {
-            background: white;
-            padding: 0 20px;
-            color: #666;
+            background: #1a1d24;
+            padding: 0 15px;
+            color: #8b92a7;
             font-weight: 500;
+            position: relative;
+            font-size: 13px;
+        }
+        
+        .btn-google {
+            background: #fff;
+            border: 1px solid #2a2d35;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            width: 100%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        
+        .btn-google:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: #333;
+        }
+        
+        .btn-google i {
+            color: #4285f4;
         }
         
         .alert {
-            border-radius: 10px;
+            border-radius: 8px;
             border: none;
-            padding: 15px;
+            padding: 12px 15px;
             margin-bottom: 20px;
+            font-size: 14px;
         }
         
         .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(229, 9, 20, 0.2);
+            color: #ff6b6b;
+            border-left: 4px solid #e50914;
         }
         
         .alert-success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(46, 160, 67, 0.2);
+            color: #3fb950;
+            border-left: 4px solid #2ea043;
         }
         
         .links {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
         }
         
         .links a {
-            color: var(--accent-color);
+            color: #e50914;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s ease;
             display: inline-block;
-            margin: 5px 0;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 5px 10px;
+            font-size: 14px;
         }
         
         .links a:hover {
-            color: var(--primary-color);
-            background: rgba(92, 190, 143, 0.1);
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(92, 190, 143, 0.2);
+            color: #ff2030;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 480px) {
+            .login-header h1 {
+                font-size: 24px;
+            }
+            
+            .login-content {
+                padding: 25px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1><i class="fas fa-sign-in-alt"></i> Login</h1>
-            <p>Welcome back to Cinema Management</p>
+            <h1><i class="fas fa-sign-in-alt"></i> Đăng Nhập</h1>
+            <p>Chào mừng trở lại Cinema Booking</p>
         </div>
         
         <div class="login-content">
             <% 
                 String error = (String) request.getAttribute("error");
                 String success = (String) request.getAttribute("success");
+                String loginMessage = (String) session.getAttribute("loginMessage");
+                if (loginMessage != null) {
+                    session.removeAttribute("loginMessage");
+                }
             %>
             
-            <% if (error != null) { %>
+            <% if (loginMessage != null) { %>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> <%= loginMessage %>
+                </div>
+            <% } else if (error != null) { %>
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i> <%= error %>
                 </div>
@@ -237,38 +264,41 @@
             <form method="POST" action="${pageContext.request.contextPath}/auth/login">
                 <div class="form-group">
                     <label for="email" class="form-label">
-                        <i class="fas fa-envelope"></i> Email Address
+                        <i class="fas fa-envelope"></i> Địa chỉ Email
                     </label>
                     <input type="email" class="form-control" id="email" name="email" 
-                           placeholder="Enter your email" required>
+                           placeholder="Nhập email của bạn" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="password" class="form-label">
-                        <i class="fas fa-lock"></i> Password
+                        <i class="fas fa-lock"></i> Mật khẩu
                     </label>
                     <input type="password" class="form-control" id="password" name="password" 
-                           placeholder="Enter your password" required>
+                           placeholder="Nhập mật khẩu" required>
                 </div>
                 
                 <button type="submit" class="btn btn-login">
-                    <i class="fas fa-sign-in-alt"></i> Login
+                    <i class="fas fa-sign-in-alt"></i> Đăng Nhập
                 </button>
             </form>
             
+            <div class="divider">
+                <span class="divider-text">HOẶC</span>
+            </div>
             
             <a href="${pageContext.request.contextPath}/auth/google?action=login" class="btn btn-google">
-                <i class="fab fa-google"></i> Continue with Google
+                <i class="fab fa-google"></i> Tiếp tục với Google
             </a>
             
             <div class="links">
-                <a href="${pageContext.request.contextPath}/auth/forgot-password">Forgot Password?</a>
-                <br>
-                <a href="${pageContext.request.contextPath}/auth/signup">Don't have an account? Sign up</a>
+                <a href="${pageContext.request.contextPath}/auth/forgot-password">Quên mật khẩu?</a>
+                |
+                <a href="${pageContext.request.contextPath}/auth/signup">Đăng ký tài khoản mới</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
