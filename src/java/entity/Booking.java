@@ -18,6 +18,7 @@ public class Booking {
     private String paymentStatus; // Pending, Completed, Failed
     private String paymentMethod; // Cash, Credit Card, E-Wallet, VNPay, Momo
     private LocalDateTime paymentDate;
+    private String transactionID; // VNPay/Momo transaction ID
     private String notes;
 
     // Default constructor
@@ -165,6 +166,14 @@ public class Booking {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getTransactionID() {
+        return transactionID;
+    }
+
+    public void setTransactionID(String transactionID) {
+        this.transactionID = transactionID;
     }
 
     @Override

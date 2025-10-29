@@ -1,11 +1,15 @@
 package controller;
 
-import dal.BillingDAO;
 import dal.BookingDAO;
+import dal.ComboDAO;
+import dal.DiscountDAO;
+import dal.FoodDAO;
 import dal.SeatDAO;
 import dal.TicketDAO;
 import entity.Booking;
 import entity.BookingSession;
+import entity.Combo;
+import entity.Food;
 import entity.Ticket;
 import utils.BookingSessionManager;
 import utils.VNPayConfig;
@@ -31,16 +35,20 @@ import java.util.Map;
 public class VNPayCallbackServlet extends HttpServlet {
     
     private TicketDAO ticketDAO;
-    private BillingDAO billingDAO;
+    private DiscountDAO discountDAO;
     private SeatDAO seatDAO;
     private BookingDAO bookingDAO;
+    private FoodDAO foodDAO;
+    private ComboDAO comboDAO;
     
     @Override
     public void init() throws ServletException {
         ticketDAO = new TicketDAO();
-        billingDAO = new BillingDAO();
+        discountDAO = new DiscountDAO();
         seatDAO = new SeatDAO();
         bookingDAO = new BookingDAO();
+        foodDAO = new FoodDAO();
+        comboDAO = new ComboDAO();
     }
     
     @Override
@@ -50,7 +58,10 @@ public class VNPayCallbackServlet extends HttpServlet {
         System.out.println("=== VNPay Callback Received ===");
         
         HttpSession session = request.getSession();
+        System.out.println("Callback Session ID: " + session.getId());
+        
         BookingSession bookingSession = BookingSessionManager.getBookingSession(session);
+        System.out.println("BookingSession retrieved: " + (bookingSession != null ? "YES" : "NULL"));
         
         // Get VNPay response parameters
         Map<String, String> vnpParams = new HashMap<>();
@@ -67,11 +78,17 @@ public class VNPayCallbackServlet extends HttpServlet {
         String transactionNo = request.getParameter("vnp_TransactionNo");
         String orderID = request.getParameter("vnp_TxnRef");
         String amount = request.getParameter("vnp_Amount");
+        String bankCode = request.getParameter("vnp_BankCode");
+        String payDate = request.getParameter("vnp_PayDate");
         
+        System.out.println("=== VNPay Response Details ===");
         System.out.println("Response Code: " + responseCode);
-        System.out.println("Transaction No: " + transactionNo);
+        System.out.println("Transaction No: " + (transactionNo != null ? transactionNo : "NULL - VNPay didn't provide"));
         System.out.println("Order ID: " + orderID);
         System.out.println("Amount: " + amount);
+        System.out.println("Bank Code: " + bankCode);
+        System.out.println("Pay Date: " + payDate);
+        System.out.println("============================");
         
         // Check if booking session exists
         if (bookingSession == null) {
@@ -80,6 +97,15 @@ public class VNPayCallbackServlet extends HttpServlet {
             request.getRequestDispatcher("/booking/payment-failed.jsp").forward(request, response);
             return;
         }
+        
+        // DEBUG: Check food/combo data in session
+        System.out.println("=== FOOD DATA IN CALLBACK SESSION ===");
+        System.out.println("Selected Combos: " + bookingSession.getSelectedCombos());
+        System.out.println("Selected Combos Size: " + (bookingSession.getSelectedCombos() != null ? bookingSession.getSelectedCombos().size() : "NULL"));
+        System.out.println("Selected Foods: " + bookingSession.getSelectedFoods());
+        System.out.println("Selected Foods Size: " + (bookingSession.getSelectedFoods() != null ? bookingSession.getSelectedFoods().size() : "NULL"));
+        System.out.println("Food Subtotal: " + bookingSession.getFoodSubtotal());
+        System.out.println("====================================");
         
         // Validate signature
         Map<String, String> paramsForValidation = new HashMap<>(vnpParams);
@@ -140,31 +166,38 @@ public class VNPayCallbackServlet extends HttpServlet {
     }
     
     /**
-     * Process booking after successful payment
+     * Process booking after successful VNPay payment
+     * Creates booking record, tickets, food items, and finalizes the transaction
      */
     private boolean processBooking(HttpSession session, BookingSession bookingSession, 
                                    String orderID, String transactionNo) {
         
-        System.out.println("Processing booking for order: " + orderID);
+        System.out.println("\n╔═══════════════════════════════════════════════════════════╗");
+        System.out.println("║          PROCESSING BOOKING FOR ORDER: " + orderID + "          ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════╝");
         
-        // Get user from session (session attribute is "userId" with lowercase 'i')
+        // Get user from session
         Integer userID = (Integer) session.getAttribute("userId");
-        System.out.println("User ID from session: " + userID);
-        
         if (userID == null) {
-            System.out.println("ERROR: UserID is null!");
+            System.err.println("✗ ERROR: UserID is null in session!");
             return false;
         }
+        System.out.println("✓ User ID: " + userID);
         
         try {
             LocalDateTime bookingTime = LocalDateTime.now();
             
-            // Step 1: Create Booking first
-            System.out.println("=== Step 1: Creating Booking ===");
+            // Step 1: Create main Booking record
+            System.out.println("\n=== Step 1: Creating Booking Record ===");
             String bookingCode = bookingDAO.generateBookingCode();
             double totalAmount = bookingSession.getTotalAmount();
             double discountAmount = bookingSession.getDiscountAmount();
             double finalAmount = totalAmount - discountAmount;
+            
+            System.out.println("Booking Code: " + bookingCode);
+            System.out.println("Total Amount: " + String.format("%,.0f VND", totalAmount));
+            System.out.println("Discount: " + String.format("%,.0f VND", discountAmount));
+            System.out.println("Final Amount: " + String.format("%,.0f VND", finalAmount));
             
             Booking booking = new Booking(
                 bookingCode,
@@ -179,23 +212,42 @@ public class VNPayCallbackServlet extends HttpServlet {
             booking.setPaymentDate(bookingTime);
             booking.setPaymentStatus("Completed");
             booking.setStatus("Confirmed");
-            booking.setNotes("Order ID: " + orderID + " | Transaction: " + transactionNo);
+            
+            // Set TransactionID - use VNPay's transaction number if available, otherwise use orderID
+            String finalTransactionID;
+            if (transactionNo != null && !transactionNo.trim().isEmpty() && !"0".equals(transactionNo)) {
+                finalTransactionID = transactionNo;
+                System.out.println("Transaction ID: " + transactionNo + " (from VNPay)");
+            } else {
+                // Fallback for sandbox/test mode where VNPay doesn't provide transaction number
+                finalTransactionID = "VNPAY_" + orderID;
+                System.out.println("Transaction ID: " + finalTransactionID + " (generated - VNPay sandbox mode)");
+            }
+            booking.setTransactionID(finalTransactionID);
+            
+            String notes = "VNPay Order: " + orderID;
+            if (transactionNo != null && !transactionNo.trim().isEmpty()) {
+                notes += " | VNPay Txn: " + transactionNo;
+            }
+            booking.setNotes(notes);
             
             int bookingID = bookingDAO.createBooking(booking);
             
             if (bookingID <= 0) {
-                System.out.println("ERROR: Failed to create booking!");
+                System.err.println("✗ ERROR: Failed to create booking in database!");
                 return false;
             }
             
-            System.out.println("✓ Booking created with ID: " + bookingID);
+            System.out.println("✓ Booking record created successfully (ID: " + bookingID + ")");
             
-            // Step 2: Create tickets with BookingID
-            System.out.println("=== Step 2: Creating Tickets ===");
+            // Step 2: Create tickets for selected seats
+            System.out.println("\n=== Step 2: Creating Tickets ===");
+            int seatCount = bookingSession.getSelectedSeatIDs().size();
+            System.out.println("Number of seats: " + seatCount);
+            System.out.println("Base ticket price: " + String.format("%,.0f VND", bookingSession.getTicketPrice()));
+            System.out.println("Ticket subtotal: " + String.format("%,.0f VND", bookingSession.getTicketSubtotal()));
+            
             List<Ticket> tickets = new ArrayList<>();
-            
-            System.out.println("Creating tickets for " + bookingSession.getSelectedSeatIDs().size() + " seats");
-            
             for (Integer seatID : bookingSession.getSelectedSeatIDs()) {
                 Ticket ticket = new Ticket(
                     bookingSession.getScreeningID(),
@@ -207,43 +259,109 @@ public class VNPayCallbackServlet extends HttpServlet {
                 tickets.add(ticket);
             }
             
-            // Insert tickets into database with BookingID
-            System.out.println("Inserting tickets into database...");
+            // Insert tickets into database
             List<Integer> ticketIDs = ticketDAO.createTickets(tickets, bookingID);
-            System.out.println("Created " + ticketIDs.size() + " tickets");
             
             if (ticketIDs.isEmpty()) {
-                System.out.println("ERROR: No tickets created!");
+                System.err.println("✗ ERROR: Failed to create tickets in database!");
                 return false;
             }
             
-            // Step 3: Create billing record (linked to booking, not individual tickets)
-            System.out.println("=== Step 3: Creating Billing ===");
-            // Note: Current BillingDAO might need update to work with Bookings
-            // For now, we can skip detailed billing or create a simplified version
-            System.out.println("Billing will be handled through Booking record");
+            System.out.println("✓ Created " + ticketIDs.size() + " ticket(s) successfully");
+            
+            // Step 3: Save food and combo items (optional - skip if customer didn't select any)
+            System.out.println("\n=== Step 3: Saving Food & Combo Items ===");
+            int comboSelections = (bookingSession.getSelectedCombos() != null ? bookingSession.getSelectedCombos().size() : 0);
+            int foodSelections = (bookingSession.getSelectedFoods() != null ? bookingSession.getSelectedFoods().size() : 0);
+            
+            System.out.println("Combos selected: " + comboSelections);
+            System.out.println("Foods selected: " + foodSelections);
+            System.out.println("Food subtotal: " + String.format("%,.0f VND", bookingSession.getFoodSubtotal()));
+            
+            if (comboSelections == 0 && foodSelections == 0) {
+                System.out.println("- No food/combo items selected, skipping this step");
+            }
+            
+            // Save combo items
+            if (bookingSession.getSelectedCombos() != null && !bookingSession.getSelectedCombos().isEmpty()) {
+                System.out.println("\nProcessing " + bookingSession.getSelectedCombos().size() + " combo item(s):");
+                java.util.Map<Integer, Double> comboPrices = new java.util.HashMap<>();
+                
+                for (Integer comboID : bookingSession.getSelectedCombos().keySet()) {
+                    int quantity = bookingSession.getSelectedCombos().get(comboID);
+                    Combo combo = comboDAO.getComboById(comboID);
+                    if (combo != null) {
+                        double price = combo.getDiscountPrice() != null ? 
+                                      combo.getDiscountPrice().doubleValue() : 
+                                      combo.getTotalPrice().doubleValue();
+                        comboPrices.put(comboID, price);
+                        System.out.println("  • " + combo.getComboName() + " x" + quantity + " @ " + String.format("%,.0f VND", price));
+                    } else {
+                        System.err.println("  ✗ ERROR: Combo ID " + comboID + " not found in database!");
+                    }
+                }
+                
+                int comboCount = bookingDAO.addBookingComboItems(bookingID, 
+                                                                 bookingSession.getSelectedCombos(), 
+                                                                 comboPrices);
+                System.out.println("✓ Saved " + comboCount + " combo item(s) to database");
+            }
+            
+            // Save food items
+            if (bookingSession.getSelectedFoods() != null && !bookingSession.getSelectedFoods().isEmpty()) {
+                System.out.println("\nProcessing " + bookingSession.getSelectedFoods().size() + " food item(s):");
+                java.util.Map<Integer, Double> foodPrices = new java.util.HashMap<>();
+                
+                for (Integer foodID : bookingSession.getSelectedFoods().keySet()) {
+                    int quantity = bookingSession.getSelectedFoods().get(foodID);
+                    Food food = foodDAO.getFoodById(foodID);
+                    if (food != null) {
+                        foodPrices.put(foodID, food.getPrice().doubleValue());
+                        System.out.println("  • " + food.getFoodName() + " x" + quantity + " @ " + String.format("%,.0f VND", food.getPrice()));
+                    } else {
+                        System.err.println("  ✗ ERROR: Food ID " + foodID + " not found in database!");
+                    }
+                }
+                
+                int foodCount = bookingDAO.addBookingFoodItems(bookingID, 
+                                                               bookingSession.getSelectedFoods(), 
+                                                               foodPrices);
+                System.out.println("✓ Saved " + foodCount + " food item(s) to database");
+            }
+            
+            // Step 4: Finalize booking
+            System.out.println("\n=== Step 4: Finalizing Booking ===");
             
             // Update discount usage if discount was applied
             if (bookingSession.getDiscountID() != null) {
-                System.out.println("Updating discount usage for discount ID: " + bookingSession.getDiscountID());
-                billingDAO.updateDiscountUsage(bookingSession.getDiscountID());
+                discountDAO.updateDiscountUsage(bookingSession.getDiscountID());
+                System.out.println("✓ Updated discount usage count (ID: " + bookingSession.getDiscountID() + ")");
+            } else {
+                System.out.println("- No discount code applied");
             }
             
-            // Release seat reservations (they're now booked)
-            System.out.println("Releasing seat reservations...");
+            // Release temporary seat reservations (seats are now permanently booked via tickets)
             seatDAO.releaseReservationsBySession(bookingSession.getReservationSessionID());
+            System.out.println("✓ Released temporary seat reservations");
             
-            // Update screening available seats
-            System.out.println("Updating screening available seats...");
-            for (int i = 0; i < ticketIDs.size(); i++) {
-                ticketDAO.updateScreeningAvailableSeats(bookingSession.getScreeningID());
-            }
+            // Update screening available seats count
+            ticketDAO.updateScreeningAvailableSeats(bookingSession.getScreeningID());
+            System.out.println("✓ Updated screening available seats count");
             
-            System.out.println("Booking process completed successfully!");
+            System.out.println("\n╔═══════════════════════════════════════════════════════════╗");
+            System.out.println("║            ✓ BOOKING COMPLETED SUCCESSFULLY!              ║");
+            System.out.println("║       Booking ID: " + String.format("%-40s", bookingID) + "║");
+            System.out.println("║       Booking Code: " + String.format("%-38s", bookingCode) + "║");
+            System.out.println("╚═══════════════════════════════════════════════════════════╝\n");
             return true;
             
         } catch (Exception e) {
-            System.out.println("EXCEPTION in processBooking: " + e.getMessage());
+            System.err.println("\n╔═══════════════════════════════════════════════════════════╗");
+            System.err.println("║              ✗ BOOKING PROCESS FAILED!                    ║");
+            System.err.println("╚═══════════════════════════════════════════════════════════╝");
+            System.err.println("Exception Type: " + e.getClass().getName());
+            System.err.println("Error Message: " + e.getMessage());
+            System.err.println("Stack Trace:");
             e.printStackTrace();
             return false;
         }

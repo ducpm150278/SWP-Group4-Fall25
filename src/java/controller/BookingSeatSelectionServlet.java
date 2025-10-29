@@ -293,6 +293,9 @@ public class BookingSeatSelectionServlet extends HttpServlet {
             // Set calculated ticket subtotal
             bookingSession.setTicketSubtotal(ticketSubtotal);
             
+            // CRITICAL: Save bookingSession back to session to ensure persistence
+            session.setAttribute("bookingSession", bookingSession);
+            
             // Redirect to food selection
             response.sendRedirect(request.getContextPath() + "/booking/select-food");
             

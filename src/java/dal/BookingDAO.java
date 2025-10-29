@@ -16,10 +16,12 @@ public class BookingDAO extends DBContext {
      * Create a new booking and return the generated BookingID
      */
     public int createBooking(Booking booking) {
+        // CRITICAL: Column order MUST match database schema!
+        // Schema order: PaymentMethod, PaymentDate, Notes, TransactionID
         String sql = "INSERT INTO Bookings (BookingCode, UserID, ScreeningID, BookingDate, " +
                      "TotalAmount, DiscountAmount, FinalAmount, Status, PaymentStatus, " +
-                     "PaymentMethod, PaymentDate, Notes) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     "PaymentMethod, PaymentDate, Notes, TransactionID) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         System.out.println("BookingDAO: Creating booking...");
         System.out.println("  BookingCode: " + booking.getBookingCode());
@@ -27,6 +29,8 @@ public class BookingDAO extends DBContext {
         System.out.println("  ScreeningID: " + booking.getScreeningID());
         System.out.println("  TotalAmount: " + booking.getTotalAmount());
         System.out.println("  FinalAmount: " + booking.getFinalAmount());
+        System.out.println("  Notes: " + booking.getNotes());
+        System.out.println("  TransactionID: " + booking.getTransactionID());
         
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -42,13 +46,26 @@ public class BookingDAO extends DBContext {
             ps.setString(9, booking.getPaymentStatus());
             ps.setString(10, booking.getPaymentMethod());
             
+            // Position 11: PaymentDate
             if (booking.getPaymentDate() != null) {
                 ps.setTimestamp(11, Timestamp.valueOf(booking.getPaymentDate()));
             } else {
                 ps.setNull(11, Types.TIMESTAMP);
             }
             
-            ps.setString(12, booking.getNotes());
+            // Position 12: Notes (BEFORE TransactionID in schema!)
+            if (booking.getNotes() != null && !booking.getNotes().isEmpty()) {
+                ps.setString(12, booking.getNotes());
+            } else {
+                ps.setNull(12, Types.NVARCHAR);
+            }
+            
+            // Position 13: TransactionID (AFTER Notes in schema!)
+            if (booking.getTransactionID() != null && !booking.getTransactionID().isEmpty()) {
+                ps.setString(13, booking.getTransactionID());
+            } else {
+                ps.setNull(13, Types.NVARCHAR);
+            }
             
             int affectedRows = ps.executeUpdate();
             
@@ -210,6 +227,7 @@ public class BookingDAO extends DBContext {
             booking.setPaymentDate(paymentDate.toLocalDateTime());
         }
         
+        booking.setTransactionID(rs.getString("TransactionID"));
         booking.setNotes(rs.getString("Notes"));
         
         return booking;
@@ -488,6 +506,158 @@ public class BookingDAO extends DBContext {
         }
         
         return foodItems;
+    }
+    
+    /**
+     * Add a food item to a booking
+     * @return true if successful, false otherwise
+     */
+    public boolean addBookingFoodItem(int bookingID, int foodID, int quantity, double unitPrice) {
+        String sql = "INSERT INTO BookingFoodItems (BookingID, FoodID, ComboID, Quantity, UnitPrice, TotalPrice) " +
+                     "VALUES (?, ?, NULL, ?, ?, ?)";
+        
+        double totalPrice = unitPrice * quantity;
+        
+        System.out.println("=== Adding Food Item to Booking ===");
+        System.out.println("BookingID: " + bookingID);
+        System.out.println("FoodID: " + foodID);
+        System.out.println("Quantity: " + quantity);
+        System.out.println("UnitPrice: " + unitPrice);
+        System.out.println("TotalPrice: " + totalPrice);
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, bookingID);
+            ps.setInt(2, foodID);
+            ps.setInt(3, quantity);
+            ps.setDouble(4, unitPrice);
+            ps.setDouble(5, totalPrice);
+            
+            System.out.println("Executing SQL: " + sql);
+            int affectedRows = ps.executeUpdate();
+            System.out.println("Affected rows: " + affectedRows);
+            
+            if (affectedRows > 0) {
+                System.out.println("✓ Added food item (ID: " + foodID + ") x" + quantity + " to booking " + bookingID);
+                return true;
+            } else {
+                System.err.println("✗ No rows affected when adding food item!");
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("=== ERROR adding food item to booking ===");
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Add a combo item to a booking
+     * @return true if successful, false otherwise
+     */
+    public boolean addBookingComboItem(int bookingID, int comboID, int quantity, double unitPrice) {
+        String sql = "INSERT INTO BookingFoodItems (BookingID, FoodID, ComboID, Quantity, UnitPrice, TotalPrice) " +
+                     "VALUES (?, NULL, ?, ?, ?, ?)";
+        
+        double totalPrice = unitPrice * quantity;
+        
+        System.out.println("=== Adding Combo Item to Booking ===");
+        System.out.println("BookingID: " + bookingID);
+        System.out.println("ComboID: " + comboID);
+        System.out.println("Quantity: " + quantity);
+        System.out.println("UnitPrice: " + unitPrice);
+        System.out.println("TotalPrice: " + totalPrice);
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, bookingID);
+            ps.setInt(2, comboID);
+            ps.setInt(3, quantity);
+            ps.setDouble(4, unitPrice);
+            ps.setDouble(5, totalPrice);
+            
+            System.out.println("Executing SQL: " + sql);
+            int affectedRows = ps.executeUpdate();
+            System.out.println("Affected rows: " + affectedRows);
+            
+            if (affectedRows > 0) {
+                System.out.println("✓ Added combo item (ID: " + comboID + ") x" + quantity + " to booking " + bookingID);
+                return true;
+            } else {
+                System.err.println("✗ No rows affected when adding combo item!");
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("=== ERROR adding combo item to booking ===");
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Add multiple food items to a booking
+     * @param foodItems Map of FoodID -> Quantity
+     * @param foodPrices Map of FoodID -> UnitPrice
+     * @return number of items successfully added
+     */
+    public int addBookingFoodItems(int bookingID, java.util.Map<Integer, Integer> foodItems, 
+                                   java.util.Map<Integer, Double> foodPrices) {
+        int successCount = 0;
+        
+        if (foodItems == null || foodItems.isEmpty()) {
+            return 0;
+        }
+        
+        for (java.util.Map.Entry<Integer, Integer> entry : foodItems.entrySet()) {
+            int foodID = entry.getKey();
+            int quantity = entry.getValue();
+            double unitPrice = foodPrices.getOrDefault(foodID, 0.0);
+            
+            if (addBookingFoodItem(bookingID, foodID, quantity, unitPrice)) {
+                successCount++;
+            }
+        }
+        
+        return successCount;
+    }
+    
+    /**
+     * Add multiple combo items to a booking
+     * @param comboItems Map of ComboID -> Quantity
+     * @param comboPrices Map of ComboID -> UnitPrice
+     * @return number of items successfully added
+     */
+    public int addBookingComboItems(int bookingID, java.util.Map<Integer, Integer> comboItems, 
+                                    java.util.Map<Integer, Double> comboPrices) {
+        int successCount = 0;
+        
+        if (comboItems == null || comboItems.isEmpty()) {
+            return 0;
+        }
+        
+        for (java.util.Map.Entry<Integer, Integer> entry : comboItems.entrySet()) {
+            int comboID = entry.getKey();
+            int quantity = entry.getValue();
+            double unitPrice = comboPrices.getOrDefault(comboID, 0.0);
+            
+            if (addBookingComboItem(bookingID, comboID, quantity, unitPrice)) {
+                successCount++;
+            }
+        }
+        
+        return successCount;
     }
     
     /**

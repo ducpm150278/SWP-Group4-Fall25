@@ -53,6 +53,12 @@ public class BookingPaymentServlet extends HttpServlet {
         HttpSession session = request.getSession();
         BookingSession bookingSession = BookingSessionManager.getBookingSession(session);
         
+        System.out.println("=== BookingPaymentServlet GET ===");
+        System.out.println("Session ID: " + session.getId());
+        System.out.println("Selected Combos in Session: " + bookingSession.getSelectedCombos());
+        System.out.println("Selected Foods in Session: " + bookingSession.getSelectedFoods());
+        System.out.println("Food Subtotal: " + bookingSession.getFoodSubtotal());
+        
         // Validate booking session
         if (!BookingSessionManager.isValidForPayment(bookingSession)) {
             response.sendRedirect(request.getContextPath() + "/booking/select-screening");
@@ -204,6 +210,9 @@ public class BookingPaymentServlet extends HttpServlet {
         bookingSession.setDiscountAmount(discountAmount);
         bookingSession.calculateTotals();
         
+        // CRITICAL: Save bookingSession back to session to ensure persistence
+        request.getSession().setAttribute("bookingSession", bookingSession);
+        
         // Format success message based on discount type
         String successMessage;
         if ("Percentage".equals(discount.getDiscountType())) {
@@ -247,6 +256,13 @@ public class BookingPaymentServlet extends HttpServlet {
         // Calculate final amount
         bookingSession.calculateTotals();
         double totalAmount = bookingSession.getTotalAmount();
+        
+        System.out.println("=== Payment Submission ===");
+        System.out.println("Session ID: " + request.getSession().getId());
+        System.out.println("Selected Combos: " + bookingSession.getSelectedCombos());
+        System.out.println("Selected Foods: " + bookingSession.getSelectedFoods());
+        System.out.println("Food Subtotal: " + bookingSession.getFoodSubtotal());
+        System.out.println("Total Amount: " + totalAmount);
         
         // Generate order ID
         String orderID = VNPayUtils.generateTxnRef();
