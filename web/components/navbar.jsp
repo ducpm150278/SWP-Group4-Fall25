@@ -177,7 +177,7 @@
 <nav class="navbar-cinema">
     <div class="navbar-container">
         <a class="navbar-brand-cinema" href="${pageContext.request.contextPath}/index.jsp">
-            <i class="fas fa-film"></i> Cinema Booking
+            <i class="fas fa-film"></i> Cinema
         </a>
         
         <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
@@ -192,6 +192,9 @@
                 </a>
                 <a href="${pageContext.request.contextPath}/booking/select-screening" class="nav-link-cinema">
                     <i class="fas fa-ticket-alt"></i> Đặt Vé
+                </a>
+                <a href="${pageContext.request.contextPath}/booking-history" class="nav-link-cinema">
+                    <i class="fas fa-history"></i> Lịch Sử
                 </a>
                 <% if (isAdmin) { %>
                     <a href="${pageContext.request.contextPath}/admin.jsp" class="nav-link-cinema">

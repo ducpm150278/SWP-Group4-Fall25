@@ -59,9 +59,9 @@ public class GuestMovieDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        String movieIDStr = request.getParameter("movieID");
+        String movieIDStr = request.getParameter("id");
         
-        if (movieIDStr == null) {
+        if (movieIDStr == null || movieIDStr.trim().isEmpty()) {
             response.sendRedirect("guest-movies");
             return;
         }

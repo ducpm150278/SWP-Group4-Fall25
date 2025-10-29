@@ -56,6 +56,11 @@
             color: #fff;
             position: relative;
             z-index: 1;
+            text-shadow: 
+                0 0 20px rgba(229, 9, 20, 0.6),
+                0 0 40px rgba(229, 9, 20, 0.4),
+                0 5px 20px rgba(0, 0, 0, 0.5),
+                0 10px 40px rgba(0, 0, 0, 0.3);
         }
         
         .hero-section p {
@@ -64,6 +69,9 @@
             color: #fff;
             position: relative;
             z-index: 1;
+            text-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.5),
+                0 4px 20px rgba(0, 0, 0, 0.3);
         }
         
         /* Main Container */
@@ -279,6 +287,17 @@
             .movies-grid {
                 grid-template-columns: 1fr;
             }
+        }
+        
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        html, body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>

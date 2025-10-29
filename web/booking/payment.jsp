@@ -745,7 +745,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="agreeTerms" name="agreeTerms" required>
+                <input type="checkbox" class="form-check-input" id="agreeTerms" name="agreeTerms">
                 <label class="form-check-label" for="agreeTerms">
                             Tôi đã đọc và đồng ý với <a href="#" target="_blank">Điều khoản và điều kiện</a> của rạp
                 </label>
@@ -754,7 +754,7 @@
             </div>
             
             <!-- Submit Button -->
-            <button type="submit" name="action" value="payment" class="btn-submit-payment">
+            <button type="submit" name="action" value="payment" class="btn-submit-payment" id="paymentButton">
                 <i class="fas fa-lock"></i>
                 <span>Thanh Toán <%= String.format("%,.0f đ", bookingSession.getTotalAmount()) %></span>
                 <i class="fas fa-arrow-right"></i>
@@ -807,6 +807,23 @@
                 // Check the radio button
                 this.querySelector('input[type="radio"]').checked = true;
             });
+        });
+        
+        // Form validation - only check terms when payment button is clicked
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            // Find which button was clicked
+            const submitter = e.submitter;
+            
+            // Only validate terms checkbox when payment button is clicked
+            if (submitter && submitter.getAttribute('value') === 'payment') {
+                const agreeTerms = document.getElementById('agreeTerms');
+                if (!agreeTerms.checked) {
+                    e.preventDefault();
+                    alert('Vui lòng đồng ý với điều khoản và điều kiện để tiếp tục thanh toán.');
+                    agreeTerms.focus();
+                    return false;
+                }
+            }
         });
         
         // Initialize countdown

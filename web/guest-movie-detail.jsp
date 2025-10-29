@@ -333,7 +333,7 @@
                         </div>
                         <div class="meta-badge">
                             <i class="fas fa-calendar"></i>
-                            <%= movie.getReleaseDate() %>
+                            <%= movie.getReleasedDate() %>
                         </div>
                         <% if (averageRating != null && averageRating > 0) { %>
                             <div class="meta-badge">
@@ -386,7 +386,7 @@
             </div>
             <div class="detail-row">
                 <div class="detail-label">Diễn viên:</div>
-                <div class="detail-value"><%= movie.getActors() != null ? movie.getActors() : "Đang cập nhật" %></div>
+                <div class="detail-value"><%= movie.getCast() != null ? movie.getCast() : "Đang cập nhật" %></div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Thể loại:</div>
@@ -398,11 +398,11 @@
             </div>
             <div class="detail-row">
                 <div class="detail-label">Ngày phát hành:</div>
-                <div class="detail-value"><%= movie.getReleaseDate() %></div>
+                <div class="detail-value"><%= movie.getReleasedDate() %></div>
             </div>
             <div class="detail-row">
-                <div class="detail-label">Quốc gia:</div>
-                <div class="detail-value"><%= movie.getCountry() != null ? movie.getCountry() : "Đang cập nhật" %></div>
+                <div class="detail-label">Ngôn ngữ:</div>
+                <div class="detail-value"><%= movie.getLanguageName() != null ? movie.getLanguageName() : "Đang cập nhật" %></div>
             </div>
         </div>
         

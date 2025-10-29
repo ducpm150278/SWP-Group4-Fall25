@@ -34,27 +34,9 @@
             max-height: 95vh;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            scrollbar-width: thin;
-            scrollbar-color: #e50914 #2a2d35;
         }
         
-        .signup-container::-webkit-scrollbar {
-            width: 8px;
-        }
         
-        .signup-container::-webkit-scrollbar-track {
-            background: #2a2d35;
-            border-radius: 10px;
-        }
-        
-        .signup-container::-webkit-scrollbar-thumb {
-            background: #e50914;
-            border-radius: 10px;
-        }
-        
-        .signup-container::-webkit-scrollbar-thumb:hover {
-            background: #ff2030;
-        }
         
         .signup-header {
             background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
@@ -277,6 +259,21 @@
             .col-md-6 {
                 padding: 0;
             }
+        }
+        
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        html, body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .signup-container::-webkit-scrollbar {
+            display: none;
         }
     </style>
 </head>
