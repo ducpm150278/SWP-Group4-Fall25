@@ -89,7 +89,8 @@
             color: #8b92a7;
         }
         
-        .step.active .step-label {
+        .step.active .step-label,
+        .step.completed .step-label {
             color: #fff;
             font-weight: 600;
         }
@@ -511,20 +512,20 @@
     <div class="progress-container">
         <div class="progress-steps">
             <div class="step active">
-                <div class="step-circle">1</div>
-                <div class="step-label">Chọn Suất</div>
+                <div class="step-circle"><i class="fas fa-film"></i></div>
+                <span class="step-label">Chọn Suất</span>
             </div>
             <div class="step">
-                <div class="step-circle">2</div>
-                <div class="step-label">Chọn Ghế</div>
+                <div class="step-circle"><i class="fas fa-couch"></i></div>
+                <span class="step-label">Chọn Ghế</span>
             </div>
             <div class="step">
-                <div class="step-circle">3</div>
-                <div class="step-label">Đồ Ăn & Nước</div>
+                <div class="step-circle"><i class="fas fa-utensils"></i></div>
+                <span class="step-label">Đồ Ăn</span>
             </div>
             <div class="step">
-                <div class="step-circle">4</div>
-                <div class="step-label">Thanh Toán</div>
+                <div class="step-circle"><i class="fas fa-credit-card"></i></div>
+                <span class="step-label">Thanh Toán</span>
             </div>
         </div>
     </div>

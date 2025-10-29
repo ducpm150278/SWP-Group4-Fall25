@@ -84,9 +84,23 @@
             box-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
         }
         
+        .step.completed {
+            cursor: pointer;
+        }
+        
+        .step.completed:hover .step-circle {
+            background: #3fb950;
+            transform: scale(1.1);
+        }
+        
+        .step.completed:hover .step-label {
+            color: #3fb950;
+        }
+        
         .step-label {
             font-size: 12px;
             color: #8b92a7;
+            transition: all 0.3s;
         }
         
         .step.active .step-label,
@@ -165,59 +179,6 @@
             color: #fff;
         }
         
-        /* Timer */
-        .timer-section {
-            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(229, 9, 20, 0.05) 100%);
-            border: 2px solid #e50914;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 25px;
-            animation: pulse-border 2s infinite;
-        }
-        
-        @keyframes pulse-border {
-            0%, 100% { border-color: #e50914; }
-            50% { border-color: #ff2030; }
-        }
-        
-        .timer-icon {
-            font-size: 32px;
-            color: #e50914;
-            margin-bottom: 10px;
-        }
-        
-        .timer-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #e50914;
-            margin-bottom: 5px;
-        }
-        
-        .timer-label {
-            font-size: 14px;
-            color: #8b92a7;
-        }
-        
-        .timer-section.warning {
-            background: linear-gradient(135deg, rgba(255, 149, 0, 0.1) 0%, rgba(255, 149, 0, 0.05) 100%);
-            border-color: #ff9500;
-        }
-        
-        .timer-section.warning .timer-icon,
-        .timer-section.warning .timer-value {
-            color: #ff9500;
-        }
-        
-        .timer-section.critical {
-            background: linear-gradient(135deg, rgba(255, 59, 48, 0.1) 0%, rgba(255, 59, 48, 0.05) 100%);
-            border-color: #ff3b30;
-        }
-        
-        .timer-section.critical .timer-icon,
-        .timer-section.critical .timer-value {
-            color: #ff3b30;
-        }
         
         /* Screen */
         .screen-section {
@@ -247,22 +208,6 @@
             position: relative;
         }
         
-        .screen::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: screen-shine 3s infinite;
-        }
-        
-        @keyframes screen-shine {
-            0%, 100% { transform: translateX(-100%); }
-            50% { transform: translateX(100%); }
-        }
-        
         /* Seat Map */
         .seat-map-section {
             background: #1a1d24;
@@ -273,16 +218,17 @@
         }
         
         .seat-grid-container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
-            display: flex;
-            gap: 20px;
-        }
-        
-        .row-labels {
             display: flex;
             flex-direction: column;
             gap: 10px;
+        }
+        
+        .seat-row-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
         .row-label {
@@ -296,100 +242,209 @@
             background: #2a2d35;
             border-radius: 6px;
             font-size: 16px;
+            flex-shrink: 0;
         }
         
-        .seat-map {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 10px;
+        .seat-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
             flex: 1;
+            align-items: center;
+        }
+        
+        /* Center aisle spacing */
+        .seat-aisle {
+            width: 30px;
+            flex-shrink: 0;
+        }
+        
+        /* Zone separators */
+        .zone-separator {
+            height: 15px;
+            position: relative;
+            margin: 8px 0;
+        }
+        
+        .zone-separator::before {
+            content: '';
+            position: absolute;
+            left: 60px;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #2a2d35 20%, #2a2d35 80%, transparent);
+        }
+        
+        .zone-label {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #0f1014;
+            padding: 2px 12px;
+            font-size: 11px;
+            color: #8b92a7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .seat {
-            width: 100%;
+            min-width: 40px;
+            width: 40px;
             height: 40px;
-            border: 2px solid transparent;
-            border-radius: 6px;
-            background: #2ea043;
-            color: white;
+            border: 1px solid #3a3d45;
+            border-radius: 4px;
+            background: #2a2d35;
+            color: #8b92a7;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             position: relative;
+            flex-shrink: 0;
         }
         
-        .seat:hover:not(.booked):not(.reserved) {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(46, 160, 67, 0.4);
-            border-color: #2ea043;
+        .seat:hover:not(.booked):not(.reserved):not(.maintenance):not(.selected) {
+            background: #3a3d45;
+            border-color: #4a4d55;
+            color: #fff;
+            transform: translateY(-2px);
         }
         
         .seat.selected {
-            background: #e50914;
-            border-color: #e50914;
-            box-shadow: 0 5px 20px rgba(229, 9, 20, 0.4);
+            background: #e50914 !important;
+            color: white !important;
+            border-color: #e50914 !important;
         }
         
         .seat.selected:hover {
-            box-shadow: 0 10px 30px rgba(229, 9, 20, 0.6);
+            background: #c50812 !important;
         }
         
         .seat.booked {
-            background: #6c757d;
+            background: #1a1d24;
+            border-color: #1a1d24;
+            color: #555;
             cursor: not-allowed;
-            opacity: 0.5;
+            opacity: 0.3;
         }
         
         .seat.reserved {
-            background: #ff9500;
+            background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%);
+            border: 2px solid #ff9500;
+            color: transparent;
             cursor: not-allowed;
-            opacity: 0.7;
+            position: relative;
+            opacity: 1;
         }
         
+        .seat.reserved::before {
+            content: '\f017';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 400;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* VIP seats - Subtle gold accent */
         .seat.vip {
-            box-shadow: 0 0 0 2px #ffd700;
+            border-color: #6b5d3f;
+            background: #2f2d2a;
+        }
+        
+        .seat.vip:hover:not(.booked):not(.reserved):not(.maintenance):not(.selected) {
+            background: #3f3d3a;
+            border-color: #8b7d5f;
         }
         
         .seat.vip.selected {
-            box-shadow: 0 0 0 2px #ffd700, 0 5px 20px rgba(229, 9, 20, 0.4);
+            background: #e50914 !important;
+            border-color: #e50914 !important;
         }
         
+        .seat.vip.booked {
+            background: #1a1d24;
+            border-color: #1a1d24;
+            color: #555;
+        }
+        
+        /* Couple seats - Wider, subtle styling */
         .seat.couple {
-            grid-column: span 2;
+            min-width: 85px;
+            width: 85px;
+            border-color: #4a3d45;
+            background: #2d2a2d;
+        }
+        
+        .seat.couple:hover:not(.booked):not(.reserved):not(.maintenance):not(.selected) {
+            background: #3d3a3d;
+            border-color: #5a4d55;
+        }
+        
+        .seat.couple.selected {
+            background: #e50914 !important;
+            border-color: #e50914 !important;
+        }
+        
+        .seat.couple.booked {
+            background: #1a1d24;
+            border-color: #1a1d24;
+            color: #555;
+        }
+        
+        /* Maintenance seats */
+        .seat.maintenance {
+            background: #1a1d24;
+            border-color: #3a3d45;
+            border-style: dashed;
+            color: #555;
+            cursor: not-allowed;
+            opacity: 0.3;
         }
         
         /* Legend */
         .legend-section {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             margin-top: 30px;
             padding: 20px;
             background: #2a2d35;
             border-radius: 8px;
         }
         
+        @media (max-width: 768px) {
+            .legend-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .legend-box {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 4px;
             border: 2px solid transparent;
+            flex-shrink: 0;
         }
         
         .legend-text {
-            font-size: 14px;
+            font-size: 13px;
             color: #fff;
+            white-space: nowrap;
         }
         
         /* Summary Section */
@@ -613,21 +668,21 @@
     <!-- Progress Steps -->
     <div class="progress-container">
         <div class="progress-steps">
-            <div class="step completed">
-                <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Chọn Suất</div>
+            <div class="step completed" onclick="window.location.href='${pageContext.request.contextPath}/booking/select-screening'" title="Quay lại chọn suất chiếu">
+                <div class="step-circle"><i class="fas fa-film"></i></div>
+                <span class="step-label">Chọn Suất</span>
             </div>
             <div class="step active">
-                <div class="step-circle">2</div>
-                <div class="step-label">Chọn Ghế</div>
+                <div class="step-circle"><i class="fas fa-couch"></i></div>
+                <span class="step-label">Chọn Ghế</span>
             </div>
             <div class="step">
-                <div class="step-circle">3</div>
-                <div class="step-label">Đồ Ăn & Nước</div>
+                <div class="step-circle"><i class="fas fa-utensils"></i></div>
+                <span class="step-label">Đồ Ăn</span>
             </div>
             <div class="step">
-                <div class="step-circle">4</div>
-                <div class="step-label">Thanh Toán</div>
+                <div class="step-circle"><i class="fas fa-credit-card"></i></div>
+                <span class="step-label">Thanh Toán</span>
             </div>
         </div>
     </div>
@@ -664,15 +719,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Timer -->
-        <div class="timer-section" id="timerSection">
-            <div class="timer-icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="timer-value" id="timerValue">15:00</div>
-            <div class="timer-label">Thời gian giữ ghế còn lại</div>
-        </div>
+
         
         <!-- Error Message -->
         <% if (request.getAttribute("error") != null) { %>
@@ -691,85 +738,118 @@
         <!-- Seat Map -->
         <div class="seat-map-section">
             <form method="post" action="${pageContext.request.contextPath}/booking/select-seats" id="seatForm">
-                <div class="seat-grid-container">
-                    <!-- Row Labels -->
-                    <div class="row-labels">
-                        <%
-                            java.util.Set<String> uniqueRows = new java.util.TreeSet<>();
-                            if (allSeats != null) {
-                                for (Seat seat : allSeats) {
-                                    uniqueRows.add(seat.getSeatRow());
+                <div class="seat-grid-container" id="seatMap">
+                    <%
+                        if (allSeats != null && !allSeats.isEmpty()) {
+                            // Group seats by row - normal order A->Z (front to back, screen is above)
+                            Map<String, java.util.List<Seat>> seatsByRow = new java.util.TreeMap<>();
+                            for (Seat seat : allSeats) {
+                                String row = seat.getSeatRow();
+                                if (!seatsByRow.containsKey(row)) {
+                                    seatsByRow.put(row, new java.util.ArrayList<>());
                                 }
-                                for (String row : uniqueRows) {
-                        %>
-                                    <div class="row-label"><%= row %></div>
-                        <%
-                                }
+                                seatsByRow.get(row).add(seat);
                             }
-                        %>
-                    </div>
-                    
-                    <!-- Seat Grid -->
-                    <div class="seat-map" id="seatMap">
-                        <%
-                            if (allSeats != null) {
-                                for (Seat seat : allSeats) {
-                                    String seatClass = "seat";
-                                    boolean isBooked = bookedSeatIDs != null && bookedSeatIDs.contains(seat.getSeatID());
-                                    boolean isReserved = reservedSeatIDs != null && reservedSeatIDs.contains(seat.getSeatID());
-                                    boolean isSelected = bookingSession.getSelectedSeatIDs() != null && 
-                                                       bookingSession.getSelectedSeatIDs().contains(seat.getSeatID());
-                                    
-                                    if (isBooked) {
-                                        seatClass += " booked";
-                                    } else if (isReserved) {
-                                        seatClass += " reserved";
-                                    } else if (isSelected) {
-                                        seatClass += " selected";
+                            
+                            // Render each row
+                            for (Map.Entry<String, java.util.List<Seat>> entry : seatsByRow.entrySet()) {
+                                String rowLabel = entry.getKey();
+                                java.util.List<Seat> rowSeats = entry.getValue();
+                                
+                                // Sort seats by seat number
+                                java.util.Collections.sort(rowSeats, new java.util.Comparator<Seat>() {
+                                    public int compare(Seat s1, Seat s2) {
+                                        return Integer.compare(s1.getSeatNumber(), s2.getSeatNumber());
                                     }
-                                    
-                                    String seatType = seat.getSeatType();
-                                    if ("VIP".equals(seatType)) {
-                                        seatClass += " vip";
-                                    } else if ("Couple".equals(seatType)) {
-                                        seatClass += " couple";
-                                    }
-                        %>
-                            <div class="<%= seatClass %>" 
-                                 data-seat-id="<%= seat.getSeatID() %>"
-                                 data-seat-label="<%= seat.getSeatRow() %><%= seat.getSeatNumber() %>"
-                                 data-available="<%= !isBooked && !isReserved %>"
-                                 data-price-multiplier="<%= seat.getPriceMultiplier() %>">
-                                <%= seat.getSeatNumber() %>
-                            </div>
-                        <%
-                                }
+                                });
+                                
+                                int totalSeats = rowSeats.size();
+                                int halfPoint = (totalSeats + 1) / 2; // Calculate center aisle position
+                    %>
+                                <div class="seat-row-container">
+                                    <div class="row-label"><%= rowLabel.trim() %></div>
+                                    <div class="seat-row">
+                                        <%
+                                            for (int i = 0; i < rowSeats.size(); i++) {
+                                                Seat seat = rowSeats.get(i);
+                                                
+                                                // Add center aisle after half the seats
+                                                if (i == halfPoint && totalSeats > 6) {
+                                        %>
+                                                    <div class="seat-aisle"></div>
+                                        <%
+                                                }
+                                                
+                                                String seatClass = "seat";
+                                                boolean isBooked = bookedSeatIDs != null && bookedSeatIDs.contains(seat.getSeatID());
+                                                boolean isReserved = reservedSeatIDs != null && reservedSeatIDs.contains(seat.getSeatID());
+                                                boolean isSelected = bookingSession.getSelectedSeatIDs() != null && 
+                                                                   bookingSession.getSelectedSeatIDs().contains(seat.getSeatID());
+                                                boolean isMaintenance = "Maintenance".equals(seat.getStatus());
+                                                
+                                                if (isMaintenance) {
+                                                    seatClass += " maintenance";
+                                                } else if (isBooked) {
+                                                    seatClass += " booked";
+                                                } else if (isReserved) {
+                                                    seatClass += " reserved";
+                                                } else if (isSelected) {
+                                                    seatClass += " selected";
+                                                }
+                                                
+                                                String seatType = seat.getSeatType();
+                                                if ("VIP".equals(seatType)) {
+                                                    seatClass += " vip";
+                                                } else if ("Couple".equals(seatType)) {
+                                                    seatClass += " couple";
+                                                }
+                                        %>
+                                                <div class="<%= seatClass %>" 
+                                                     data-seat-id="<%= seat.getSeatID() %>"
+                                                     data-seat-label="<%= seat.getSeatRow().trim() %><%= seat.getSeatNumber() %>"
+                                                     data-available="<%= !isBooked && !isReserved && !isMaintenance %>"
+                                                     data-price-multiplier="<%= seat.getPriceMultiplier() %>"
+                                                     data-seat-type="<%= seatType %>">
+                                                    <%= seat.getSeatNumber() %>
+                                                </div>
+                                        <%
+                                            }
+                                        %>
+                                    </div>
+                                </div>
+                    <%
                             }
-                        %>
-                    </div>
+                        }
+                    %>
                 </div>
                 
                 <!-- Legend -->
                 <div class="legend-section">
                     <div class="legend-item">
-                        <div class="legend-box" style="background: #2ea043;"></div>
-                        <span class="legend-text">Còn trống</span>
+                        <div class="legend-box" style="background: #2a2d35; border: 1px solid #3a3d45;"></div>
+                        <span class="legend-text">Ghế thường</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-box" style="background: #e50914;"></div>
+                        <div class="legend-box" style="background: #2f2d2a; border: 1px solid #6b5d3f;"></div>
+                        <span class="legend-text">Ghế VIP</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box" style="background: #2d2a2d; border: 1px solid #4a3d45; width: 50px;"></div>
+                        <span class="legend-text">Ghế đôi</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box" style="background: #e50914; border: 2px solid #e50914;"></div>
                         <span class="legend-text">Đang chọn</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-box" style="background: #6c757d; opacity: 0.5;"></div>
+                        <div class="legend-box" style="background: #1a1d24; border: 1px solid #1a1d24; opacity: 0.3;"></div>
                         <span class="legend-text">Đã đặt</span>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-box" style="background: #ff9500; opacity: 0.7;"></div>
+                        <div class="legend-box" style="background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%); border: 2px solid #ff9500; position: relative; display: flex; align-items: center; justify-content: center; font-family: 'Font Awesome 5 Free'; font-weight: 400;">
+                            <span style="color: rgba(255, 255, 255, 0.9); font-size: 12px;">&#xf017;</span>
+                        </div>
                         <span class="legend-text">Đang giữ</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box" style="background: #2ea043; box-shadow: 0 0 0 2px #ffd700;"></div>
-                        <span class="legend-text">VIP</span>
                     </div>
                 </div>
             </form>
@@ -815,12 +895,10 @@
         const ticketPrice = <%= bookingSession.getTicketPrice() %>;
         const selectedSeatsData = new Map();
         const maxSeats = 8;
-        let timeLeft = <%= request.getAttribute("remainingSeconds") != null ? request.getAttribute("remainingSeconds") : 900 %>;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initializeSeats();
-            startCountdown();
             startAutoRefresh();
         });
         
@@ -925,35 +1003,6 @@
             setTimeout(function() {
                 form.submit();
             }, 500);
-        }
-        
-        function startCountdown() {
-            updateTimer();
-            setInterval(updateTimer, 1000);
-        }
-        
-        function updateTimer() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('timerValue').textContent = 
-                String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
-            
-            const timerSection = document.getElementById('timerSection');
-            if (timeLeft <= 60) {
-                timerSection.className = 'timer-section critical';
-            } else if (timeLeft <= 180) {
-                timerSection.className = 'timer-section warning';
-            }
-            
-            if (timeLeft <= 0) {
-                showNotification('Hết thời gian! Đang chuyển hướng...', 'error');
-                setTimeout(function() {
-                    window.location.href = '${pageContext.request.contextPath}/booking/select-screening';
-                }, 2000);
-                return;
-            }
-            
-            timeLeft--;
         }
         
         function startAutoRefresh() {

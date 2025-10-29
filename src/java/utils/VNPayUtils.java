@@ -1,5 +1,6 @@
 package utils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
@@ -57,10 +58,11 @@ public class VNPayUtils {
     }
     
     /**
-     * Create payment parameters
+     * Create payment parameters with dynamic return URL
      */
     public static Map<String, String> createPaymentParams(String orderId, long amount, 
-                                                          String orderInfo, String ipAddress) {
+                                                          String orderInfo, String ipAddress, 
+                                                          HttpServletRequest request) {
         Map<String, String> vnpParams = new HashMap<>();
         
         vnpParams.put("vnp_Version", VNPayConfig.VNP_VERSION);
@@ -72,7 +74,7 @@ public class VNPayUtils {
         vnpParams.put("vnp_OrderInfo", orderInfo);
         vnpParams.put("vnp_OrderType", VNPayConfig.VNP_ORDER_TYPE);
         vnpParams.put("vnp_Locale", VNPayConfig.VNP_LOCALE);
-        vnpParams.put("vnp_ReturnUrl", VNPayConfig.VNP_RETURN_URL);
+        vnpParams.put("vnp_ReturnUrl", VNPayConfig.getReturnUrl(request));
         vnpParams.put("vnp_IpAddr", ipAddress);
         
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -162,7 +164,7 @@ public class VNPayUtils {
     /**
      * Get client IP address from request
      */
-    public static String getIpAddress(javax.servlet.http.HttpServletRequest request) {
+    public static String getIpAddress(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (ipAddress == null || ipAddress.isEmpty()) {
             ipAddress = request.getRemoteAddr();

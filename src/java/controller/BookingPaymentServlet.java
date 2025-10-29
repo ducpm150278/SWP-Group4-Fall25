@@ -1,8 +1,14 @@
 package controller;
 
 import dal.DiscountDAO;
+import dal.SeatDAO;
+import dal.ComboDAO;
+import dal.FoodDAO;
 import entity.BookingSession;
 import entity.Discount;
+import entity.Seat;
+import entity.Combo;
+import entity.Food;
 import utils.BookingSessionManager;
 import utils.VNPayConfig;
 import utils.VNPayUtils;
@@ -17,6 +23,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Servlet for Step 4: Payment with VNPay integration
@@ -25,10 +34,16 @@ import java.util.Map;
 public class BookingPaymentServlet extends HttpServlet {
     
     private DiscountDAO discountDAO;
+    private SeatDAO seatDAO;
+    private ComboDAO comboDAO;
+    private FoodDAO foodDAO;
     
     @Override
     public void init() throws ServletException {
         discountDAO = new DiscountDAO();
+        seatDAO = new SeatDAO();
+        comboDAO = new ComboDAO();
+        foodDAO = new FoodDAO();
     }
     
     @Override
@@ -47,6 +62,55 @@ public class BookingPaymentServlet extends HttpServlet {
         // Calculate remaining time
         long remainingSeconds = BookingSessionManager.getRemainingSeconds(bookingSession.getReservationExpiry());
         request.setAttribute("remainingSeconds", remainingSeconds);
+        
+        // Get seat details for breakdown
+        List<Map<String, Object>> seatDetails = new ArrayList<>();
+        double baseTicketPrice = bookingSession.getTicketPrice();
+        for (Integer seatID : bookingSession.getSelectedSeatIDs()) {
+            Seat seat = seatDAO.getSeatByID(seatID);
+            if (seat != null) {
+                Map<String, Object> detail = new HashMap<>();
+                detail.put("label", seat.getSeatLabel());
+                detail.put("type", seat.getSeatType());
+                detail.put("multiplier", seat.getPriceMultiplier());
+                detail.put("price", baseTicketPrice * seat.getPriceMultiplier());
+                seatDetails.add(detail);
+            }
+        }
+        request.setAttribute("seatDetails", seatDetails);
+        
+        // Get combo details for breakdown
+        List<Map<String, Object>> comboDetails = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : bookingSession.getSelectedCombos().entrySet()) {
+            Combo combo = comboDAO.getComboById(entry.getKey());
+            if (combo != null) {
+                Map<String, Object> detail = new HashMap<>();
+                detail.put("name", combo.getComboName());
+                detail.put("quantity", entry.getValue());
+                double price = combo.getDiscountPrice() != null ? 
+                              combo.getDiscountPrice().doubleValue() : 
+                              combo.getTotalPrice().doubleValue();
+                detail.put("price", price);
+                detail.put("total", price * entry.getValue());
+                comboDetails.add(detail);
+            }
+        }
+        request.setAttribute("comboDetails", comboDetails);
+        
+        // Get food details for breakdown
+        List<Map<String, Object>> foodDetails = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : bookingSession.getSelectedFoods().entrySet()) {
+            Food food = foodDAO.getFoodById(entry.getKey());
+            if (food != null) {
+                Map<String, Object> detail = new HashMap<>();
+                detail.put("name", food.getFoodName());
+                detail.put("quantity", entry.getValue());
+                detail.put("price", food.getPrice().doubleValue());
+                detail.put("total", food.getPrice().doubleValue() * entry.getValue());
+                foodDetails.add(detail);
+            }
+        }
+        request.setAttribute("foodDetails", foodDetails);
         
         // Calculate totals
         bookingSession.calculateTotals();
@@ -96,13 +160,17 @@ public class BookingPaymentServlet extends HttpServlet {
         }
         
         // Validate discount code
+        System.out.println("Attempting to apply discount code: [" + discountCode.trim() + "]");
         Discount discount = discountDAO.getDiscountByCode(discountCode.trim());
         
         if (discount == null) {
+            System.out.println("Discount not found in database for code: [" + discountCode.trim() + "]");
             request.setAttribute("error", "Mã giảm giá không tồn tại!");
             doGet(request, response);
             return;
         }
+        
+        System.out.println("Discount found: " + discount.getCode() + ", Status: " + discount.getStatus());
         
         // Check if discount is active
         if (!"Active".equals(discount.getStatus())) {
@@ -126,9 +194,9 @@ public class BookingPaymentServlet extends HttpServlet {
             return;
         }
         
-        // Calculate discount amount
+        // Calculate discount amount based on type
         double subtotal = bookingSession.getTicketSubtotal() + bookingSession.getFoodSubtotal();
-        double discountAmount = subtotal * (discount.getDiscountPercentage() / 100.0);
+        double discountAmount = discount.calculateDiscountAmount(subtotal);
         
         // Apply discount
         bookingSession.setDiscountID(discount.getDiscountID());
@@ -136,8 +204,16 @@ public class BookingPaymentServlet extends HttpServlet {
         bookingSession.setDiscountAmount(discountAmount);
         bookingSession.calculateTotals();
         
-        request.setAttribute("success", "Áp dụng mã giảm giá thành công! Giảm " + 
-                            String.format("%.0f%%", discount.getDiscountPercentage()));
+        // Format success message based on discount type
+        String successMessage;
+        if ("Percentage".equals(discount.getDiscountType())) {
+            successMessage = "Áp dụng mã giảm giá thành công! Giảm " + 
+                           String.format("%.0f%%", discount.getDiscountValue());
+        } else {
+            successMessage = "Áp dụng mã giảm giá thành công! Giảm " + 
+                           String.format("%,.0f đ", discount.getDiscountValue());
+        }
+        request.setAttribute("success", successMessage);
         doGet(request, response);
     }
     
@@ -186,12 +262,13 @@ public class BookingPaymentServlet extends HttpServlet {
         String ipAddress = VNPayUtils.getIpAddress(request);
         
         try {
-            // Create VNPay payment URL
+            // Create VNPay payment URL with dynamic return URL
             Map<String, String> vnpParams = VNPayUtils.createPaymentParams(
                 orderID,
                 (long) totalAmount,
                 orderInfo,
-                ipAddress
+                ipAddress,
+                request
             );
             
             String paymentUrl = VNPayUtils.buildPaymentUrl(vnpParams);

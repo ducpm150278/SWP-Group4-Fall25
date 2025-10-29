@@ -44,6 +44,16 @@ public class BookingSelectScreeningServlet extends HttpServlet {
         
         HttpSession session = request.getSession();
         
+        // Check if user is logged in
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) {
+            // Save the current URL to redirect back after login
+            session.setAttribute("redirectAfterLogin", request.getContextPath() + "/booking/select-screening");
+            session.setAttribute("loginMessage", "Vui lòng đăng nhập để đặt vé");
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+        
         // Clear any existing booking session
         BookingSessionManager.clearBookingSession(session);
         

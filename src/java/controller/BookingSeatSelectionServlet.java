@@ -271,12 +271,17 @@ public class BookingSeatSelectionServlet extends HttpServlet {
                 return;
             }
             
-            // Get seat labels
+            // Get seat labels and calculate ticket subtotal
             List<String> seatLabels = new ArrayList<>();
+            double ticketSubtotal = 0;
+            double baseTicketPrice = bookingSession.getTicketPrice();
+            
             for (Integer seatID : selectedSeatIDs) {
                 Seat seat = seatDAO.getSeatByID(seatID);
                 if (seat != null) {
                     seatLabels.add(seat.getSeatLabel());
+                    // Calculate price based on seat type multiplier
+                    ticketSubtotal += baseTicketPrice * seat.getPriceMultiplier();
                 }
             }
             
@@ -285,8 +290,8 @@ public class BookingSeatSelectionServlet extends HttpServlet {
             bookingSession.setSelectedSeatLabels(seatLabels);
             bookingSession.setReservationExpiry(BookingSessionManager.getReservationExpiry());
             
-            // Calculate ticket subtotal
-            bookingSession.setTicketSubtotal(bookingSession.getTicketPrice() * selectedSeatIDs.size());
+            // Set calculated ticket subtotal
+            bookingSession.setTicketSubtotal(ticketSubtotal);
             
             // Redirect to food selection
             response.sendRedirect(request.getContextPath() + "/booking/select-food");
