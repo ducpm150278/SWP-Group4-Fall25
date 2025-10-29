@@ -15,7 +15,7 @@ public class TicketDAO extends DBContext {
      * Create a single ticket
      */
     public int createTicket(Ticket ticket) {
-        String sql = "INSERT INTO Tickets (ScreeningID, UserID, SeatID, BookingTime, UnitPrice) " +
+        String sql = "INSERT INTO Tickets (ScreeningID, UserID, SeatID, BookingTime, SeatPrice) " +
                      "VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = getConnection();
@@ -45,37 +45,117 @@ public class TicketDAO extends DBContext {
     }
     
     /**
-     * Create multiple tickets in batch
+     * Create multiple tickets in batch with BookingID
+     * NOTE: SQL Server has issues with executeBatch() + RETURN_GENERATED_KEYS
+     * So we insert one by one to get the generated IDs
      */
-    public List<Integer> createTickets(List<Ticket> tickets) {
+    public List<Integer> createTickets(List<Ticket> tickets, int bookingID) {
         List<Integer> ticketIDs = new ArrayList<>();
-        String sql = "INSERT INTO Tickets (ScreeningID, UserID, SeatID, BookingTime, UnitPrice) " +
-                     "VALUES (?, ?, ?, ?, ?)";
         
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        System.out.println("TicketDAO: Creating " + tickets.size() + " tickets...");
+        
+        // Use single connection for all inserts (transaction context)
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false); // Start transaction
             
-            for (Ticket ticket : tickets) {
-                ps.setInt(1, ticket.getScreeningID());
-                ps.setInt(2, ticket.getUserID());
-                ps.setInt(3, ticket.getSeatID());
-                ps.setTimestamp(4, Timestamp.valueOf(ticket.getBookingTime()));
-                ps.setDouble(5, ticket.getUnitPrice());
-                ps.addBatch();
-            }
+            String sql = "INSERT INTO Tickets (BookingID, ScreeningID, UserID, SeatID, BookingTime, SeatPrice) " +
+                         "VALUES (?, ?, ?, ?, ?, ?)";
             
-            ps.executeBatch();
-            ResultSet rs = ps.getGeneratedKeys();
-            
-            while (rs.next()) {
-                ticketIDs.add(rs.getInt(1));
+            try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                
+                int ticketIndex = 0;
+                for (Ticket ticket : tickets) {
+                    ticketIndex++;
+                    System.out.println("=== Processing ticket " + ticketIndex + "/" + tickets.size() + " ===");
+                    
+                    // Check for null values
+                    if (ticket == null) {
+                        System.err.println("ERROR: Ticket object is null!");
+                        continue;
+                    }
+                    if (ticket.getBookingTime() == null) {
+                        System.err.println("ERROR: BookingTime is null!");
+                        continue;
+                    }
+                    
+                    System.out.println("Inserting ticket: ScreeningID=" + ticket.getScreeningID() + 
+                                     ", UserID=" + ticket.getUserID() + 
+                                     ", SeatID=" + ticket.getSeatID() +
+                                     ", UnitPrice=" + ticket.getUnitPrice() +
+                                     ", BookingTime=" + ticket.getBookingTime());
+                    
+                    try {
+                        ps.setInt(1, bookingID);
+                        ps.setInt(2, ticket.getScreeningID());
+                        ps.setInt(3, ticket.getUserID());
+                        ps.setInt(4, ticket.getSeatID());
+                        ps.setTimestamp(5, Timestamp.valueOf(ticket.getBookingTime()));
+                        ps.setDouble(6, ticket.getUnitPrice());
+                        
+                        System.out.println("Executing insert statement...");
+                        int affectedRows = ps.executeUpdate();
+                        System.out.println("Affected rows: " + affectedRows);
+                        
+                        if (affectedRows > 0) {
+                            System.out.println("Getting generated keys...");
+                            ResultSet rs = ps.getGeneratedKeys();
+                            System.out.println("ResultSet retrieved: " + (rs != null));
+                            
+                            if (rs.next()) {
+                                int ticketID = rs.getInt(1);
+                                ticketIDs.add(ticketID);
+                                System.out.println("✓ Created ticket with ID: " + ticketID);
+                            } else {
+                                System.err.println("ERROR: ResultSet.next() returned false - No generated key found!");
+                            }
+                            rs.close();
+                        } else {
+                            System.err.println("ERROR: No rows affected for ticket insert!");
+                        }
+                        
+                    } catch (SQLException sqlEx) {
+                        System.err.println("ERROR inserting individual ticket " + ticketIndex + ":");
+                        System.err.println("SQL State: " + sqlEx.getSQLState());
+                        System.err.println("Error Code: " + sqlEx.getErrorCode());
+                        System.err.println("Message: " + sqlEx.getMessage());
+                        sqlEx.printStackTrace();
+                        // Don't throw, continue with next ticket
+                    }
+                }
+                
+                conn.commit(); // Commit transaction
+                System.out.println("Successfully created " + ticketIDs.size() + " tickets");
+                
+            } catch (SQLException e) {
+                conn.rollback(); // Rollback on error
+                System.err.println("=== SQL ERROR in createTickets ===");
+                System.err.println("Error Code: " + e.getErrorCode());
+                System.err.println("SQL State: " + e.getSQLState());
+                System.err.println("Message: " + e.getMessage());
+                e.printStackTrace();
+                
+                // Try to get more details about constraint violations
+                Throwable cause = e.getCause();
+                if (cause != null) {
+                    System.err.println("Caused by: " + cause.getMessage());
+                }
+                throw e; // Re-throw to outer catch
             }
             
         } catch (SQLException e) {
-            System.err.println("Error creating tickets: " + e.getMessage());
+            System.err.println("=== OUTER CATCH: Connection/Transaction error ===");
+            System.err.println("Error Code: " + e.getErrorCode());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("=== UNEXPECTED ERROR ===");
+            System.err.println("Type: " + e.getClass().getName());
+            System.err.println("Message: " + e.getMessage());
             e.printStackTrace();
         }
         
+        System.out.println("Returning " + ticketIDs.size() + " ticket IDs");
         return ticketIDs;
     }
     

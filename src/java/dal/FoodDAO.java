@@ -60,8 +60,8 @@ public class FoodDAO extends DBContext{
      * Tạo food mới
      */
     public boolean createFood(Food food) {
-        String sql = "INSERT INTO Food (FoodName, Description, Price, FoodType, ImageURL, IsAvailable, CreatedDate, LastModifiedDate) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Food (FoodName, Description, Price, FoodType, ImageURL, IsAvailable) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, food.getFoodName());
@@ -70,8 +70,6 @@ public class FoodDAO extends DBContext{
             stmt.setString(4, food.getFoodType());
             stmt.setString(5, food.getImageURL());
             stmt.setBoolean(6, food.getIsAvailable());
-            stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
 
             int affectedRows = stmt.executeUpdate();
 
@@ -96,7 +94,7 @@ public class FoodDAO extends DBContext{
      */
     public boolean updateFood(Food food) {
         String sql = "UPDATE Food SET FoodName = ?, Description = ?, Price = ?, FoodType = ?, "
-                + "ImageURL = ?, IsAvailable = ?, LastModifiedDate = ? WHERE FoodID = ?";
+                + "ImageURL = ?, IsAvailable = ? WHERE FoodID = ?";
 
         try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
             stmt.setString(1, food.getFoodName());
@@ -105,8 +103,7 @@ public class FoodDAO extends DBContext{
             stmt.setString(4, food.getFoodType());
             stmt.setString(5, food.getImageURL());
             stmt.setBoolean(6, food.getIsAvailable());
-            stmt.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.setInt(8, food.getFoodID());
+            stmt.setInt(7, food.getFoodID());
 
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0;
@@ -254,11 +251,6 @@ public class FoodDAO extends DBContext{
         Timestamp createdTimestamp = rs.getTimestamp("CreatedDate");
         if (createdTimestamp != null) {
             food.setCreatedDate(createdTimestamp.toLocalDateTime());
-        }
-
-        Timestamp modifiedTimestamp = rs.getTimestamp("LastModifiedDate");
-        if (modifiedTimestamp != null) {
-            food.setLastModifiedDate(modifiedTimestamp.toLocalDateTime());
         }
 
         return food;
