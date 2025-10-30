@@ -196,10 +196,10 @@ public class DiscountDAO extends DBContext {
     public void updateDiscount(int id, String code, int maxUsage, int usageCount,
             LocalDate start, LocalDate end, String status, double discountPercentage) {
         String sql = """
-        UPDATE Discounts
-        SET Code=?, MaxUsage=?, UsageCount=?, StartDate=?, EndDate=?, 
-            Status=?, DiscountPercentage=?, LastModifiedDate=GETDATE()
-        WHERE DiscountID=?""";
+UPDATE Discounts
+SET Code=?, MaxUsage=?, UsageCount=?, StartDate=?, EndDate=?, 
+    Status=?, DiscountPercentage=?
+WHERE DiscountID=?""";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
             ps.setString(1, code);
             ps.setInt(2, maxUsage);
@@ -214,6 +214,7 @@ public class DiscountDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    //xóa
 
     public boolean deleteDiscount(int id) {
         String sql = "DELETE FROM Discounts WHERE DiscountID = ?";
@@ -243,6 +244,64 @@ public class DiscountDAO extends DBContext {
             e.printStackTrace();
             return false;
         }
+    //tìm kiếm
+    public List<Discount> searchDiscounts(String keyword, LocalDate from, LocalDate to, String status) {
+        List<Discount> list = new ArrayList<>();
+
+        // Câu SQL động — chỉ thêm điều kiện khi người dùng nhập
+        StringBuilder sql = new StringBuilder("SELECT * FROM Discounts WHERE 1=1");
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND Code LIKE ?");
+        }
+        if (from != null) {
+            sql.append(" AND StartDate >= ?");
+        }
+        if (to != null) {
+            sql.append(" AND EndDate <= ?");
+        }
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND Status = ?");
+        }
+
+        sql.append(" ORDER BY DiscountID DESC");
+
+        try (PreparedStatement ps = getConnection().prepareStatement(sql.toString())) {
+            int index = 1;
+
+            if (keyword != null && !keyword.isEmpty()) {
+                ps.setString(index++, "%" + keyword + "%");
+            }
+            if (from != null) {
+                ps.setTimestamp(index++, Timestamp.valueOf(from.atStartOfDay()));
+            }
+            if (to != null) {
+                ps.setTimestamp(index++, Timestamp.valueOf(to.atTime(23, 59, 59)));
+            }
+            if (status != null && !status.isEmpty()) {
+                ps.setString(index++, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Discount d = new Discount();
+                d.setDiscountID(rs.getInt("DiscountID"));
+                d.setCode(rs.getString("Code"));
+                d.setCreatedBy(rs.getInt("CreatedBy"));
+                d.setMaxUsage(rs.getInt("MaxUsage"));
+                d.setUsageCount(rs.getInt("UsageCount"));
+                d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
+                d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
+                d.setStatus(rs.getString("Status"));
+                d.setDiscountPercentage(rs.getDouble("DiscountPercentage"));
+                list.add(d);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
 }

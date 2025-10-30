@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -158,8 +159,9 @@
                                             <td>${sc.movieTitle}</td>
                                             <td>${sc.cinemaName}</td>
                                             <td>${sc.roomName}</td>
-                                            <td class="text-center">${sc.startTime}</td>
-                                            <td class="text-center">${sc.endTime}</td>
+                                            <td class="text-center">${sc.formattedStartTime}</td>
+                                            <td class="text-center">${sc.formattedEndTime}</td>
+
                                             <td class="text-center">
                                                 <span class="badge bg-${sc.movieStatus == 'Active' ? 'success' 
                                                                         : (sc.movieStatus == 'Upcoming' ? 'warning' 

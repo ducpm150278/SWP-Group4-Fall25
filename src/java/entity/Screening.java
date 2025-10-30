@@ -5,6 +5,7 @@
 package entity;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
@@ -181,6 +182,22 @@ public class Screening {
 
     public void setRoomType(String roomType) {
         this.roomType = roomType;
+    }
+
+    public String getFormattedStartTime() {
+        if (startTime == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        return startTime.format(formatter);
+    }
+
+    public String getFormattedEndTime() {
+        if (endTime == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        return endTime.format(formatter);
     }
 
     @Override

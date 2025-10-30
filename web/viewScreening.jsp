@@ -85,7 +85,7 @@
     <body class="bg-light">
 
         <div class="container mt-5">
-            <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+            <div class="card shadow-sm mx-auto" style="max-width: 1000px;">
                 <div class="card-header bg-primary text-white text-center">
                     <h4 class="mb-0">Chi tiết lịch chiếu</h4>
                 </div>

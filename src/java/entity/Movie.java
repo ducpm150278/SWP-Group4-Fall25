@@ -6,6 +6,7 @@ package entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Movie {
 
@@ -175,6 +176,14 @@ public class Movie {
 
     public void setLanguageName(String languageName) {
         this.languageName = languageName;
+    }
+
+    public String getFormattedReleasedDate() {
+        if (releasedDate == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return releasedDate.format(formatter);
     }
 
     @Override

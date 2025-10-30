@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller;
 
 import dal.DiscountDAO;
@@ -15,47 +14,50 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
  * @author admin
  */
-@WebServlet(name="EditDiscountServlet", urlPatterns={"/editDiscount"})
+@WebServlet(name = "EditDiscountServlet", urlPatterns = {"/editDiscount"})
 public class EditDiscountServlet extends HttpServlet {
-   
-    /** 
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet EditDiscountServlet</title>");  
+            out.println("<title>Servlet EditDiscountServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet EditDiscountServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet EditDiscountServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    } 
+    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /** 
+    /**
      * Handles the HTTP <code>GET</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
     DiscountDAO dao = new DiscountDAO();
 
     @Override
@@ -75,8 +77,25 @@ public class EditDiscountServlet extends HttpServlet {
             return;
         }
 
-        // Format ngày để hiển thị lại trong input[type=date]
+        // ✅ Format ngày theo chuẩn HTML5: yyyy-MM-dd
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        String startDateFormatted = "";
+        String endDateFormatted = "";
+
+        if (discount.getStartDate() != null) {
+            startDateFormatted = discount.getStartDate().toLocalDate().format(formatter);
+        }
+
+        if (discount.getEndDate() != null) {
+            endDateFormatted = discount.getEndDate().toLocalDate().format(formatter);
+        }
+
+        // Gửi sang JSP
         request.setAttribute("discount", discount);
+        request.setAttribute("startDateFormatted", startDateFormatted);
+        request.setAttribute("endDateFormatted", endDateFormatted);
+
         request.getRequestDispatcher("editDiscount.jsp").forward(request, response);
     }
 
@@ -88,40 +107,42 @@ public class EditDiscountServlet extends HttpServlet {
             int discountID = Integer.parseInt(request.getParameter("discountID"));
             String code = request.getParameter("code");
             String status = request.getParameter("status");
-            String startDateStr = request.getParameter("startDate");
-            String endDateStr = request.getParameter("endDate");
-            String maxUsageStr = request.getParameter("maxUsage");
-            String usageCountStr = request.getParameter("usageCount");
-            String discountStr = request.getParameter("discountPercentage");
+
+            LocalDate startDate = LocalDate.parse(request.getParameter("startDate"));
+            LocalDate endDate = LocalDate.parse(request.getParameter("endDate"));
+            int maxUsage = Integer.parseInt(request.getParameter("maxUsage"));
+            int usageCount = Integer.parseInt(request.getParameter("usageCount"));
+            double discountPercentage = Double.parseDouble(request.getParameter("discountPercentage"));
 
             boolean hasError = false;
 
-            LocalDate startDate = LocalDate.parse(startDateStr);
-            LocalDate endDate = LocalDate.parse(endDateStr);
-            int maxUsage = Integer.parseInt(maxUsageStr);
-            int usageCount = Integer.parseInt(usageCountStr);
-            double discountPercentage = Double.parseDouble(discountStr);
-
+            // ✅ Kiểm tra ngày
             if (endDate.isBefore(startDate)) {
                 request.setAttribute("errorStartEnd", "Ngày kết thúc phải sau ngày bắt đầu!");
                 hasError = true;
             }
 
+            // ✅ Kiểm tra số lần sử dụng
             if (maxUsage <= 0) {
                 request.setAttribute("errorMaxUsage", "Số lần sử dụng tối đa phải lớn hơn 0!");
                 hasError = true;
             }
-
             if (usageCount < 0) {
                 request.setAttribute("errorUsageCount", "Số lần đã sử dụng không được âm!");
                 hasError = true;
             }
-
-            if (discountPercentage < 0 || discountPercentage > 100) {
-                request.setAttribute("errorDiscount", "Phần trăm giảm giá phải từ 0 đến 100!");
+            if (usageCount > maxUsage) {
+                request.setAttribute("errorUsageCount", "Số lần đã sử dụng không được vượt quá số lần tối đa!");
                 hasError = true;
             }
 
+            // ✅ Kiểm tra phần trăm giảm giá
+            if (discountPercentage < 0 || discountPercentage > 100) {
+                request.setAttribute("errorDiscount", "Phần trăm giảm giá phải nằm trong khoảng 0–100%!");
+                hasError = true;
+            }
+
+            // ✅ Nếu có lỗi thì trả lại trang cũ + giữ dữ liệu
             if (hasError) {
                 Discount discount = new Discount();
                 discount.setDiscountID(discountID);
@@ -132,12 +153,16 @@ public class EditDiscountServlet extends HttpServlet {
                 discount.setDiscountPercentage(discountPercentage);
                 discount.setStartDate(startDate.atStartOfDay());
                 discount.setEndDate(endDate.atStartOfDay());
+
                 request.setAttribute("discount", discount);
                 request.getRequestDispatcher("editDiscount.jsp").forward(request, response);
                 return;
             }
 
+            // ✅ Cập nhật DB
             dao.updateDiscount(discountID, code, maxUsage, usageCount, startDate, endDate, status, discountPercentage);
+
+            // ✅ Chuyển hướng sau khi cập nhật thành công
             response.sendRedirect("listDiscount?updateSuccess=1");
 
         } catch (Exception e) {
@@ -147,8 +172,9 @@ public class EditDiscountServlet extends HttpServlet {
         }
     }
 
-    /** 
+    /**
      * Returns a short description of the servlet.
+     *
      * @return a String containing servlet description
      */
     @Override

@@ -69,12 +69,14 @@
                                 <div class="mb-3">
                                     <label class="form-label">Thời gian bắt đầu</label>
                                     <input type="datetime-local" name="startTime" id="startTime" class="form-control" required>
+                                    <div id="startError" class="text-danger small mt-1"></div>
                                 </div>
 
                                 <!-- Thời gian kết thúc -->
                                 <div class="mb-3">
                                     <label class="form-label">Thời gian kết thúc</label>
                                     <input type="datetime-local" name="endTime" id="endTime" class="form-control" required>
+                                    <div id="endError" class="text-danger small mt-1"></div>
                                 </div>
 
                                 <!-- Trạng thái -->
@@ -147,7 +149,46 @@
                 // Gọi init
                 filterRooms();
                 updateStatus();
+
             })();
+        </script>
+        <script>
+            document.querySelector("form").addEventListener("submit", function (e) {
+                const startInput = document.getElementById("startTime");
+                const endInput = document.getElementById("endTime");
+                const startError = document.getElementById("startError");
+                const endError = document.getElementById("endError");
+
+                // Xóa lỗi cũ
+                startError.textContent = "";
+                endError.textContent = "";
+
+                // Lấy giá trị
+                const start = new Date(startInput.value);
+                const end = new Date(endInput.value);
+                let valid = true;
+
+                // Kiểm tra nhập thiếu
+                if (!startInput.value) {
+                    startError.textContent = "Vui lòng chọn thời gian bắt đầu.";
+                    valid = false;
+                }
+                if (!endInput.value) {
+                    endError.textContent = "Vui lòng chọn thời gian kết thúc.";
+                    valid = false;
+                }
+
+                // Nếu cả hai đều có giá trị thì kiểm tra logic
+                if (startInput.value && endInput.value && end <= start) {
+                    endError.textContent = "❌ Thời gian kết thúc phải sau thời gian bắt đầu.";
+                    valid = false;
+                }
+
+                // Nếu có lỗi thì chặn submit
+                if (!valid) {
+                    e.preventDefault();
+                }
+            });
         </script>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

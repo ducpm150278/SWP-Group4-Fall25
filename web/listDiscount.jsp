@@ -65,36 +65,51 @@
                             <!-- Hàng 2: Ngày bắt đầu / kết thúc / Trạng thái -->
                             <div class="row g-3 align-items-end">
 
-                                <div class="col-md-3"> 
-                                    <label for="status" class="form-label fw-semibold">Thời điểm áp dụng</label>
-                                    <input type="date" name="start" class="form-control"> </div>
+                                <!-- Từ ngày -->
+                                <div class="col-md-3">
+                                    <label for="from" class="form-label fw-semibold">Từ ngày</label>
+                                    <input type="date" 
+                                           id="from" 
+                                           name="from" 
+                                           class="form-control shadow-sm rounded-3"
+                                           value="${param.from}">
+                                </div>
+
+                                <!-- Đến ngày -->
+                                <div class="col-md-3">
+                                    <label for="to" class="form-label fw-semibold">Đến ngày</label>
+                                    <input type="date" 
+                                           id="to" 
+                                           name="to" 
+                                           class="form-control shadow-sm rounded-3"
+                                           value="${param.to}">
+                                </div>
 
                                 <!-- Trạng thái -->
                                 <div class="col-md-3">
                                     <label for="status" class="form-label fw-semibold">Trạng thái</label>
                                     <select name="status" id="status" class="form-select shadow-sm rounded-3">
                                         <option value="">Tất cả</option>
-                                        <option value="Active" ${status == 'Active' ? 'selected' : ''}>Active</option>
-                                        <option value="Inactive" ${status == 'Inactive' ? 'selected' : ''}>Inactive</option>
-                                        <option value="Upcoming" ${status == 'Expired' ? 'selected' : ''}>Expired</option>
+                                        <option value="Active" ${param.status == 'Active' ? 'selected' : ''}>Active</option>
+                                        <option value="Inactive" ${param.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                        <option value="Expired" ${param.status == 'Expired' ? 'selected' : ''}>Expired</option>
                                     </select>
                                 </div>
 
-                                <!-- Nút tìm kiếm & quay lại -->
+                                <!-- Nút lọc + quay lại -->
                                 <div class="col-md-3 d-flex gap-2">
-                                    <!-- Nút tìm kiếm -->
                                     <button type="submit" class="btn btn-primary w-100 shadow-sm rounded-3">
                                         <i class="bi bi-funnel"></i> Lọc
                                     </button>
 
-                                    <!-- Nút quay lại -->
                                     <c:if test="${not empty param.keyword or not empty param.from or not empty param.to or not empty param.status}">
-                                        <a href="listScreening" class="btn btn-secondary w-100 shadow-sm rounded-3">
+                                        <a href="listDiscount" class="btn btn-secondary w-100 shadow-sm rounded-3">
                                             <i class="bi bi-arrow-left"></i> Quay lại
                                         </a>
                                     </c:if>
                                 </div>
                             </div>
+
 
                         </form>
 
@@ -148,14 +163,12 @@
                         <!-- Phân trang -->
                         <div class="d-flex justify-content-center mt-3">
                             <ul class="pagination">
+
                                 <!-- Nút "Trước" -->
                                 <c:if test="${currentPage > 1}">
                                     <li class="page-item">
                                         <a class="page-link"
-                                           href="listDiscount?page=${currentPage - 1}
-                                           &keyword=${param.keyword}
-                                           &start=${param.start}
-                                           &status=${param.status}">
+                                           href="listDiscount?page=${currentPage - 1}&keyword=${keyword}&start=${start}&status=${status}">
                                             « Trước
                                         </a>
                                     </li>
@@ -165,10 +178,7 @@
                                 <c:forEach begin="1" end="${totalPages}" var="i">
                                     <li class="page-item ${i == currentPage ? 'active' : ''}">
                                         <a class="page-link"
-                                           href="listDiscount?page=${i}
-                                           &keyword=${param.keyword}
-                                           &start=${param.start}
-                                           &status=${param.status}">
+                                           href="listDiscount?page=${i}&keyword=${keyword}&start=${start}&status=${status}">
                                             ${i}
                                         </a>
                                     </li>
@@ -178,16 +188,15 @@
                                 <c:if test="${currentPage < totalPages}">
                                     <li class="page-item">
                                         <a class="page-link"
-                                           href="listDiscount?page=${currentPage + 1}
-                                           &keyword=${param.keyword}
-                                           &start=${param.start}
-                                           &status=${param.status}">
+                                           href="listDiscount?page=${currentPage + 1}&keyword=${keyword}&start=${start}&status=${status}">
                                             Sau »
                                         </a>
                                     </li>
                                 </c:if>
+
                             </ul>
                         </div>
+
 
 
 
