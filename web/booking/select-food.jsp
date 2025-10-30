@@ -187,39 +187,17 @@
             75% { transform: translateX(5px); }
         }
         
-        /* Tab Navigation */
-        .custom-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #2a2d35;
+        /* Section Headers */
+        .section-header {
+            margin-bottom: 20px;
         }
         
-        .custom-tab {
-            padding: 15px 30px;
-            background: transparent;
-            border: none;
-            color: #8b92a7;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-            position: relative;
-            top: 2px;
+        .section-header h2 {
+            margin: 0;
         }
         
-        .custom-tab:hover {
-            color: #fff;
-        }
-        
-        .custom-tab.active {
-            color: #fff;
-            border-bottom-color: #e50914;
-        }
-        
-        .custom-tab i {
-            margin-right: 8px;
+        .section-header p {
+            margin: 5px 0 0 0;
         }
         
         /* Food Items Grid */
@@ -548,17 +526,14 @@
         </div>
         
         <form method="post" action="${pageContext.request.contextPath}/booking/select-food" id="foodForm">
-            <!-- Custom Tabs -->
-            <div class="custom-tabs">
-                <button type="button" class="custom-tab active" onclick="switchTab('combos', this)">
-                    <i class="fas fa-box"></i> Combo Tiết Kiệm
-                </button>
-                <button type="button" class="custom-tab" onclick="switchTab('foods', this)">
-                    <i class="fas fa-hamburger"></i> Đồ Ăn Riêng Lẻ
-                </button>
+            <!-- Combos Section -->
+            <div class="section-header" style="margin-bottom: 20px;">
+                <h2 style="font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-box" style="color: #e50914;"></i> Combo Tiết Kiệm
+                </h2>
+                <p style="color: #8b92a7; font-size: 14px; margin-top: 5px;">Gói combo với giá ưu đãi</p>
             </div>
             
-            <!-- Combos Tab -->
             <div id="combos-content" class="tab-content-area">
                 <% if (combos != null && !combos.isEmpty()) { %>
                     <div class="food-grid">
@@ -611,8 +586,15 @@
                 <% } %>
             </div>
             
-            <!-- Individual Foods Tab -->
-            <div id="foods-content" class="tab-content-area" style="display: none;">
+            <!-- Individual Foods Section -->
+            <div class="section-header" style="margin: 40px 0 20px 0;">
+                <h2 style="font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-hamburger" style="color: #e50914;"></i> Đồ Ăn & Nước Uống Riêng Lẻ
+                </h2>
+                <p style="color: #8b92a7; font-size: 14px; margin-top: 5px;">Tự do lựa chọn món yêu thích</p>
+            </div>
+            
+            <div id="foods-content" class="tab-content-area">
                 <% if (foods != null && !foods.isEmpty()) { %>
                     <div class="food-grid">
                     <% for (Food food : foods) { %>
@@ -692,24 +674,6 @@
     
     <script>
         const ticketTotal = <%= bookingSession.getTicketSubtotal() %>;
-        
-        // Tab Switching
-        function switchTab(tabName, element) {
-            // Hide all tab contents
-            document.getElementById('combos-content').style.display = 'none';
-            document.getElementById('foods-content').style.display = 'none';
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.custom-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-content').style.display = 'block';
-            
-            // Add active class to clicked tab
-            element.classList.add('active');
-        }
         
         // Quantity Controls
         function increaseQuantity(id) {

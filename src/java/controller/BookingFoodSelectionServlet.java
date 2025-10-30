@@ -100,10 +100,16 @@ public class BookingFoodSelectionServlet extends HttpServlet {
         }
         
         try {
+            System.out.println("=== BookingFoodSelectionServlet POST ===");
+            System.out.println("Action: " + request.getParameter("action"));
+            
             // Get selected combos
             Map<Integer, Integer> selectedCombos = new HashMap<>();
             String[] comboIDs = request.getParameterValues("comboIDs");
             String[] comboQuantities = request.getParameterValues("comboQuantities");
+            
+            System.out.println("Combo IDs: " + (comboIDs != null ? java.util.Arrays.toString(comboIDs) : "null"));
+            System.out.println("Combo Quantities: " + (comboQuantities != null ? java.util.Arrays.toString(comboQuantities) : "null"));
             
             if (comboIDs != null && comboQuantities != null) {
                 for (int i = 0; i < comboIDs.length; i++) {
@@ -111,6 +117,7 @@ public class BookingFoodSelectionServlet extends HttpServlet {
                     int quantity = Integer.parseInt(comboQuantities[i]);
                     if (quantity > 0) {
                         selectedCombos.put(comboID, quantity);
+                        System.out.println("  Adding combo: ID=" + comboID + ", Qty=" + quantity);
                     }
                 }
             }
@@ -120,12 +127,16 @@ public class BookingFoodSelectionServlet extends HttpServlet {
             String[] foodIDs = request.getParameterValues("foodIDs");
             String[] foodQuantities = request.getParameterValues("foodQuantities");
             
+            System.out.println("Food IDs: " + (foodIDs != null ? java.util.Arrays.toString(foodIDs) : "null"));
+            System.out.println("Food Quantities: " + (foodQuantities != null ? java.util.Arrays.toString(foodQuantities) : "null"));
+            
             if (foodIDs != null && foodQuantities != null) {
                 for (int i = 0; i < foodIDs.length; i++) {
                     int foodID = Integer.parseInt(foodIDs[i]);
                     int quantity = Integer.parseInt(foodQuantities[i]);
                     if (quantity > 0) {
                         selectedFoods.put(foodID, quantity);
+                        System.out.println("  Adding food: ID=" + foodID + ", Qty=" + quantity);
                     }
                 }
             }
@@ -156,6 +167,17 @@ public class BookingFoodSelectionServlet extends HttpServlet {
             bookingSession.setSelectedCombos(selectedCombos);
             bookingSession.setSelectedFoods(selectedFoods);
             bookingSession.setFoodSubtotal(foodSubtotal);
+            
+            // CRITICAL: Explicitly save bookingSession back to session to ensure persistence
+            session.setAttribute("bookingSession", bookingSession);
+            
+            System.out.println("=== Saving to BookingSession ===");
+            System.out.println("Selected Combos: " + selectedCombos);
+            System.out.println("Selected Foods: " + selectedFoods);
+            System.out.println("Food Subtotal: " + foodSubtotal);
+            System.out.println("Session ID: " + session.getId());
+            System.out.println("BookingSession saved to session attribute");
+            System.out.println("=== End Food Selection Processing ===");
             
             // Redirect to payment
             response.sendRedirect(request.getContextPath() + "/booking/payment");

@@ -227,6 +227,23 @@ WHERE DiscountID=?""";
         return false;
     }
 
+    /**
+     * Update discount usage count (increment by 1)
+     */
+    public boolean updateDiscountUsage(int discountID) {
+        String sql = "UPDATE Discounts SET UsageCount = UsageCount + 1 WHERE DiscountID = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, discountID);
+            return ps.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("Error updating discount usage: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     //tìm kiếm
     public List<Discount> searchDiscounts(String keyword, LocalDate from, LocalDate to, String status) {
         List<Discount> list = new ArrayList<>();
