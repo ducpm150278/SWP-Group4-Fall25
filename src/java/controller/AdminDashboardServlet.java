@@ -3,7 +3,7 @@ package controller;
 import dal.CinemaMDAO;
 import dal.ScreeningRoomDAO;
 import dal.SeatMDAO;
-import dal.UserDAO;
+import dal.UserMDAO;
 import entity.CinemaM;
 import entity.ScreeningRoom;
 import entity.SeatM;
@@ -68,7 +68,7 @@ public class AdminDashboardServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        UserDAO ud = new UserDAO();
+        UserMDAO ud = new UserMDAO();
         CinemaMDAO cd = new CinemaMDAO();
         try {
             String section = request.getParameter("section");
@@ -488,7 +488,7 @@ public class AdminDashboardServlet extends HttpServlet {
         try {
             String section = request.getParameter("section");
             if (section != null && section.equals("user-management")) {
-                UserDAO ud = new UserDAO();
+                UserMDAO ud = new UserMDAO();
                 EmailService es = new EmailService();
 //                LogHistoryDAO lhd = new LogHistoryDAO();
 
