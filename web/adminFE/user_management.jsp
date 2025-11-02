@@ -247,51 +247,71 @@
     </c:choose>
 
     <!-- Add User Modal -->
-    <div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form id="addform" action="dashboard" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Create New User Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addUserForm" action="dashboard" method="POST" novalidate>
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="section" value="user-management">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Create New User</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
+                    
                     <div class="modal-body">
+                        <!-- Full Name -->
                         <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" name="fullname" placeholder="Ex: nguyen van A, etc..." required>
+                            <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="fullname" name="fullname" 
+                                   placeholder="Enter full name (e.g., Nguyen Van A)" required
+                                   minlength="2" maxlength="100">
+                            <div class="invalid-feedback">Please enter a valid full name (2-100 characters).</div>
                         </div>
+
+                        <!-- Email -->
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email" placeholder="Ex: abc@example.com, etc..." required>
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="Enter email address (e.g., abc@example.com)" required>
+                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                            <div class="form-text">A temporary password will be sent to this email.</div>
                         </div>
+
+                        <!-- Phone Number -->
                         <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" 
-                                   class="form-control" 
-                                   name="phonenumber" 
-                                   pattern="[0-9]{10,15}" 
-                                   title="Phone number must be 10-15 digits"
-                                   placeholder="Ex: 1234567890, etc..." 
-                                   required>
-                            <div class="invalid-feedback">
-                                Please enter a valid phone number (10-15 digits)
-                            </div>
+                            <label for="phonenumber" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phonenumber" name="phonenumber" 
+                                   placeholder="Enter phone number (10-15 digits)" required
+                                   minlength="10" maxlength="15">
+                            <div class="invalid-feedback">Please enter a valid phone number (10-15 digits).</div>
                         </div>
+
+                        <!-- Role -->
                         <div class="mb-3">
-                            <label class="form-label">Role</label>
-                            <select class="form-select" name="role" required>
-                                <option value="">Select User Role</option>
-                                <option value="Admin">Admin</option>
+                            <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="" selected disabled>Select User Role</option>
+                                <option value="Admin">Administrator</option>
                                 <option value="Staff">Staff</option>
                                 <option value="Customer">Customer</option>
                             </select>
+                            <div class="invalid-feedback">Please select a user role.</div>
+                        </div>
+
+                        <!-- Status Alert -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Note:</strong> New accounts will be created with "Temporary" status. 
+                            Users must change their password on first login.
                         </div>
                     </div>
+                    
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create New User</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Create User Account
+                        </button>
                     </div>
                 </form>
             </div>
@@ -386,11 +406,11 @@
                     <div class="modal-footer justify-content-between">
                         <c:choose>
                             <c:when test="${param.mode == 'edit'}">
-                                <button type="submit" class="btn btn-success">Save</button>
-                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.userID}" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-success" id="saveButton">Save</button>
+                                <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
                             </c:when>
                             <c:otherwise>
-                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.userID}&mode=edit" class="btn btn-warning">Edit</a>
+                                <button type="button" class="btn btn-warning" id="editButton">Edit</button>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </c:otherwise>
                         </c:choose>
@@ -463,53 +483,420 @@
 
     <!-- JavaScript functions -->
     <script>
-        // Show toast
+        // JavaScript functions for User Management
         document.addEventListener('DOMContentLoaded', function () {
-        <c:if test="${not empty sessionScope.showToast}">
-            <c:choose>
-                <c:when test="${sessionScope.showToast == 'add_success'}">
-            var successToast = new bootstrap.Toast(document.getElementById('successAddToast'));
-            successToast.show();
-                </c:when>
-                <c:when test="${sessionScope.showToast == 'add_success_no_email'}">
-            var successToast = new bootstrap.Toast(document.getElementById('successAddToastButNoEmail'));
-            successToast.show();
-                </c:when>
-                <c:when test="${sessionScope.ExceptionError == 'add_failed'}">
-            var errorToast = new bootstrap.Toast(document.getElementById('errorAddToast'));
-            errorToast.show();
-                </c:when>
-                <c:when test="${sessionScope.showToast == 'add_error_email'}">
-            var errorToast = new bootstrap.Toast(document.getElementById('errorEmailAddToast'));
-            errorToast.show();
-                </c:when>
-                <c:when test="${sessionScope.showToast == 'add_error_phone'}">
-            var errorToast = new bootstrap.Toast(document.getElementById('errorPhoneAddToast'));
-            errorToast.show();
-                </c:when>
-                <c:when test="${sessionScope.showToast == 'update_success'}">
-            var successToast = new bootstrap.Toast(document.getElementById('successUpdateToast'));
-            successToast.show();
-                </c:when>
-                <c:when test="${sessionScope.ExceptionError == 'update_failed'}">
-            var errorToast = new bootstrap.Toast(document.getElementById('errorUpdateToast'));
-            errorToast.show();
-                </c:when>
-                <c:when test="${sessionScope.showToast == 'delete_success'}">
-            var successToast = new bootstrap.Toast(document.getElementById('successDeleteToast'));
-            successToast.show();
-                </c:when>
-                <c:when test="${sessionScope.ExceptionError == 'delete_failed'}">
-            var errorToast = new bootstrap.Toast(document.getElementById('errorDeleteToast'));
-            errorToast.show();
-                </c:when>
-            </c:choose>
-            <c:remove var="showToast" scope="session"/>
-            <c:remove var="ExceptionError" scope="session"/>
-        </c:if>
+            // Initialize all functions
+            initializeAddUserForm();
+            initializeViewUserModal();
+            showToasts();
+            
+            // Password toggle functionality
+            initializePasswordToggle();
+            
+            // Debug form elements
+            debugFormElements();
         });
 
-        // Hàm hiện modal delete với thông tin của user
+        // Show toast notifications
+        function showToasts() {
+            <c:if test="${not empty sessionScope.showToast}">
+                <c:choose>
+                    <c:when test="${sessionScope.showToast == 'add_success'}">
+                        var successToast = new bootstrap.Toast(document.getElementById('successAddToast'));
+                        successToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.showToast == 'add_success_no_email'}">
+                        var successToast = new bootstrap.Toast(document.getElementById('successAddToastButNoEmail'));
+                        successToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.ExceptionError == 'add_failed'}">
+                        var errorToast = new bootstrap.Toast(document.getElementById('errorAddToast'));
+                        errorToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.showToast == 'add_error_email'}">
+                        var errorToast = new bootstrap.Toast(document.getElementById('errorEmailAddToast'));
+                        errorToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.showToast == 'add_error_phone'}">
+                        var errorToast = new bootstrap.Toast(document.getElementById('errorPhoneAddToast'));
+                        errorToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.showToast == 'update_success'}">
+                        var successToast = new bootstrap.Toast(document.getElementById('successUpdateToast'));
+                        successToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.ExceptionError == 'update_failed'}">
+                        var errorToast = new bootstrap.Toast(document.getElementById('errorUpdateToast'));
+                        errorToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.showToast == 'delete_success'}">
+                        var successToast = new bootstrap.Toast(document.getElementById('successDeleteToast'));
+                        successToast.show();
+                    </c:when>
+                    <c:when test="${sessionScope.ExceptionError == 'delete_failed'}">
+                        var errorToast = new bootstrap.Toast(document.getElementById('errorDeleteToast'));
+                        errorToast.show();
+                    </c:when>
+                </c:choose>
+                <c:remove var="showToast" scope="session"/>
+                <c:remove var="ExceptionError" scope="session"/>
+            </c:if>
+        }
+
+        // Debug function to check if all required elements exist
+        function debugFormElements() {
+            console.log('=== DEBUG FORM ELEMENTS ===');
+            
+            const elements = {
+                'addUserForm': document.getElementById('addUserForm'),
+                'submitBtn': document.getElementById('submitBtn'),
+                'addUserModal': document.getElementById('addUserModal'),
+                'email': document.getElementById('email'),
+                'phonenumber': document.getElementById('phonenumber'),
+                'fullname': document.getElementById('fullname'),
+                'role': document.getElementById('role')
+            };
+            
+            Object.entries(elements).forEach(([name, element]) => {
+                console.log(`${name}:`, element ? 'FOUND' : 'NOT FOUND');
+            });
+            
+            console.log('=== DEBUG COMPLETED ===');
+        }
+
+        // Add User Form Handling - FIXED VERSION
+        function initializeAddUserForm() {
+            const addUserForm = document.getElementById('addUserForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!addUserForm) {
+                console.warn('Add user form not found in DOM');
+                return;
+            }
+            
+            console.log('Initializing add user form...');
+            
+            // Real-time validation for all fields
+            const fields = addUserForm.querySelectorAll('input[required], select[required]');
+            fields.forEach(field => {
+                field.addEventListener('input', function() {
+                    validateField(this);
+                    updateSubmitButton();
+                });
+                
+                field.addEventListener('blur', function() {
+                    validateField(this);
+                    updateSubmitButton();
+                });
+                
+                field.addEventListener('change', function() {
+                    validateField(this);
+                    updateSubmitButton();
+                });
+            });
+            
+            // Special validation for email
+            const emailField = document.getElementById('email');
+            if (emailField) {
+                emailField.addEventListener('input', function() {
+                    validateEmailField(this);
+                    updateSubmitButton();
+                });
+            } else {
+                console.warn('Email field not found');
+            }
+            
+            // Special validation for phone
+            const phoneField = document.getElementById('phonenumber');
+            if (phoneField) {
+                phoneField.addEventListener('input', function() {
+                    validatePhoneField(this);
+                    updateSubmitButton();
+                });
+            } else {
+                console.warn('Phone field not found');
+            }
+            
+            // Form submission
+            addUserForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                console.log('Form submission started...');
+                
+                if (validateAddUserForm()) {
+                    // Show loading state
+                    setSubmitButtonLoading(true);
+                    
+                    console.log('Form is valid, submitting...');
+                    
+                    // Submit form after a small delay to show loading state
+                    setTimeout(() => {
+                        this.submit();
+                    }, 500);
+                } else {
+                    console.log('Form validation failed');
+                    // Scroll to first invalid field
+                    const firstInvalid = addUserForm.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                    }
+                }
+            });
+            
+            // Reset form when modal is hidden
+            const addUserModal = document.getElementById('addUserModal');
+            if (addUserModal) {
+                addUserModal.addEventListener('hidden.bs.modal', function() {
+                    console.log('Modal hidden, resetting form...');
+                    resetAddUserForm();
+                });
+                
+                // Also reset when modal is shown (in case of previous errors)
+                addUserModal.addEventListener('show.bs.modal', function() {
+                    console.log('Modal shown, resetting form...');
+                    resetAddUserForm();
+                });
+            } else {
+                console.warn('Add user modal not found');
+            }
+            
+            console.log('Add user form initialization completed');
+        }
+
+        // Field validation - IMPROVED VERSION
+        function validateField(field) {
+            const value = field.value.trim();
+            
+            // Skip validation for empty optional fields
+            if (!field.hasAttribute('required') && !value) {
+                field.classList.remove('is-valid', 'is-invalid');
+                return true;
+            }
+            
+            // For required fields
+            if (field.hasAttribute('required') && !value) {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+                return false;
+            }
+            
+            try {
+                // Use checkValidity but catch pattern errors
+                if (field.checkValidity() && value) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                    return true;
+                } else {
+                    field.classList.remove('is-valid');
+                    if (value) {
+                        field.classList.add('is-invalid');
+                    }
+                    return false;
+                }
+            } catch (error) {
+                console.warn('Validation error for field:', field.name, error);
+                // Fallback validation for problematic patterns
+                return fallbackValidation(field, value);
+            }
+        }
+
+        // Fallback validation for problematic patterns
+        function fallbackValidation(field, value) {
+            const fieldType = field.type.toLowerCase();
+            const fieldName = field.name.toLowerCase();
+            
+            // Email validation fallback
+            if (fieldType === 'email' || fieldName.includes('email')) {
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const isValid = emailRegex.test(value);
+                
+                if (isValid) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                } else {
+                    field.classList.remove('is-valid');
+                    field.classList.add('is-invalid');
+                }
+                return isValid;
+            }
+            
+            // Phone validation fallback
+            if (fieldName.includes('phone')) {
+                const phoneRegex = /^[0-9]{10,15}$/;
+                const isValid = phoneRegex.test(value);
+                
+                if (isValid) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                } else {
+                    field.classList.remove('is-valid');
+                    field.classList.add('is-invalid');
+                }
+                return isValid;
+            }
+            
+            // Default: assume valid if we can't validate
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            return true;
+        }
+
+        // Email field validation - FIXED REGEX
+        function validateEmailField(field) {
+            const value = field.value.trim();
+            // Fixed regex pattern - removed the problematic 'v' flag and $ anchor
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            
+            if (!value) {
+                field.classList.remove('is-valid', 'is-invalid');
+                return false;
+            }
+            
+            if (emailRegex.test(value)) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                return true;
+            } else {
+                field.classList.remove('is-valid');
+                field.classList.add('is-invalid');
+                return false;
+            }
+        }
+
+        // Phone field validation - FIXED REGEX
+        function validatePhoneField(field) {
+            const value = field.value.trim();
+            // Fixed regex pattern - removed problematic anchors if any
+            const phoneRegex = /^[0-9]{10,15}$/;
+            
+            if (!value) {
+                field.classList.remove('is-valid', 'is-invalid');
+                return false;
+            }
+            
+            if (phoneRegex.test(value)) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                return true;
+            } else {
+                field.classList.remove('is-valid');
+                field.classList.add('is-invalid');
+                return false;
+            }
+        }
+
+        // Form validation - IMPROVED VERSION
+        function validateAddUserForm() {
+            const form = document.getElementById('addUserForm');
+            const fields = form.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+            
+            console.log('=== FORM VALIDATION START ===');
+            
+            // Validate all required fields
+            fields.forEach(field => {
+                const fieldResult = validateField(field);
+                console.log(`Field ${field.name}: ${fieldResult}`);
+                
+                if (!fieldResult) {
+                    isValid = false;
+                }
+            });
+            
+            // Special validation for email (using our custom function)
+            const emailField = document.getElementById('email');
+            if (emailField) {
+                const emailResult = validateEmailField(emailField);
+                console.log(`Email field: ${emailResult}`);
+                
+                if (!emailResult) {
+                    isValid = false;
+                }
+            }
+            
+            // Special validation for phone (using our custom function)
+            const phoneField = document.getElementById('phonenumber');
+            if (phoneField) {
+                const phoneResult = validatePhoneField(phoneField);
+                console.log(`Phone field: ${phoneResult}`);
+                
+                if (!phoneResult) {
+                    isValid = false;
+                }
+            }
+            
+            console.log('=== FORM VALIDATION RESULT: ' + isValid + ' ===');
+            return isValid;
+        }
+
+        // Update submit button state
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            if (!submitBtn) {
+                console.warn('Submit button not found');
+                return;
+            }
+            
+            const form = document.getElementById('addUserForm');
+            if (!form) {
+                console.warn('Add user form not found');
+                return;
+            }
+            
+            if (form.checkValidity()) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Set submit button loading state - FIXED VERSION
+        function setSubmitButtonLoading(isLoading) {
+            const submitBtn = document.getElementById('submitBtn');
+            if (!submitBtn) {
+                console.warn('Submit button not found, skipping loading state');
+                return;
+            }
+            
+            const spinner = submitBtn.querySelector('.spinner-border');
+            const originalText = 'Create User Account';
+            
+            if (isLoading) {
+                submitBtn.disabled = true;
+                if (spinner) {
+                    spinner.classList.remove('d-none');
+                }
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+            } else {
+                submitBtn.disabled = false;
+                if (spinner) {
+                    spinner.classList.add('d-none');
+                }
+                submitBtn.textContent = originalText;
+            }
+        }
+
+        // Reset form - FIXED VERSION
+        function resetAddUserForm() {
+            const form = document.getElementById('addUserForm');
+            if (!form) {
+                console.warn('Add user form not found');
+                return;
+            }
+            
+            const fields = form.querySelectorAll('input, select');
+            fields.forEach(field => {
+                if (field.type !== 'hidden') {
+                    field.value = '';
+                    field.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+            
+            setSubmitButtonLoading(false);
+        }
+
+        // Delete User Modal
         function showDeleteModal(userId, fullName, email, phone, role) {
             // Set user details in the modal
             document.getElementById('deleteUserName').textContent = fullName;
@@ -523,78 +910,137 @@
             deleteModal.show();
         }
 
-        function togglePassword() {
-            const input = document.getElementById("passwordField");
-            const eyeIcon = document.querySelector(".eye-icon");
-            if (input.type === "password") {
-                input.type = "text";
-                eyeIcon.textContent = "🙈"; // Icon khi password hiển thị
-            } else {
-                input.type = "password";
-                eyeIcon.textContent = "👁"; // Icon khi password ẩn
+        // Password toggle functionality
+        function initializePasswordToggle() {
+            const toggleBtn = document.querySelector('.password-toggle-btn');
+            const passwordField = document.getElementById('passwordField');
+            
+            if (toggleBtn && passwordField) {
+                toggleBtn.addEventListener('click', function() {
+                    togglePassword();
+                });
             }
         }
 
-        // Hiển thị modal khi có dữ liệu viewUser
-        document.addEventListener('DOMContentLoaded', function () {
-            // Khởi tạo và hiển thị modal ngay khi trang load xong
-        <c:if test="${requestScope.viewUser != null}">
-            var viewModal = new bootstrap.Modal(document.getElementById('viewUserModal'));
-            viewModal.show();
-        </c:if>
-            // Xử lý sự kiện khi modal bị ẩn
-            document.getElementById('viewUserModal').addEventListener('hidden.bs.modal', function () {
-                // Chuyển hướng về trang quản lý user khi đóng modal
-                window.location.href = 'dashboard?section=user-management&page=${requestScope.currentPage}';
-            });
-
-            // Xử lý khi click nút Edit
-            document.getElementById('editButton').addEventListener('click', function () {
-
-                // Bật chỉnh sửa cho các trường được phép
-                document.getElementById('roleField').disabled = false;
-                document.getElementById('statusField').disabled = false;
-
-                // Thay đổi hiển thị các nút
-                document.getElementById('editButton').classList.add('d-none');
-                document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.add('d-none');
-                document.getElementById('saveButton').classList.remove('d-none');
-                document.getElementById('cancelButton').classList.remove('d-none');
-            });
-
-            // Xử lý khi click nút Cancel
-            document.getElementById('cancelButton').addEventListener('click', function () {
-
-                // Tắt chỉnh sửa các trường
-                document.getElementById('roleField').disabled = true;
-                document.getElementById('statusField').disabled = true;
-                // Khôi phục giá trị ban đầu từ server 
-                document.getElementById('roleField').value = '${requestScope.viewUser.role}';
-                document.getElementById('statusField').value = '${requestScope.viewUser.accountStatus}';
-                // Thay đổi hiển thị các nút
-                document.getElementById('editButton').classList.remove('d-none');
-                document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.remove('d-none');
-                document.getElementById('saveButton').classList.add('d-none');
-                document.getElementById('cancelButton').classList.add('d-none');
-            });
-        });
-
-        // Form submission handler
-        document.getElementById("addform").addEventListener('submit', function (e) {
-            const phoneInput = document.querySelector('input[name="phonenumber"]');
-            const phoneRegex = /^[0-9]{10,15}$/;
-
-            if (!phoneRegex.test(phoneInput.value)) {
-                e.preventDefault();
-                phoneInput.classList.add('is-invalid');
+        function togglePassword() {
+            const input = document.getElementById("passwordField");
+            const eyeIcon = document.querySelector(".eye-icon");
+            if (!input || !eyeIcon) return;
+            
+            if (input.type === "password") {
+                input.type = "text";
+                eyeIcon.textContent = "🙈";
+                eyeIcon.title = "Hide password";
             } else {
-                phoneInput.classList.remove('is-invalid');
+                input.type = "password";
+                eyeIcon.textContent = "👁";
+                eyeIcon.title = "Show password";
             }
-        });
+        }
 
-        // Real-time validation
-        document.querySelector('input[name="phonenumber"]').addEventListener('input', function () {
-            this.classList.remove('is-invalid');
+        // View User Modal initialization
+        function initializeViewUserModal() {
+            // Khởi tạo và hiển thị modal ngay khi trang load xong
+            <c:if test="${requestScope.viewUser != null}">
+                var viewModal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+                viewModal.show();
+            </c:if>
+            
+            // Xử lý sự kiện khi modal bị ẩn
+            const viewUserModal = document.getElementById('viewUserModal');
+            if (viewUserModal) {
+                viewUserModal.addEventListener('hidden.bs.modal', function () {
+                    // Chuyển hướng về trang quản lý user khi đóng modal
+                    const currentPage = '${requestScope.currentPage}' || '1';
+                    window.location.href = 'dashboard?section=user-management&page=' + currentPage;
+                });
+            }
+            
+            // Edit mode handling
+            const editButton = document.getElementById('editButton');
+            const saveButton = document.getElementById('saveButton');
+            const cancelButton = document.getElementById('cancelButton');
+            
+            if (editButton) {
+                editButton.addEventListener('click', function() {
+                    enableEditMode();
+                });
+            }
+            
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    disableEditMode();
+                });
+            }
+        }
+
+        function enableEditMode() {
+            // Bật chỉnh sửa cho các trường được phép
+            document.getElementById('roleField').disabled = false;
+            document.getElementById('statusField').disabled = false;
+
+            // Thay đổi hiển thị các nút
+            document.getElementById('editButton').classList.add('d-none');
+            document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.add('d-none');
+            document.getElementById('saveButton').classList.remove('d-none');
+            document.getElementById('cancelButton').classList.remove('d-none');
+        }
+
+        function disableEditMode() {
+            // Tắt chỉnh sửa các trường
+            document.getElementById('roleField').disabled = true;
+            document.getElementById('statusField').disabled = true;
+            
+            // Khôi phục giá trị ban đầu từ server 
+            document.getElementById('roleField').value = '${requestScope.viewUser.role}';
+            document.getElementById('statusField').value = '${requestScope.viewUser.accountStatus}';
+            
+            // Thay đổi hiển thị các nút
+            document.getElementById('editButton').classList.remove('d-none');
+            document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.remove('d-none');
+            document.getElementById('saveButton').classList.add('d-none');
+            document.getElementById('cancelButton').classList.add('d-none');
+        }
+
+        // Utility function to show error message
+        function showError(message, type = 'error') {
+            const toastContainer = document.querySelector('.position-fixed.bottom-0.end-0');
+            if (!toastContainer) return;
+            
+            const toastId = 'customToast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-bg-${type == 'error' ? 'danger' : 'success'} border-0 mb-2" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('afterbegin', toastHtml);
+            const toast = new bootstrap.Toast(document.getElementById(toastId));
+            toast.show();
+            
+            // Remove toast from DOM after hide
+            document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        }
+
+        // Auto-hide success toasts after delay
+        function autoHideToasts() {
+            const successToasts = document.querySelectorAll('.toast.text-bg-success');
+            successToasts.forEach(toast => {
+                const bsToast = new bootstrap.Toast(toast);
+                setTimeout(() => {
+                    bsToast.hide();
+                }, 5000);
+            });
+        }
+
+        // Initialize auto-hide when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            autoHideToasts();
         });
     </script>
-</div>
+</div>0

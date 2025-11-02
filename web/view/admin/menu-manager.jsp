@@ -79,7 +79,7 @@
                             </a>
 
                             <div class="sb-sidenav-menu-heading">Quản lý</div>
-                            <a class="<%= uri.equals("/hotelrentalmanagement/views/dashboard/room.jsp") ? "nav-link active" : "nav-link" %>" href="listRoom">
+                            <a class="<%= uri.equals("/hotelrentalmanagement/views/dashboard/room.jsp") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard">
                                 <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
                                 Quản lý tài khoản
                             </a>
@@ -109,7 +109,7 @@
 
 
                             <!-- Quản lý đồ ăn -->
-                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="listapprovebooking">
+                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="food-management">
                                 <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
                                 Quản lý đồ ăn
                             </a>
