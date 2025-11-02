@@ -10,7 +10,6 @@ import entity.Screening;
 import utils.BookingSessionManager;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +23,6 @@ import java.util.List;
 /**
  * Servlet for Step 1: Select Screening (Cinema, Movie, Date, Time)
  */
-@WebServlet(name = "BookingSelectScreeningServlet", urlPatterns = {"/booking/select-screening"})
 public class BookingSelectScreeningServlet extends HttpServlet {
     
     private CinemaDAO cinemaDAO;

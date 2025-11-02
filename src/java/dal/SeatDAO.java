@@ -29,7 +29,7 @@ public class SeatDAO extends DBContext {
                     rs.getInt("SeatID"),
                     rs.getInt("RoomID"),
                     rs.getString("SeatRow"),
-                    rs.getInt("SeatNumber"),
+                    rs.getString("SeatNumber"),
                     rs.getString("SeatType"),
                     rs.getDouble("PriceMultiplier"),
                     rs.getString("Status")
@@ -250,7 +250,7 @@ public class SeatDAO extends DBContext {
                     rs.getInt("SeatID"),
                     rs.getInt("RoomID"),
                     rs.getString("SeatRow"),
-                    rs.getInt("SeatNumber"),
+                    rs.getString("SeatNumber"),
                     rs.getString("SeatType"),
                     rs.getDouble("PriceMultiplier"),
                     rs.getString("Status")

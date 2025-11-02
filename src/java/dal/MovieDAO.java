@@ -23,29 +23,29 @@ public class MovieDAO extends DBContext {
     public List<Movie> getAll() {
         List<Movie> list = new ArrayList<>();
         String sql = """
-                       SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
-                                      m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
-                                      m.status, m.createdDate, l.languageName 
+                       SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
+                                      m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
+                                      m.Status, l.LanguageName 
                                       FROM Movies m 
-                                      JOIN Language l ON m.languageID = l.languageID""";
+                                      JOIN Language l ON m.LanguageID = l.LanguageID""";
         try {
             PreparedStatement pre = getConnection().prepareStatement(sql);
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
 
-                int movieID = rs.getInt("movieID");
-                String title = rs.getString("title");
-                String genre = rs.getString("genre");
-                String summary = rs.getString("summary");
-                String trailerURL = rs.getString("trailerURL");
-                String cast = rs.getString("cast");
-                String director = rs.getString("director");
-                int duration = rs.getInt("duration"); // phút
-                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
-                String posterURL = rs.getString("posterURL");
-                String status = rs.getString("status"); // true = đang chiếu, false = ngừng
-                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
-                String languageName = rs.getString("languageName");
+                int movieID = rs.getInt("MovieID");
+                String title = rs.getString("Title");
+                String genre = rs.getString("Genre");
+                String summary = rs.getString("Summary");
+                String trailerURL = rs.getString("TrailerURL");
+                String cast = rs.getString("Cast");
+                String director = rs.getString("Director");
+                int duration = rs.getInt("Duration"); // phút
+                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
+                String posterURL = rs.getString("PosterURL");
+                String status = rs.getString("Status"); // true = đang chiếu, false = ngừng
+                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
+                String languageName = rs.getString("LanguageName");
                 list.add(new Movie(movieID, title, genre, summary, trailerURL, cast, director, duration, releasedDate, posterURL, status, createdDate, languageName));
             }
 
@@ -57,9 +57,9 @@ public class MovieDAO extends DBContext {
 
     public void addMovie(String title, String genre, String summary, String trailerURL,
             String cast, String director, int duration, LocalDate releasedDate,
-            String posterURL, int languageID, String status, LocalDateTime createdDate) {
-        String sql = "INSERT INTO Movies (Title, Genre, Summary, TrailerURL, Cast, Director, Duration, ReleasedDate, PosterURL, LanguageID, Status, CreatedDate) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String posterURL, int languageID, String status) {
+        String sql = "INSERT INTO Movies (Title, Genre, Summary, TrailerURL, Cast, Director, Duration, ReleasedDate, PosterURL, LanguageID, Status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, title);
@@ -73,7 +73,6 @@ public class MovieDAO extends DBContext {
             pre.setString(9, posterURL);
             pre.setInt(10, languageID);   // ✅ truyền trực tiếp ID
             pre.setString(11, status);
-            pre.setTimestamp(12, java.sql.Timestamp.valueOf(createdDate));
 
             pre.executeUpdate();
         } catch (SQLException e) {
@@ -86,7 +85,7 @@ public class MovieDAO extends DBContext {
         String sql = """
         SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, m.Cast, 
                m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-               m.Status, m.CreatedDate, l.LanguageName
+               m.Status, l.LanguageName
         FROM Movies m
         JOIN Language l ON m.LanguageID = l.LanguageID
         WHERE m.Title LIKE ?
@@ -108,7 +107,7 @@ public class MovieDAO extends DBContext {
                         rs.getDate("ReleasedDate").toLocalDate(),
                         rs.getString("PosterURL"),
                         rs.getString("Status"),
-                        rs.getTimestamp("CreatedDate").toLocalDateTime(),
+                        null, // Movies table doesn't have CreatedDate
                         rs.getString("LanguageName") // ✅ lấy languageName
                 );
                 list.add(movie);
@@ -165,7 +164,7 @@ public class MovieDAO extends DBContext {
         String sql = """
         SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, m.Cast, 
                m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-               m.Status, m.CreatedDate, l.LanguageName
+               m.Status, l.LanguageName
         FROM Movies m
         JOIN Language l ON m.LanguageID = l.LanguageID
         WHERE m.MovieID = ?
@@ -187,7 +186,7 @@ public class MovieDAO extends DBContext {
                         rs.getDate("ReleasedDate").toLocalDate(),
                         rs.getString("PosterURL"),
                         rs.getString("Status"),
-                        rs.getTimestamp("CreatedDate").toLocalDateTime(),
+                        null, // Movies table doesn't have CreatedDate
                         rs.getString("LanguageName") // thêm languageName
                 );
                 return m;
@@ -219,19 +218,19 @@ public class MovieDAO extends DBContext {
         List<Movie> list = new ArrayList<>();
 
         String sql = """
-        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
-               m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
-               m.status, m.createdDate, l.languageName
+        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
+               m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
+               m.Status, l.LanguageName
         FROM Movies m 
-        JOIN Language l ON m.languageID = l.languageID
+        JOIN Language l ON m.LanguageID = l.LanguageID
         WHERE 1=1
     """;
 
         if (keyword != null && !keyword.isBlank()) {
-            sql += " AND m.title LIKE ? ";
+            sql += " AND m.Title LIKE ? ";
         }
 
-        sql += " ORDER BY m.createdDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
+        sql += " ORDER BY m.ReleasedDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             int index = 1;
@@ -243,19 +242,19 @@ public class MovieDAO extends DBContext {
 
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
-                int movieID = rs.getInt("movieID");
-                String title = rs.getString("title");
-                String genre = rs.getString("genre");
-                String summary = rs.getString("summary");
-                String trailerURL = rs.getString("trailerURL");
-                String cast = rs.getString("cast");
-                String director = rs.getString("director");
-                int duration = rs.getInt("duration");
-                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
-                String posterURL = rs.getString("posterURL");
-                String status = rs.getString("status");
-                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
-                String languageName = rs.getString("languageName");
+                int movieID = rs.getInt("MovieID");
+                String title = rs.getString("Title");
+                String genre = rs.getString("Genre");
+                String summary = rs.getString("Summary");
+                String trailerURL = rs.getString("TrailerURL");
+                String cast = rs.getString("Cast");
+                String director = rs.getString("Director");
+                int duration = rs.getInt("Duration");
+                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
+                String posterURL = rs.getString("PosterURL");
+                String status = rs.getString("Status");
+                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
+                String languageName = rs.getString("LanguageName");
 
                 list.add(new Movie(movieID, title, genre, summary, trailerURL,
                         cast, director, duration, releasedDate, posterURL,
@@ -309,19 +308,19 @@ public class MovieDAO extends DBContext {
     public List<Movie> getMoviesByStatus(String status, String keyword) {
         List<Movie> list = new ArrayList<>();
         String sql = """
-        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
-               m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
-               m.status, m.createdDate, l.languageName
+        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
+               m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
+               m.Status, l.LanguageName
         FROM Movies m 
-        JOIN Language l ON m.languageID = l.languageID
-        WHERE m.status = ?
+        JOIN Language l ON m.LanguageID = l.LanguageID
+        WHERE m.Status = ?
         """;
         
         if (keyword != null && !keyword.isBlank()) {
-            sql += " AND m.title LIKE ?";
+            sql += " AND m.Title LIKE ?";
         }
         
-        sql += " ORDER BY m.releasedDate DESC";
+        sql += " ORDER BY m.ReleasedDate DESC";
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, status);
@@ -331,19 +330,19 @@ public class MovieDAO extends DBContext {
             
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
-                int movieID = rs.getInt("movieID");
-                String title = rs.getString("title");
-                String genre = rs.getString("genre");
-                String summary = rs.getString("summary");
-                String trailerURL = rs.getString("trailerURL");
-                String cast = rs.getString("cast");
-                String director = rs.getString("director");
-                int duration = rs.getInt("duration");
-                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
-                String posterURL = rs.getString("posterURL");
-                String movieStatus = rs.getString("status");
-                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
-                String languageName = rs.getString("languageName");
+                int movieID = rs.getInt("MovieID");
+                String title = rs.getString("Title");
+                String genre = rs.getString("Genre");
+                String summary = rs.getString("Summary");
+                String trailerURL = rs.getString("TrailerURL");
+                String cast = rs.getString("Cast");
+                String director = rs.getString("Director");
+                int duration = rs.getInt("Duration");
+                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
+                String posterURL = rs.getString("PosterURL");
+                String movieStatus = rs.getString("Status");
+                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
+                String languageName = rs.getString("LanguageName");
 
                 list.add(new Movie(movieID, title, genre, summary, trailerURL,
                         cast, director, duration, releasedDate, posterURL,
@@ -358,19 +357,19 @@ public class MovieDAO extends DBContext {
     public List<Movie> getActiveMoviesForGuest(String keyword) {
         List<Movie> list = new ArrayList<>();
         String sql = """
-        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
-               m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
-               m.status, m.createdDate, l.languageName
+        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
+               m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
+               m.Status, l.LanguageName
         FROM Movies m 
-        JOIN Language l ON m.languageID = l.languageID
-        WHERE m.status IN ('Active', 'Upcoming')
+        JOIN Language l ON m.LanguageID = l.LanguageID
+        WHERE m.Status IN ('Active', 'Upcoming')
         """;
         
         if (keyword != null && !keyword.isBlank()) {
-            sql += " AND m.title LIKE ?";
+            sql += " AND m.Title LIKE ?";
         }
         
-        sql += " ORDER BY m.releasedDate DESC";
+        sql += " ORDER BY m.ReleasedDate DESC";
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             if (keyword != null && !keyword.isBlank()) {
@@ -379,19 +378,19 @@ public class MovieDAO extends DBContext {
             
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
-                int movieID = rs.getInt("movieID");
-                String title = rs.getString("title");
-                String genre = rs.getString("genre");
-                String summary = rs.getString("summary");
-                String trailerURL = rs.getString("trailerURL");
-                String cast = rs.getString("cast");
-                String director = rs.getString("director");
-                int duration = rs.getInt("duration");
-                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
-                String posterURL = rs.getString("posterURL");
-                String status = rs.getString("status");
-                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
-                String languageName = rs.getString("languageName");
+                int movieID = rs.getInt("MovieID");
+                String title = rs.getString("Title");
+                String genre = rs.getString("Genre");
+                String summary = rs.getString("Summary");
+                String trailerURL = rs.getString("TrailerURL");
+                String cast = rs.getString("Cast");
+                String director = rs.getString("Director");
+                int duration = rs.getInt("Duration");
+                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
+                String posterURL = rs.getString("PosterURL");
+                String status = rs.getString("Status");
+                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
+                String languageName = rs.getString("LanguageName");
 
                 list.add(new Movie(movieID, title, genre, summary, trailerURL,
                         cast, director, duration, releasedDate, posterURL,
@@ -409,30 +408,30 @@ public class MovieDAO extends DBContext {
     public List<Movie> getAllActiveMovies() {
         List<Movie> list = new ArrayList<>();
         String sql = """
-                      SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
-                             m.cast, m.director, m.duration, m.releasedDate, m.posterURL, 
-                             m.status, m.createdDate, l.languageName 
+                      SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
+                             m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
+                             m.Status, l.LanguageName 
                       FROM Movies m 
-                      JOIN Language l ON m.languageID = l.languageID
-                      WHERE m.status = 'Active'
-                      ORDER BY m.title ASC""";
+                      JOIN Language l ON m.LanguageID = l.LanguageID
+                      WHERE m.Status = 'Active'
+                      ORDER BY m.Title ASC""";
         try {
             PreparedStatement pre = getConnection().prepareStatement(sql);
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
-                int movieID = rs.getInt("movieID");
-                String title = rs.getString("title");
-                String genre = rs.getString("genre");
-                String summary = rs.getString("summary");
-                String trailerURL = rs.getString("trailerURL");
-                String cast = rs.getString("cast");
-                String director = rs.getString("director");
-                int duration = rs.getInt("duration");
-                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
-                String posterURL = rs.getString("posterURL");
-                String status = rs.getString("status");
-                LocalDateTime createdDate = rs.getTimestamp("createdDate").toLocalDateTime();
-                String languageName = rs.getString("languageName");
+                int movieID = rs.getInt("MovieID");
+                String title = rs.getString("Title");
+                String genre = rs.getString("Genre");
+                String summary = rs.getString("Summary");
+                String trailerURL = rs.getString("TrailerURL");
+                String cast = rs.getString("Cast");
+                String director = rs.getString("Director");
+                int duration = rs.getInt("Duration");
+                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
+                String posterURL = rs.getString("PosterURL");
+                String status = rs.getString("Status");
+                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
+                String languageName = rs.getString("LanguageName");
                 list.add(new Movie(movieID, title, genre, summary, trailerURL, cast, director, duration, releasedDate, posterURL, status, createdDate, languageName));
             }
         } catch (SQLException e) {

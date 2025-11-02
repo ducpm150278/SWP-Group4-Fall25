@@ -12,7 +12,7 @@
         <servlet-name>CustomerProfileServlet</servlet-name>
         <url-pattern>/CustomerProfile</url-pattern>
     </servlet-mapping>
-    
+        
     <!-- Change password functionality -->
     <servlet>
         <servlet-name>ChangePasswordServlet</servlet-name>
@@ -89,11 +89,11 @@
     
     <!-- Google OAuth callback -->
     <servlet>
-        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <servlet-name>GoogleAuthCallbackController</servlet-name>
         <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <servlet-name>GoogleAuthCallbackController</servlet-name>
         <url-pattern>/GoogleAuthCallback</url-pattern>
     </servlet-mapping>
     

@@ -25,10 +25,25 @@ public class DiscountDAO extends DBContext {
                 d.setDiscountID(rs.getInt("DiscountID"));
                 d.setCode(rs.getString("Code"));
                 d.setDiscountType(rs.getString("DiscountType"));
-                d.setDiscountValue(rs.getDouble("DiscountValue"));
+                
+                // Handle both DiscountPercentage and DiscountValue
+                if ("Percentage".equals(rs.getString("DiscountType"))) {
+                    double percentage = rs.getObject("DiscountPercentage") != null ? 
+                                       rs.getDouble("DiscountPercentage") : 0.0;
+                    d.setDiscountValue(percentage);
+                    d.setDiscountPercentage(percentage);
+                } else {
+                    double value = rs.getObject("DiscountValue") != null ? 
+                                  rs.getDouble("DiscountValue") : 0.0;
+                    d.setDiscountValue(value);
+                }
+                
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
+                d.setMaxUsage(rs.getInt("MaxUsage"));
+                d.setUsageCount(rs.getInt("UsageCount"));
+                d.setCreatedBy(rs.getInt("CreatedBy"));
                 list.add(d);
             }
         } catch (SQLException e) {
@@ -103,10 +118,25 @@ public class DiscountDAO extends DBContext {
                 d.setDiscountID(rs.getInt("DiscountID"));
                 d.setCode(rs.getString("Code"));
                 d.setDiscountType(rs.getString("DiscountType"));
-                d.setDiscountValue(rs.getDouble("DiscountValue"));
+                
+                // Handle both DiscountPercentage and DiscountValue
+                if ("Percentage".equals(rs.getString("DiscountType"))) {
+                    double percentage = rs.getObject("DiscountPercentage") != null ? 
+                                       rs.getDouble("DiscountPercentage") : 0.0;
+                    d.setDiscountValue(percentage);
+                    d.setDiscountPercentage(percentage);
+                } else {
+                    double value = rs.getObject("DiscountValue") != null ? 
+                                  rs.getDouble("DiscountValue") : 0.0;
+                    d.setDiscountValue(value);
+                }
+                
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
+                d.setMaxUsage(rs.getInt("MaxUsage"));
+                d.setUsageCount(rs.getInt("UsageCount"));
+                d.setCreatedBy(rs.getInt("CreatedBy"));
                 list.add(d);
             }
         } catch (SQLException e) {
@@ -244,6 +274,8 @@ WHERE DiscountID=?""";
             e.printStackTrace();
             return false;
         }
+    }
+    
     //tìm kiếm
     public List<Discount> searchDiscounts(String keyword, LocalDate from, LocalDate to, String status) {
         List<Discount> list = new ArrayList<>();
@@ -293,7 +325,20 @@ WHERE DiscountID=?""";
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
-                d.setDiscountPercentage(rs.getDouble("DiscountPercentage"));
+                d.setDiscountType(rs.getString("DiscountType"));
+                
+                // Handle both DiscountPercentage and DiscountValue
+                if ("Percentage".equals(rs.getString("DiscountType"))) {
+                    double percentage = rs.getObject("DiscountPercentage") != null ? 
+                                       rs.getDouble("DiscountPercentage") : 0.0;
+                    d.setDiscountValue(percentage);
+                    d.setDiscountPercentage(percentage);
+                } else {
+                    double value = rs.getObject("DiscountValue") != null ? 
+                                  rs.getDouble("DiscountValue") : 0.0;
+                    d.setDiscountValue(value);
+                }
+                
                 list.add(d);
             }
 

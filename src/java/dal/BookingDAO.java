@@ -4,6 +4,8 @@ import entity.Booking;
 import entity.BookingDetailDTO;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +20,10 @@ public class BookingDAO extends DBContext {
     public int createBooking(Booking booking) {
         // CRITICAL: Column order MUST match database schema!
         // Schema order: PaymentMethod, PaymentDate, Notes, TransactionID
-        String sql = "INSERT INTO Bookings (BookingCode, UserID, ScreeningID, BookingDate, " +
+        String sql = "INSERT INTO Bookings (BookingCode, UserID, ScreeningID, DiscountID, BookingDate, " +
                      "TotalAmount, DiscountAmount, FinalAmount, Status, PaymentStatus, " +
                      "PaymentMethod, PaymentDate, Notes, TransactionID) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         System.out.println("BookingDAO: Creating booking...");
         System.out.println("  BookingCode: " + booking.getBookingCode());
@@ -38,33 +40,42 @@ public class BookingDAO extends DBContext {
             ps.setString(1, booking.getBookingCode());
             ps.setInt(2, booking.getUserID());
             ps.setInt(3, booking.getScreeningID());
-            ps.setTimestamp(4, Timestamp.valueOf(booking.getBookingDate()));
-            ps.setDouble(5, booking.getTotalAmount());
-            ps.setDouble(6, booking.getDiscountAmount());
-            ps.setDouble(7, booking.getFinalAmount());
-            ps.setString(8, booking.getStatus());
-            ps.setString(9, booking.getPaymentStatus());
-            ps.setString(10, booking.getPaymentMethod());
             
-            // Position 11: PaymentDate
+            // Position 4: DiscountID (nullable)
+            Integer discountID = booking.getDiscountID();
+            if (discountID != null && discountID > 0) {
+                ps.setInt(4, discountID);
+            } else {
+                ps.setNull(4, Types.INTEGER);
+            }
+            
+            ps.setTimestamp(5, Timestamp.valueOf(booking.getBookingDate()));
+            ps.setDouble(6, booking.getTotalAmount());
+            ps.setDouble(7, booking.getDiscountAmount());
+            ps.setDouble(8, booking.getFinalAmount());
+            ps.setString(9, booking.getStatus());
+            ps.setString(10, booking.getPaymentStatus());
+            ps.setString(11, booking.getPaymentMethod());
+            
+            // Position 12: PaymentDate
             if (booking.getPaymentDate() != null) {
-                ps.setTimestamp(11, Timestamp.valueOf(booking.getPaymentDate()));
+                ps.setTimestamp(12, Timestamp.valueOf(booking.getPaymentDate()));
             } else {
-                ps.setNull(11, Types.TIMESTAMP);
+                ps.setNull(12, Types.TIMESTAMP);
             }
             
-            // Position 12: Notes (BEFORE TransactionID in schema!)
+            // Position 13: Notes (BEFORE TransactionID in schema!)
             if (booking.getNotes() != null && !booking.getNotes().isEmpty()) {
-                ps.setString(12, booking.getNotes());
-            } else {
-                ps.setNull(12, Types.NVARCHAR);
-            }
-            
-            // Position 13: TransactionID (AFTER Notes in schema!)
-            if (booking.getTransactionID() != null && !booking.getTransactionID().isEmpty()) {
-                ps.setString(13, booking.getTransactionID());
+                ps.setString(13, booking.getNotes());
             } else {
                 ps.setNull(13, Types.NVARCHAR);
+            }
+            
+            // Position 14: TransactionID (AFTER Notes in schema!)
+            if (booking.getTransactionID() != null && !booking.getTransactionID().isEmpty()) {
+                ps.setString(14, booking.getTransactionID());
+            } else {
+                ps.setNull(14, Types.NVARCHAR);
             }
             
             int affectedRows = ps.executeUpdate();
@@ -214,6 +225,13 @@ public class BookingDAO extends DBContext {
         booking.setBookingCode(rs.getString("BookingCode"));
         booking.setUserID(rs.getInt("UserID"));
         booking.setScreeningID(rs.getInt("ScreeningID"));
+        
+        // Extract DiscountID (nullable)
+        int discountID = rs.getInt("DiscountID");
+        if (!rs.wasNull()) {
+            booking.setDiscountID(discountID);
+        }
+        
         booking.setBookingDate(rs.getTimestamp("BookingDate").toLocalDateTime());
         booking.setTotalAmount(rs.getDouble("TotalAmount"));
         booking.setDiscountAmount(rs.getDouble("DiscountAmount"));
@@ -339,7 +357,7 @@ public class BookingDAO extends DBContext {
                      "b.DiscountAmount, b.FinalAmount, b.Status, b.PaymentStatus, " +
                      "b.PaymentMethod, b.PaymentDate, " +
                      "m.Title AS MovieTitle, m.PosterURL AS MoviePosterURL, m.Duration AS MovieDuration, " +
-                     "c.CinemaName, r.RoomName, s.StartTime AS ScreeningTime " +
+                     "c.CinemaName, r.RoomName, s.ScreeningDate, s.Showtime " +
                      "FROM Bookings b " +
                      "JOIN Screenings s ON b.ScreeningID = s.ScreeningID " +
                      "JOIN Movies m ON s.MovieID = m.MovieID " +
@@ -380,8 +398,16 @@ public class BookingDAO extends DBContext {
                 detail.setMovieDuration(rs.getInt("MovieDuration"));
                 detail.setCinemaName(rs.getString("CinemaName"));
                 detail.setRoomName(rs.getString("RoomName"));
-                detail.setScreeningTime(rs.getTimestamp("ScreeningTime").toLocalDateTime());
-                detail.setDiscountCode(null); // Bookings table doesn't have DiscountID reference
+                
+                // Convert ScreeningDate + Showtime to LocalDateTime
+                java.sql.Date screeningDate = rs.getDate("ScreeningDate");
+                String showtime = rs.getString("Showtime");
+                if (screeningDate != null && showtime != null) {
+                    LocalDateTime[] times = parseShowtime(screeningDate.toLocalDate(), showtime);
+                    detail.setScreeningTime(times[0]);
+                }
+                
+                detail.setDiscountCode(null); // TODO: Get discount code from DiscountID if needed
                 
                 // Get tickets (seats) for this booking
                 List<String> seatLabels = getBookingSeats(bookingID);
@@ -673,6 +699,37 @@ public class BookingDAO extends DBContext {
         }
         
         return null;
+    }
+    
+    /**
+     * Parse Showtime string (e.g., "08:00-10:00") and combine with ScreeningDate
+     * to create LocalDateTime objects for StartTime and EndTime
+     */
+    private LocalDateTime[] parseShowtime(LocalDate screeningDate, String showtime) {
+        if (showtime == null || !showtime.contains("-")) {
+            LocalDateTime now = LocalDateTime.now();
+            return new LocalDateTime[]{now, now.plusHours(2)};
+        }
+        
+        try {
+            String[] parts = showtime.split("-");
+            if (parts.length != 2) {
+                LocalDateTime now = LocalDateTime.now();
+                return new LocalDateTime[]{now, now.plusHours(2)};
+            }
+            
+            LocalTime startTime = LocalTime.parse(parts[0].trim());
+            LocalTime endTime = LocalTime.parse(parts[1].trim());
+            
+            return new LocalDateTime[]{
+                LocalDateTime.of(screeningDate, startTime),
+                LocalDateTime.of(screeningDate, endTime)
+            };
+        } catch (Exception e) {
+            System.err.println("Error parsing showtime: " + showtime + " - " + e.getMessage());
+            LocalDateTime now = LocalDateTime.now();
+            return new LocalDateTime[]{now, now.plusHours(2)};
+        }
     }
 }
 

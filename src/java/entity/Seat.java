@@ -7,7 +7,7 @@ public class Seat {
     private int seatID;
     private int roomID;
     private String seatRow;
-    private int seatNumber;
+    private String seatNumber; // Changed from int to String (VARCHAR(5))
     private String seatType; // Standard, VIP, Couple
     private double priceMultiplier; // Price multiplier for different seat types
     private String status; // Available, Maintenance
@@ -15,7 +15,7 @@ public class Seat {
     public Seat() {
     }
     
-    public Seat(int seatID, int roomID, String seatRow, int seatNumber, 
+    public Seat(int seatID, int roomID, String seatRow, String seatNumber, 
                 String seatType, double priceMultiplier, String status) {
         this.seatID = seatID;
         this.roomID = roomID;
@@ -51,11 +51,11 @@ public class Seat {
         this.seatRow = seatRow;
     }
     
-    public int getSeatNumber() {
+    public String getSeatNumber() {
         return seatNumber;
     }
     
-    public void setSeatNumber(int seatNumber) {
+    public void setSeatNumber(String seatNumber) {
         this.seatNumber = seatNumber;
     }
     
