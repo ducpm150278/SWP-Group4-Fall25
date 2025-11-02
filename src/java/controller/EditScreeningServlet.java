@@ -128,13 +128,13 @@ public class EditScreeningServlet extends HttpServlet {
             LocalDateTime endTime = LocalDateTime.parse(endTimeStr, formatter);
 
             ScreeningDAO dao = new ScreeningDAO();
-            boolean updated = dao.updateScreening(screeningID, movieID, roomID, startTime, endTime, status);
+//            boolean updated = dao.updateScreening(screeningID, movieID, roomID, startTime, endTime, status);
 
-            if (updated) {
-                response.sendRedirect("listScreening?success=1");
-            } else {
-                response.sendRedirect("editScreening?screeningID=" + screeningID + "&error=1");
-            }
+//            if (updated) {
+//                response.sendRedirect("listScreening?success=1");
+//            } else {
+//                response.sendRedirect("editScreening?screeningID=" + screeningID + "&error=1");
+//            }
 
         } catch (Exception e) {
             e.printStackTrace();

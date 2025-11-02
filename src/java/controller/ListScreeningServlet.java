@@ -93,23 +93,23 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
     int totalRecords;
 
     // Nếu có điều kiện tìm kiếm
-    if ((keyword != null && !keyword.isEmpty()) || from != null || to != null || (status != null && !status.isEmpty())) {
-        list = dao.searchScreeningsWithPaging(keyword, from, to, status, page, pageSize);
-        totalRecords = dao.countSearchScreenings(keyword, from, to, status);
-    } else {
-        list = dao.getAllScreeningWithPaging(page, pageSize);
-        totalRecords = dao.countAllScreenings();
-    }
+//    if ((keyword != null && !keyword.isEmpty()) || from != null || to != null || (status != null && !status.isEmpty())) {
+//        list = dao.searchScreeningsWithPaging(keyword, from, to, status, page, pageSize);
+//        totalRecords = dao.countSearchScreenings(keyword, from, to, status);
+//    } else {
+//        list = dao.getAllScreeningWithPaging(page, pageSize);
+//        totalRecords = dao.countAllScreenings();
+//    }
 
-    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-
-    request.setAttribute("screenings", list);
+//    int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+//
+//    request.setAttribute("screenings", list);
     request.setAttribute("keyword", keyword);
     request.setAttribute("from", fromStr);
     request.setAttribute("to", toStr);
     request.setAttribute("status", status);
     request.setAttribute("currentPage", page);
-    request.setAttribute("totalPages", totalPages);
+//    request.setAttribute("totalPages", totalPages);
 
     request.getRequestDispatcher("listScreening.jsp").forward(request, response);
 }

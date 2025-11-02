@@ -32,6 +32,16 @@
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/logout</url-pattern>
     </servlet-mapping>
+
+    <!-- Google OAuth callback -->
+    <servlet>
+        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GoogleAuthCallbackServlet</servlet-name>
+        <url-pattern>/GoogleAuthCallback</url-pattern>
+    </servlet-mapping>
     
     <!-- FOOD & COMBO MANAGEMENT -->
     
@@ -85,16 +95,6 @@
     <servlet-mapping>
         <servlet-name>GoogleAuthController</servlet-name>
         <url-pattern>/auth/google</url-pattern>
-    </servlet-mapping>
-    
-    <!-- Google OAuth callback -->
-    <servlet>
-        <servlet-name>GoogleAuthCallbackController</servlet-name>
-        <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>GoogleAuthCallbackController</servlet-name>
-        <url-pattern>/GoogleAuthCallback</url-pattern>
     </servlet-mapping>
     
     <!-- Email verification -->

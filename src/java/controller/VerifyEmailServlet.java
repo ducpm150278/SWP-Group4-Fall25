@@ -134,7 +134,7 @@ public class VerifyEmailServlet extends HttpServlet {
                 boolean success = userDAO.updateEmailAndVerification(user.getUserID(), savedEmail, true);
                 if (success) {
                     user.setEmail(savedEmail);
-                    user.setIsEmailVerified(true);
+                    user.setEmailVerified(true);
                     session.setAttribute("user", user);
                     request.setAttribute("message", "Email successfully verified and updated!");
                     session.removeAttribute("verificationCode");

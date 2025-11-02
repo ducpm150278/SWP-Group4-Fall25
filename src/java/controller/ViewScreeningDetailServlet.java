@@ -80,12 +80,12 @@ public class ViewScreeningDetailServlet extends HttpServlet {
             }
 
             // Lấy các khung giờ khác của cùng phim trong khoảng từ ngày bắt đầu -> kết thúc
-            List<Screening> otherSchedules = dao.getOtherSchedulesOfMovie(
-                    detail.getMovieID(),
-                    detail.getStartTime().toLocalDate().atStartOfDay(),
-                    detail.getEndTime().toLocalDate().atTime(23, 59, 59),
-                    screeningID
-            );
+//            List<Screening> otherSchedules = dao.getOtherSchedulesOfMovie(
+//                    detail.getMovieID(),
+//                    detail.getStartTime().toLocalDate().atStartOfDay(),
+//                    detail.getEndTime().toLocalDate().atTime(23, 59, 59),
+//                    screeningID
+//            );
 
             // Format sẵn thời gian để hiển thị trong JSP
             DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -96,10 +96,10 @@ public class ViewScreeningDetailServlet extends HttpServlet {
             request.setAttribute("formattedEnd", detail.getEndTime().format(dateFmt));
 
             // Format khung giờ khác
-            for (Screening s : otherSchedules) {
-                s.setMovieTitle(s.getStartTime().format(dateFmt) + " - " + s.getEndTime().format(timeFmt)
-                        + " (" + s.getCinemaName() + " - " + s.getRoomName() + ")");
-            }
+//            for (Screening s : otherSchedules) {
+//                s.setMovieTitle(s.getStartTime().format(dateFmt) + " - " + s.getEndTime().format(timeFmt)
+//                        + " (" + s.getCinemaName() + " - " + s.getRoomName() + ")");
+//            }
 
             request.setAttribute("detail", detail);
             int totalSeats = detail.getAvailableSeats() + detail.getSoldSeats();
@@ -114,7 +114,7 @@ public class ViewScreeningDetailServlet extends HttpServlet {
             request.setAttribute("seatStatus", seatStatus);
             request.setAttribute("rows", rows);
             request.setAttribute("cols", cols);
-            request.setAttribute("otherSchedules", otherSchedules);
+//            request.setAttribute("otherSchedules", otherSchedules);
             request.getRequestDispatcher("viewScreening.jsp").forward(request, response);
 
         } catch (Exception e) {

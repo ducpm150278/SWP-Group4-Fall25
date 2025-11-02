@@ -4,11 +4,11 @@
  */
 package controller;
 
-import dal.CinemaDAO;
+import dal.CinemaMDAO;
 import dal.MovieDAO;
 import dal.ScreeningDAO;
 import dal.ScreeningRoomDAO;
-import entity.Cinema;
+import entity.CinemaM;
 import entity.Movie;
 import entity.Screening;
 import entity.ScreeningRoom;
@@ -70,11 +70,11 @@ public class AddScreeningServlet extends HttpServlet {
             throws ServletException, IOException {
 
         MovieDAO mdao = new MovieDAO();
-        CinemaDAO cdao = new CinemaDAO();
+        CinemaMDAO cdao = new CinemaMDAO();
         ScreeningRoomDAO rdao = new ScreeningRoomDAO();
 
         List<Movie> movies = mdao.getAll();          // tất cả phim (có status)
-        List<Cinema> cinemas = cdao.getAllCinemas();
+        List<CinemaM> cinemas = cdao.getAllCinemas();
         List<ScreeningRoom> rooms = rdao.getAllRooms();
 
         request.setAttribute("movies", movies);
@@ -109,7 +109,7 @@ public class AddScreeningServlet extends HttpServlet {
 
                 // Gửi lại dữ liệu để hiển thị form (tránh mất danh sách)
                 MovieDAO mdao = new MovieDAO();
-                CinemaDAO cdao = new CinemaDAO();
+                CinemaMDAO cdao = new CinemaMDAO();
                 ScreeningRoomDAO rdao = new ScreeningRoomDAO();
                 request.setAttribute("movies", mdao.getAll());
                 request.setAttribute("cinemas", cdao.getAllCinemas());
@@ -128,7 +128,7 @@ public class AddScreeningServlet extends HttpServlet {
 
             // ✅ Tự động lấy sức chứa của phòng (không nhập tay)
             ScreeningDAO dao = new ScreeningDAO();
-            int availableSeats = dao.getSeatCapacityByRoomID(roomID);
+//            int availableSeats = dao.getSeatCapacityByRoomID(roomID);
 
             // Gán dữ liệu vào model
             Screening sc = new Screening();
@@ -137,10 +137,10 @@ public class AddScreeningServlet extends HttpServlet {
             sc.setStartTime(start);
             sc.setEndTime(end);
             sc.setTicketPrice(ticketPrice);
-            sc.setAvailableSeats(availableSeats);
+//            sc.setAvailableSeats(availableSeats);
 
             // Lưu vào DB
-            dao.insertScreening(sc);
+//            dao.insertScreening(sc);
 
             // Chuyển hướng về danh sách lịch chiếu
             response.sendRedirect(request.getContextPath() + "/listScreening?addSuccess=1");

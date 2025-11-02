@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package entity;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
-/**
- *
- * @author admin
- */
 public class ScreeningRoom {
     private int roomID;
     private int cinemaID;
@@ -17,30 +9,15 @@ public class ScreeningRoom {
     private int seatCapacity;
     private String roomType;
     private boolean isActive;
-    private LocalDateTime createdDate;
+    private List<SeatM> seats; // Thêm danh sách ghế
+    private CinemaM cinema; // Thêm tham chiếu đến cinema
 
+    // Constructors
     public ScreeningRoom() {
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-       public ScreeningRoom(int roomID, int cinemaID, String roomName, int seatCapacity, 
-                        String roomType, boolean isActive, LocalDateTime createdDate) {
-        this.roomID = roomID;
-        this.cinemaID = cinemaID;
-        this.roomName = roomName;
-        this.seatCapacity = seatCapacity;
-        this.roomType = roomType;
-        this.isActive = isActive;
-        this.createdDate = createdDate;
-    }
-
-    public ScreeningRoom(int roomID, int cinemaID, String roomName, int seatCapacity, String roomType, boolean isActive) {
+    public ScreeningRoom(int roomID, int cinemaID, String roomName, int seatCapacity, 
+                        String roomType, boolean isActive) {
         this.roomID = roomID;
         this.cinemaID = cinemaID;
         this.roomName = roomName;
@@ -49,6 +26,8 @@ public class ScreeningRoom {
         this.isActive = isActive;
     }
 
+
+    // Getters and Setters
     public int getRoomID() {
         return roomID;
     }
@@ -93,14 +72,63 @@ public class ScreeningRoom {
         return isActive;
     }
 
-     public void setActive(boolean active) {
+    public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public List<SeatM> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(List<SeatM> seats) {
+        this.seats = seats;
+        // Tự động cập nhật seatCapacity khi set seats
+        if (seats != null) {
+            this.seatCapacity = seats.size();
+        } else {
+            this.seatCapacity = 0;
+        }
+    }
+
+    public CinemaM getCinema() {
+        return cinema;
+    }
+
+    public void setCinema(CinemaM cinema) {
+        this.cinema = cinema;
+        if (cinema != null) {
+            this.cinemaID = cinema.getCinemaID();
+        }
+    }
+
+    // Helper methods
+    public int calculateAvailableSeats() {
+        if (seats != null) {
+            return (int) seats.stream()
+                    .filter(seat -> "Available".equals(seat.getStatus()))
+                    .count();
+        }
+        return 0;
+    }
+
+    public int calculateSeatsByType(String seatType) {
+        if (seats != null) {
+            return (int) seats.stream()
+                    .filter(seat -> seatType.equals(seat.getSeatType()))
+                    .count();
+        }
+        return 0;
     }
 
     @Override
     public String toString() {
-        return "ScreeningRoom{" + "roomID=" + roomID + ", cinemaID=" + cinemaID + ", roomName=" + roomName + ", seatCapacity=" + seatCapacity + ", roomType=" + roomType + ", isActive=" + isActive + '}';
+        return "ScreeningRoom{" + 
+                "roomID=" + roomID + 
+                ", cinemaID=" + cinemaID + 
+                ", roomName=" + roomName + 
+                ", seatCapacity=" + seatCapacity + 
+                ", roomType=" + roomType + 
+                ", isActive=" + isActive + 
+                '}';
     }
-    
-    
 }

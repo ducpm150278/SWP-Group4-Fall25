@@ -482,14 +482,14 @@
                                 <span>Cinema Management</span>
                             </a>
                         </li>
-    <!--                    <li class="${param.section eq 'log-history' ? 'active' : ''}">
-                            <a href="<c:url value='/admin/dashboard?section=log-history'/>">
+                        <li class="${param.section eq 'screening-room-management' ? 'active' : ''}">
+                            <a href="<c:url value='/adminFE/dashboard?section=screening-room-management'/>">
                                 <i class="fas fa-history"></i>
-                                <span>Log History</span>
+                                <span>Screening Room Management</span>
                             </a>
-                        </li>
+                        </li><!--
                         <li class="${param.section eq 'request-management' ? 'active' : ''}">
-                            <a href="<c:url value='/admin/dashboard?section=request-management'/>">
+                            <a href="<c:url value='/adminFE/dashboard?section=request-management'/>">
                                 <i class="fas fa-envelope"></i>
                                 <span>Request</span>
                             </a>
@@ -527,8 +527,8 @@
                         <c:when test="${param.section eq 'cinema-management'}">
                             <jsp:include page="cinema_management.jsp"/>
                         </c:when>
-                        <c:when test="${param.section eq 'log-history'}">
-                            <jsp:include page="log-history.jsp"/>
+                        <c:when test="${param.section eq 'screening-room-management'}">
+                            <jsp:include page="screening_room_management.jsp"/>
                         </c:when>
                         <c:when test="${param.section eq 'request-management'}">
                             <jsp:include page="request.jsp"/>
