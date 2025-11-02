@@ -123,8 +123,8 @@ public class AddMovieServlet extends HttpServlet {
 
             // Thêm phim
             MovieDAO dao = new MovieDAO();
-            dao.addMovie(title, genre, summary, trailerURL, cast, director,
-                    duration, releasedDate, posterURL, languageId, status, createdDate);
+//            dao.addMovie(title, genre, summary, trailerURL, cast, director,
+//                    duration, releasedDate, posterURL, languageId, status, createdDate);
 
             // Thành công → redirect về danh sách
             response.sendRedirect("list?addSuccess=1");

@@ -128,7 +128,7 @@ public class AddScreeningServlet extends HttpServlet {
 
             // ✅ Tự động lấy sức chứa của phòng (không nhập tay)
             ScreeningDAO dao = new ScreeningDAO();
-            int availableSeats = dao.getSeatCapacityByRoomID(roomID);
+//            int availableSeats = dao.getSeatCapacityByRoomID(roomID);
 
             // Gán dữ liệu vào model
             Screening sc = new Screening();
@@ -137,10 +137,10 @@ public class AddScreeningServlet extends HttpServlet {
             sc.setStartTime(start);
             sc.setEndTime(end);
             sc.setTicketPrice(ticketPrice);
-            sc.setAvailableSeats(availableSeats);
+//            sc.setAvailableSeats(availableSeats);
 
             // Lưu vào DB
-            dao.insertScreening(sc);
+//            dao.insertScreening(sc);
 
             // Chuyển hướng về danh sách lịch chiếu
             response.sendRedirect(request.getContextPath() + "/listScreening?addSuccess=1");
