@@ -10,6 +10,7 @@ public class Booking {
     private String bookingCode;
     private int userID;
     private int screeningID;
+    private Integer discountID; // Nullable foreign key to Discounts table
     private LocalDateTime bookingDate;
     private double totalAmount;
     private double discountAmount;
@@ -174,6 +175,14 @@ public class Booking {
 
     public void setTransactionID(String transactionID) {
         this.transactionID = transactionID;
+    }
+    
+    public Integer getDiscountID() {
+        return discountID;
+    }
+    
+    public void setDiscountID(Integer discountID) {
+        this.discountID = discountID;
     }
 
     @Override

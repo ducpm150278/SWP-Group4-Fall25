@@ -42,15 +42,29 @@ public class LoadScreeningsServlet extends HttpServlet {
             // Validate parameters
             if (cinemaIDStr == null || cinemaIDStr.isEmpty() ||
                 movieIDStr == null || movieIDStr.isEmpty() ||
-                dateStr == null || dateStr.isEmpty()) {
+                dateStr == null || dateStr.isEmpty() || 
+                dateStr.trim().isEmpty() || dateStr.equals("--") || dateStr.equals("null")) {
                 
-                out.print("{\"success\":false,\"message\":\"Missing required parameters\"}");
+                out.print("{\"success\":false,\"message\":\"Missing or invalid required parameters\"}");
+                return;
+            }
+            
+            // Validate date format
+            if (!dateStr.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                out.print("{\"success\":false,\"message\":\"Invalid date format. Expected YYYY-MM-DD\"}");
                 return;
             }
             
             int cinemaID = Integer.parseInt(cinemaIDStr);
             int movieID = Integer.parseInt(movieIDStr);
-            LocalDate date = LocalDate.parse(dateStr);
+            
+            LocalDate date;
+            try {
+                date = LocalDate.parse(dateStr);
+            } catch (Exception e) {
+                out.print("{\"success\":false,\"message\":\"Invalid date format: " + dateStr + "\"}");
+                return;
+            }
             
             // Get available screenings
             List<Screening> screenings = screeningDAO.getAvailableScreenings(cinemaID, movieID, date);

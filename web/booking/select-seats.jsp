@@ -759,7 +759,14 @@
                                 // Sort seats by seat number
                                 java.util.Collections.sort(rowSeats, new java.util.Comparator<Seat>() {
                                     public int compare(Seat s1, Seat s2) {
-                                        return Integer.compare(s1.getSeatNumber(), s2.getSeatNumber());
+                                        try {
+                                            int num1 = Integer.parseInt(s1.getSeatNumber());
+                                            int num2 = Integer.parseInt(s2.getSeatNumber());
+                                            return Integer.compare(num1, num2);
+                                        } catch (NumberFormatException e) {
+                                            // Fallback to string comparison if parsing fails
+                                            return s1.getSeatNumber().compareTo(s2.getSeatNumber());
+                                        }
                                     }
                                 });
                                 

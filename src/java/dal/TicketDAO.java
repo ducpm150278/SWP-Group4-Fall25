@@ -3,6 +3,8 @@ package dal;
 import entity.Ticket;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -164,8 +166,8 @@ public class TicketDAO extends DBContext {
      */
     public List<Ticket> getTicketsByUserID(int userID) {
         List<Ticket> tickets = new ArrayList<>();
-        String sql = "SELECT t.TicketID, t.ScreeningID, t.UserID, t.SeatID, t.BookingTime, t.UnitPrice, " +
-                     "s.StartTime, m.Title AS MovieTitle, c.CinemaName, " +
+        String sql = "SELECT t.TicketID, t.ScreeningID, t.UserID, t.SeatID, t.BookingTime, t.SeatPrice AS UnitPrice, " +
+                     "s.ScreeningDate, s.Showtime, m.Title AS MovieTitle, c.CinemaName, " +
                      "CONCAT(st.SeatRow, st.SeatNumber) AS SeatLabel " +
                      "FROM Tickets t " +
                      "JOIN Screenings s ON t.ScreeningID = s.ScreeningID " +
@@ -193,7 +195,15 @@ public class TicketDAO extends DBContext {
                 );
                 ticket.setMovieTitle(rs.getString("MovieTitle"));
                 ticket.setCinemaName(rs.getString("CinemaName"));
-                ticket.setScreeningTime(rs.getTimestamp("StartTime").toLocalDateTime());
+                
+                // Convert ScreeningDate + Showtime to LocalDateTime
+                java.sql.Date screeningDate = rs.getDate("ScreeningDate");
+                String showtime = rs.getString("Showtime");
+                if (screeningDate != null && showtime != null) {
+                    LocalDateTime[] times = parseShowtime(screeningDate.toLocalDate(), showtime);
+                    ticket.setScreeningTime(times[0]);
+                }
+                
                 ticket.setSeatLabel(rs.getString("SeatLabel"));
                 
                 tickets.add(ticket);
@@ -252,8 +262,8 @@ public class TicketDAO extends DBContext {
      * Get ticket by ID with full details
      */
     public Ticket getTicketByID(int ticketID) {
-        String sql = "SELECT t.TicketID, t.ScreeningID, t.UserID, t.SeatID, t.BookingTime, t.UnitPrice, " +
-                     "s.StartTime, m.Title AS MovieTitle, c.CinemaName, " +
+        String sql = "SELECT t.TicketID, t.ScreeningID, t.UserID, t.SeatID, t.BookingTime, t.SeatPrice AS UnitPrice, " +
+                     "s.ScreeningDate, s.Showtime, m.Title AS MovieTitle, c.CinemaName, " +
                      "CONCAT(st.SeatRow, st.SeatNumber) AS SeatLabel " +
                      "FROM Tickets t " +
                      "JOIN Screenings s ON t.ScreeningID = s.ScreeningID " +
@@ -280,7 +290,15 @@ public class TicketDAO extends DBContext {
                 );
                 ticket.setMovieTitle(rs.getString("MovieTitle"));
                 ticket.setCinemaName(rs.getString("CinemaName"));
-                ticket.setScreeningTime(rs.getTimestamp("StartTime").toLocalDateTime());
+                
+                // Convert ScreeningDate + Showtime to LocalDateTime
+                java.sql.Date screeningDate = rs.getDate("ScreeningDate");
+                String showtime = rs.getString("Showtime");
+                if (screeningDate != null && showtime != null) {
+                    LocalDateTime[] times = parseShowtime(screeningDate.toLocalDate(), showtime);
+                    ticket.setScreeningTime(times[0]);
+                }
+                
                 ticket.setSeatLabel(rs.getString("SeatLabel"));
                 
                 return ticket;
@@ -313,22 +331,37 @@ public class TicketDAO extends DBContext {
         }
     }
     
+    // Note: updateScreeningAvailableSeats removed - AvailableSeats is now calculated
+    // dynamically via view vw_CurrentScreenings in the database
+    
     /**
-     * Update available seats count for screening
+     * Parse Showtime string (e.g., "08:00-10:00") and combine with ScreeningDate
+     * to create LocalDateTime objects for StartTime and EndTime
      */
-    public boolean updateScreeningAvailableSeats(int screeningID) {
-        String sql = "UPDATE Screenings SET AvailableSeats = AvailableSeats - 1 WHERE ScreeningID = ?";
+    private LocalDateTime[] parseShowtime(LocalDate screeningDate, String showtime) {
+        if (showtime == null || !showtime.contains("-")) {
+            LocalDateTime now = LocalDateTime.now();
+            return new LocalDateTime[]{now, now.plusHours(2)};
+        }
         
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try {
+            String[] parts = showtime.split("-");
+            if (parts.length != 2) {
+                LocalDateTime now = LocalDateTime.now();
+                return new LocalDateTime[]{now, now.plusHours(2)};
+            }
             
-            ps.setInt(1, screeningID);
-            return ps.executeUpdate() > 0;
+            LocalTime startTime = LocalTime.parse(parts[0].trim());
+            LocalTime endTime = LocalTime.parse(parts[1].trim());
             
-        } catch (SQLException e) {
-            System.err.println("Error updating available seats: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            return new LocalDateTime[]{
+                LocalDateTime.of(screeningDate, startTime),
+                LocalDateTime.of(screeningDate, endTime)
+            };
+        } catch (Exception e) {
+            System.err.println("Error parsing showtime: " + showtime + " - " + e.getMessage());
+            LocalDateTime now = LocalDateTime.now();
+            return new LocalDateTime[]{now, now.plusHours(2)};
         }
     }
 }

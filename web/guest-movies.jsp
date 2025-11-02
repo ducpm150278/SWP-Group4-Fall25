@@ -153,9 +153,11 @@
             border: 1px solid #2a2d35;
             cursor: pointer !important;
             color: #fff;
-            display: block;
+            display: flex;
+            flex-direction: column;
             position: relative;
             user-select: none;
+            height: 100%;
         }
         
         .movie-card:hover {
@@ -183,6 +185,9 @@
         
         .movie-info {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
         
         .movie-title {
@@ -191,6 +196,13 @@
             color: #fff;
             margin-bottom: 10px;
             line-height: 1.3;
+            min-height: 3.9rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .movie-genre {
@@ -201,6 +213,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            min-height: 1.5rem;
         }
         
         .movie-description {
@@ -209,10 +222,13 @@
             line-height: 1.6;
             margin-bottom: 15px;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
-            line-clamp: 3;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            min-height: 6.4rem;
         }
         
         .movie-meta {
@@ -223,6 +239,7 @@
             font-size: 0.85rem;
             padding-top: 15px;
             border-top: 1px solid #2a2d35;
+            margin-top: auto;
         }
         
         .movie-meta i {
@@ -360,7 +377,10 @@
                      onclick="window.location.href=this.getAttribute('data-href');"
                      style="cursor: pointer;">
                     <img src="<%= movie.getPosterURL() != null ? movie.getPosterURL() : "https://via.placeholder.com/280x400?text=No+Image" %>" 
-                         alt="<%= movie.getTitle() %>" class="movie-poster">
+                         alt="<%= movie.getTitle() %>" 
+                         class="movie-poster"
+                         data-movie-title="<%= movie.getTitle() %>"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/280x400/1a1d24/e50914?text=' + encodeURIComponent(this.getAttribute('data-movie-title') || 'Movie');">
                     <div class="movie-info">
                         <h3 class="movie-title"><%= movie.getTitle() %></h3>
                         <div class="movie-genre">
@@ -460,6 +480,18 @@
                 // Add hover effect feedback
                 card.addEventListener('mouseenter', function() {
                     console.log('Hovering card:', href);
+                });
+            });
+            
+            // Handle image load errors - set fallback placeholder
+            const moviePosters = document.querySelectorAll('.movie-poster');
+            moviePosters.forEach(function(img) {
+                img.addEventListener('error', function() {
+                    // If image fails to load, set a placeholder
+                    if (!this.src.includes('placeholder')) {
+                        const movieTitle = this.alt || 'Movie';
+                        this.src = 'https://via.placeholder.com/280x400/1a1d24/e50914?text=' + encodeURIComponent(movieTitle);
+                    }
                 });
             });
         });

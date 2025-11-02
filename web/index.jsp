@@ -151,31 +151,55 @@
         }
         
         .hero-section h1 .cinema-highlight {
-            color: var(--primary-red);
+            color: #fff;
             font-weight: 900;
             position: relative;
             display: inline-block;
             letter-spacing: 2px;
+            padding: 8px 20px;
+            margin-top: 8px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.25), rgba(229, 9, 20, 0.15));
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--primary-red);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            vertical-align: baseline;
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+            animation: elegantAppear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
+            overflow: hidden;
         }
         
-        .hero-section h1 .cinema-highlight::after {
+        @keyframes elegantAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+                filter: blur(4px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+                filter: blur(0);
+            }
+        }
+        
+        .hero-section h1 .cinema-highlight::before {
             content: '';
             position: absolute;
-            bottom: 10px;
+            top: 0;
             left: 0;
-            width: 100%;
-            height: 8px;
-            background: var(--primary-red);
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-red), var(--light-red));
+            opacity: 0;
+            transition: opacity 0.3s ease;
             z-index: -1;
-            transform: scaleX(0);
-            transform-origin: left;
-            animation: underlineExpand 1s ease-out 0.6s forwards;
         }
         
-        @keyframes underlineExpand {
-            to {
-                transform: scaleX(1);
-            }
+        .hero-section h1 .cinema-highlight:hover::before {
+            opacity: 0.15;
         }
         
         @keyframes fadeInUp {

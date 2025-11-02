@@ -344,9 +344,8 @@ public class VNPayCallbackServlet extends HttpServlet {
             seatDAO.releaseReservationsBySession(bookingSession.getReservationSessionID());
             System.out.println("✓ Released temporary seat reservations");
             
-            // Update screening available seats count
-            ticketDAO.updateScreeningAvailableSeats(bookingSession.getScreeningID());
-            System.out.println("✓ Updated screening available seats count");
+            // Note: AvailableSeats is now calculated dynamically via view vw_CurrentScreenings
+            // No need to manually update it
             
             System.out.println("\n╔═══════════════════════════════════════════════════════════╗");
             System.out.println("║            ✓ BOOKING COMPLETED SUCCESSFULLY!              ║");

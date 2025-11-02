@@ -50,13 +50,13 @@ public class CinemaDAO {
         List<Cinema> list = new ArrayList<>();
         
         // Query lấy tất cả cinemas và số lượng phòng trong một lần
-        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], "
-                   + "c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate], "
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as ActualRooms "
                    + "FROM [dbo].[Cinemas] c "
                    + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
-                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], "
-                   + "c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate] "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
         try (Connection conn = db.getConnection();
@@ -77,8 +77,14 @@ public class CinemaDAO {
     // Get cinema by ID
     public Cinema getCinemaById(int cinemaId) {
         Cinema cinema = null;
-        String sql = "SELECT CinemaID, CinemaName, Location, City, District, TotalRooms, PhoneNumber, "
-                   + "IsActive, CreatedDate FROM Cinemas WHERE CinemaID = ?";
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate], "
+                   + "COUNT(sr.RoomID) as ActualRooms "
+                   + "FROM [dbo].[Cinemas] c "
+                   + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
+                   + "WHERE c.[CinemaID] = ? "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate]";
 
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -101,19 +107,22 @@ public class CinemaDAO {
 
     // Add new cinema
     public boolean addCinema(Cinema cinema) {
-        String sql = "INSERT INTO Cinemas (CinemaName, Location, City, District, TotalRooms, PhoneNumber, IsActive) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Cinemas (CinemaName, Location, Address, IsActive) "
+                   + "VALUES (?, ?, ?, ?)";
         
         try (Connection conn = db.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, cinema.getCinemaName());
-            stmt.setString(2, cinema.getLocation());
-            stmt.setString(3, cinema.getCity());
-            stmt.setString(4, cinema.getDistrict());
-            stmt.setInt(5, cinema.getTotalRooms());
-            stmt.setString(6, cinema.getPhoneNumber());
-            stmt.setBoolean(7, cinema.isActive());
+            // Map Location from entity to Location column (city), Address to Address column
+            String location = cinema.getCity() != null ? cinema.getCity() : cinema.getLocation();
+            stmt.setString(2, location);
+            // Use location (full address) as Address if available, otherwise use Address from entity
+            String address = cinema.getLocation() != null && !cinema.getLocation().equals(location) 
+                           ? cinema.getLocation() 
+                           : (cinema.getDistrict() != null ? cinema.getDistrict() : "");
+            stmt.setString(3, address);
+            stmt.setBoolean(4, cinema.isActive());
             
             int affectedRows = stmt.executeUpdate();
             
@@ -135,21 +144,22 @@ public class CinemaDAO {
     public boolean updateCinema(int cinemaID, String cinemaName, String location, String city, 
                                 String district, int totalRooms, String phoneNumber, boolean isActive) {
         String sql = "UPDATE [dbo].[Cinemas]\n"
-                + "   SET [CinemaName] = ?, [Location] = ?, [City] = ?, [District] = ?, \n"
-                + "       [TotalRooms] = ?, [PhoneNumber] = ?, [IsActive] = ?\n"
+                + "   SET [CinemaName] = ?, [Location] = ?, [Address] = ?, [IsActive] = ?\n"
                 + " WHERE [CinemaID] = ?";
 
         try (Connection conn = db.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, cinemaName);
-            ps.setString(2, location);
-            ps.setString(3, city);
-            ps.setString(4, district);
-            ps.setInt(5, totalRooms);
-            ps.setString(6, phoneNumber);
-            ps.setBoolean(7, isActive);
-            ps.setInt(8, cinemaID);
+            // Map city to Location column
+            String loc = city != null ? city : location;
+            ps.setString(2, loc);
+            // Combine location/district as Address
+            String address = location != null && !location.equals(loc) ? location : 
+                           (district != null ? district : "");
+            ps.setString(3, address);
+            ps.setBoolean(4, isActive);
+            ps.setInt(5, cinemaID);
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
@@ -198,8 +208,8 @@ public class CinemaDAO {
         List<Cinema> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], ")
-           .append("c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate], ")
+        sql.append("SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], ")
+           .append("c.[IsActive], c.[CreatedDate], ")
            .append("COUNT(sr.RoomID) as ActualRooms ")
            .append("FROM [dbo].[Cinemas] c ")
            .append("LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 ")
@@ -224,8 +234,8 @@ public class CinemaDAO {
             sql.append(" AND c.[Location] = ?");
         }
 
-        sql.append(" GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], ")
-           .append("c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate]");
+        sql.append(" GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], ")
+           .append("c.[IsActive], c.[CreatedDate]");
 
         // Thêm điều kiện sort
         if (sortBy != null) {
@@ -329,14 +339,14 @@ public class CinemaDAO {
     // Get active cinemas only
     public List<Cinema> getActiveCinemas() {
         List<Cinema> list = new ArrayList<>();
-        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], "
-                   + "c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate], "
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as ActualRooms "
                    + "FROM [dbo].[Cinemas] c "
                    + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
                    + "WHERE c.[IsActive] = 1 "
-                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], "
-                   + "c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate] "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
         try (Connection conn = db.getConnection();
@@ -426,14 +436,14 @@ public class CinemaDAO {
     // Get cinemas by location
     public List<Cinema> getCinemasByLocation(String location) {
         List<Cinema> list = new ArrayList<>();
-        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], "
-                   + "c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate], "
+        String sql = "SELECT c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as ActualRooms "
                    + "FROM [dbo].[Cinemas] c "
                    + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
                    + "WHERE c.[Location] = ? AND c.[IsActive] = 1 "
-                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[City], c.[District], "
-                   + "c.[TotalRooms], c.[PhoneNumber], c.[IsActive], c.[CreatedDate] "
+                   + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], "
+                   + "c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
         try (Connection conn = db.getConnection();
@@ -455,17 +465,25 @@ public class CinemaDAO {
     
     /**
      * Helper method to extract Cinema object from ResultSet
-     * Includes all fields from the simplified schema
+     * Maps new schema (Location, Address) to old entity structure for backwards compatibility
      */
     private Cinema extractCinemaFromResultSet(ResultSet rs) throws SQLException {
+        // New schema: Location (city enum), Address (specific address)
+        // Old entity expects: location (full), city, district, totalRooms, phoneNumber
+        String locationValue = rs.getString("Location"); // This is the city (Hà Nội, TP.HCM, etc.)
+        String addressValue = rs.getString("Address"); // This is the specific address
+        
+        // Calculate totalRooms from ActualRooms (COUNT of ScreeningRooms)
+        int totalRooms = rs.getInt("ActualRooms");
+        
         Cinema cinema = new Cinema(
             rs.getInt("CinemaID"),
             rs.getString("CinemaName"),
-            rs.getString("Location"),
-            rs.getString("City"),
-            rs.getString("District"),
-            rs.getInt("TotalRooms"),
-            rs.getString("PhoneNumber"),
+            addressValue != null ? addressValue : locationValue, // Use Address as location, fallback to Location
+            locationValue, // Map Location to city
+            null, // District doesn't exist in new schema
+            totalRooms, // Use calculated ActualRooms
+            null, // PhoneNumber doesn't exist in new schema
             rs.getBoolean("IsActive"),
             toLocalDateTime(rs.getTimestamp("CreatedDate"))
         );
