@@ -73,48 +73,40 @@ public class ViewScreeningDetailServlet extends HttpServlet {
             int screeningID = Integer.parseInt(idStr);
             ScreeningDAO dao = new ScreeningDAO();
 
-            Screening detail = dao.getScreeningDetail(screeningID);
+            Screening detail = dao.getScreeningDetails(screeningID);
+            System.out.println(detail.getBaseTicketPrice());
             if (detail == null) {
                 response.sendRedirect("listScreening");
                 return;
             }
+            int capacity = dao.getSeatCapacityByRoomID(detail.getRoomID());
+            int availableSeats = capacity;
+            int soldSeats = 0;
+            int cols = 10; // số ghế mỗi hàng
+            int rows = (int) Math.ceil((double) capacity / cols);
+            String rowLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-            // Lấy các khung giờ khác của cùng phim trong khoảng từ ngày bắt đầu -> kết thúc
-//            List<Screening> otherSchedules = dao.getOtherSchedulesOfMovie(
-//                    detail.getMovieID(),
-//                    detail.getStartTime().toLocalDate().atStartOfDay(),
-//                    detail.getEndTime().toLocalDate().atTime(23, 59, 59),
-//                    screeningID
-//            );
-
-            // Format sẵn thời gian để hiển thị trong JSP
-            DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
-
-            // Gán các chuỗi đã định dạng vào request
-            request.setAttribute("formattedStart", detail.getStartTime().format(dateFmt));
-            request.setAttribute("formattedEnd", detail.getEndTime().format(dateFmt));
-
-            // Format khung giờ khác
-//            for (Screening s : otherSchedules) {
-//                s.setMovieTitle(s.getStartTime().format(dateFmt) + " - " + s.getEndTime().format(timeFmt)
-//                        + " (" + s.getCinemaName() + " - " + s.getRoomName() + ")");
-//            }
-
-            request.setAttribute("detail", detail);
-            int totalSeats = detail.getAvailableSeats() + detail.getSoldSeats();
-            int rows = 5; // số hàng (có thể thay theo loại phòng)
-            int cols = totalSeats / rows;
-
-            List<Boolean> seatStatus = new ArrayList<>();
-            for (int i = 0; i < totalSeats; i++) {
-                seatStatus.add(i < detail.getSoldSeats()); // true = đã đặt
+            List<String> seatLabels = new ArrayList<>();
+            for (int i = 0; i < rows; i++) {
+                for (int j = 1; j <= cols; j++) {
+                    int seatIndex = i * cols + j;
+                    if (seatIndex > capacity) {
+                        break;
+                    }
+                    String label = rowLabels.charAt(i) + String.valueOf(j);
+                    seatLabels.add(label);
+                }
             }
 
-            request.setAttribute("seatStatus", seatStatus);
+            String formattedDate = detail.getFormattedScreeningDate();
+
+            request.setAttribute("detail", detail);
+            request.setAttribute("seatLabels", seatLabels);
             request.setAttribute("rows", rows);
             request.setAttribute("cols", cols);
-//            request.setAttribute("otherSchedules", otherSchedules);
+            request.setAttribute("availableSeats", availableSeats);
+            request.setAttribute("soldSeats", soldSeats);
+            request.setAttribute("formattedDate", formattedDate);
             request.getRequestDispatcher("viewScreening.jsp").forward(request, response);
 
         } catch (Exception e) {

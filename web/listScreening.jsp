@@ -87,7 +87,7 @@
 
                                 <!-- Ngày bắt đầu -->
                                 <div class="col-md-3">
-                                    <label for="from" class="form-label fw-semibold">Ngày bắt đầu</label>
+                                    <label for="from" class="form-label fw-semibold">Từ ngày</label>
                                     <input type="date" 
                                            class="form-control shadow-sm rounded-3" 
                                            id="from" 
@@ -97,12 +97,26 @@
 
                                 <!-- Ngày kết thúc -->
                                 <div class="col-md-3">
-                                    <label for="to" class="form-label fw-semibold">Ngày kết thúc</label>
+                                    <label for="to" class="form-label fw-semibold">Đến ngày</label>
                                     <input type="date" 
                                            class="form-control shadow-sm rounded-3" 
                                            id="to" 
                                            name="to" 
                                            value="${to}">
+                                </div>
+                                <!-- Khung giờ chiếu -->
+                                <div class="col-md-3">
+                                    <label for="showtime" class="form-label fw-semibold">Khung giờ chiếu</label>
+                                    <select name="showtime" id="showtime" class="form-select shadow-sm rounded-3">
+                                        <option value="">Tất cả</option>
+                                        <option value="08:00-10:00" ${param.showtime == '08:00-10:00' ? 'selected' : ''}>08:00 - 10:00</option>
+                                        <option value="10:15-12:15" ${param.showtime == '10:15-12:15' ? 'selected' : ''}>10:15 - 12:15</option>
+                                        <option value="12:30-14:30" ${param.showtime == '12:30-14:30' ? 'selected' : ''}>12:30 - 14:30</option>
+                                        <option value="14:45-16:45" ${param.showtime == '14:45-16:45' ? 'selected' : ''}>14:45 - 16:45</option>
+                                        <option value="17:00-19:00" ${param.showtime == '17:00-19:00' ? 'selected' : ''}>17:00 - 19:00</option>
+                                        <option value="19:15-21:15" ${param.showtime == '19:15-21:15' ? 'selected' : ''}>19:15 - 21:15</option>
+                                        <option value="21:30-23:30" ${param.showtime == '21:30-23:30' ? 'selected' : ''}>21:30 - 23:30</option>
+                                    </select>
                                 </div>
 
                                 <!-- Trạng thái -->
@@ -113,6 +127,7 @@
                                         <option value="Active" ${status == 'Active' ? 'selected' : ''}>Active</option>
                                         <option value="Inactive" ${status == 'Inactive' ? 'selected' : ''}>Inactive</option>
                                         <option value="Upcoming" ${status == 'Upcoming' ? 'selected' : ''}>Upcoming</option>
+                                        <option value="Upcoming" ${status == 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                                     </select>
                                 </div>
 
@@ -147,8 +162,8 @@
                                         <th>Tên phim</th>
                                         <th>Rạp chiếu</th>
                                         <th>Tên phòng</th>
-                                        <th>Bắt đầu</th>
-                                        <th>Kết thúc</th>
+                                        <th>Ngày chiếu</th>
+                                        <th>Khung giờ</th>
                                         <th>Trạng thái</th>
                                         <th>Thao tác</th>
                                     </tr>
@@ -159,8 +174,8 @@
                                             <td>${sc.movieTitle}</td>
                                             <td>${sc.cinemaName}</td>
                                             <td>${sc.roomName}</td>
-                                            <td class="text-center">${sc.formattedStartTime}</td>
-                                            <td class="text-center">${sc.formattedEndTime}</td>
+                                            <td class="text-center">${sc.formattedScreeningDate}</td>
+                                            <td class="text-center">${sc.showtime}</td>
 
                                             <td class="text-center">
                                                 <span class="badge bg-${sc.movieStatus == 'Active' ? 'success' 

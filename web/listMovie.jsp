@@ -45,21 +45,74 @@
                             <div class="alert alert-danger">Không thể xóa phim. Vui lòng thử lại.</div>
                         </c:if>
 
-                        <!-- Thanh search -->
-                        <form action="list" method="get" class="row g-2 mb-3">
-                            <div class="col-md-4">
-                                <input type="text" name="keyword" class="form-control" 
-                                       placeholder="Tìm phim theo tiêu đề" 
-                                       value="${keyword != null ? keyword : ''}">
+                         <!-- Thanh search -->
+                        <form action="list" method="get" class="mb-4">
+
+                            <!-- Hàng 1: Thanh tìm kiếm -->
+                            <div class="row mb-3 align-items-end">
+                                <div class="col-md-6">
+                                    <div class="input-group shadow-sm rounded-3">
+                                        <input type="text" 
+                                               name="keyword" 
+                                               class="form-control rounded-start" 
+                                               placeholder="Tìm phim theo tiêu đề..."
+                                               value="${param.keyword}">
+                                        <button type="submit" class="btn btn-primary rounded-end">
+                                            <i class="bi bi-search"></i> Tìm kiếm
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+
+                            <!-- Hàng 2: Ngày chiếu, Ngày kết thúc, Trạng thái, Lọc + Quay lại -->
+                            <div class="row g-3 align-items-end">
+
+                                <!-- Ngày chiếu -->
+                                <div class="col-md-3">
+                                    <label for="from" class="form-label fw-semibold">Từ ngày</label>
+                                    <input type="date" 
+                                           class="form-control shadow-sm rounded-3" 
+                                           id="from" 
+                                           name="from" 
+                                           value="${param.from}">
+                                </div>
+
+                                <!-- Ngày kết thúc -->
+                                <div class="col-md-3">
+                                    <label for="to" class="form-label fw-semibold">Đến ngày</label>
+                                    <input type="date" 
+                                           class="form-control shadow-sm rounded-3" 
+                                           id="to" 
+                                           name="to" 
+                                           value="${param.to}">
+                                </div>
+
+                                <!-- Trạng thái -->
+                                <div class="col-md-3">
+                                    <label for="status" class="form-label fw-semibold">Trạng thái</label>
+                                    <select name="status" id="status" class="form-select shadow-sm rounded-3">
+                                        <option value="">Tất cả</option>
+                                        <option value="Active" ${param.status == 'Active' ? 'selected' : ''}>Active</option>
+                                        <option value="Inactive" ${param.status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                        <option value="Upcoming" ${param.status == 'Upcoming' ? 'selected' : ''}>Upcoming</option>
+                                        <option value="Upcoming" ${param.status == 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                    </select>
+                                </div>
+
+                                <!-- Nút Lọc và Quay lại -->
+                                <div class="col-md-3 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary w-100 shadow-sm rounded-3">
+                                        <i class="bi bi-funnel"></i> Lọc
+                                    </button>
+
+                                    <c:if test="${not empty param.keyword or not empty param.from or not empty param.to or not empty param.status}">
+                                        <a href="list" class="btn btn-secondary w-100 shadow-sm rounded-3">
+                                            <i class="bi bi-arrow-left"></i> Quay lại
+                                        </a>
+                                    </c:if>
+                                </div>
                             </div>
-                            <div class="col-md-2">
-                                <c:if test="${not empty param.keyword}">
-                                    <a href="list" class="btn btn-secondary w-100">Quay lại</a>
-                                </c:if>
-                            </div>
+
                         </form>
 
                         <!-- Nút thêm -->
@@ -79,6 +132,7 @@
                                         <th>Đạo diễn</th>
                                         <th>Thời lượng</th>
                                         <th>Ngày chiếu</th>
+                                        <th>Ngày kết thúc</th>
                                         <th>Poster</th>
                                         <th>Trạng thái</th>
                                         <th>Ngôn ngữ</th>
@@ -99,6 +153,7 @@
                                             <td>${m.director}</td>
                                             <td class="text-center">${m.duration} phút</td>
                                             <td class="text-center">${m.formattedReleasedDate}</td>
+                                            <td class="text-center">${m.formattedEndDate}</td>
                                             <td class="text-center">
                                                 <img src="${m.posterURL}" alt="Poster" width="80" class="rounded shadow-sm">
                                             </td>

@@ -25,10 +25,37 @@ public class Movie {
     private LocalDateTime createdDate;
     // Chỉ lưu tên ngôn ngữ
     private String languageName;
+    private LocalDate endDate;
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+    
 
     public Movie() {
     }
-
+ public Movie(int movieID, String title, String genre, String summary,
+            String trailerURL, String cast, String director, int duration,
+            LocalDate releasedDate, LocalDate endDate, String posterURL,
+            String status, String languageName) {
+        this.movieID = movieID;
+        this.title = title;
+        this.genre = genre;
+        this.summary = summary;
+        this.trailerURL = trailerURL;
+        this.cast = cast;
+        this.director = director;
+        this.duration = duration;
+        this.releasedDate = releasedDate;
+        this.endDate = endDate;
+        this.posterURL = posterURL;
+        this.status = status;
+        this.languageName = languageName;
+    }
     public Movie(Integer movieID, String title, String genre, String summary, String trailerURL, String cast, String director, Integer duration,
             LocalDate releasedDate, String posterURL, Integer languageID, String status, LocalDateTime createdDate) {
         this.movieID = movieID;
@@ -182,8 +209,11 @@ public class Movie {
         if (releasedDate == null) {
             return "";
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return releasedDate.format(formatter);
+    }
+    public String getFormattedEndDate() {
+        return endDate != null ? endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
     }
 
     @Override

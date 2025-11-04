@@ -61,24 +61,6 @@
                                         </c:forEach>
                                     </select>
                                 </div>
-                            </div>
-
-                            <!-- Cột 2: Thời gian bắt đầu/kết thúc + Trạng thái -->
-                            <div class="col-md-6">
-                                <!-- Thời gian bắt đầu -->
-                                <div class="mb-3">
-                                    <label class="form-label">Thời gian bắt đầu</label>
-                                    <input type="datetime-local" name="startTime" id="startTime" class="form-control" required>
-                                    <div id="startError" class="text-danger small mt-1"></div>
-                                </div>
-
-                                <!-- Thời gian kết thúc -->
-                                <div class="mb-3">
-                                    <label class="form-label">Thời gian kết thúc</label>
-                                    <input type="datetime-local" name="endTime" id="endTime" class="form-control" required>
-                                    <div id="endError" class="text-danger small mt-1"></div>
-                                </div>
-
                                 <!-- Trạng thái -->
                                 <div class="mb-3">
                                     <label class="form-label">Trạng thái</label>
@@ -90,6 +72,32 @@
                                         <option value="Cancelled">Cancelled</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <!-- Cột 2: Thời gian bắt đầu/kết thúc + Trạng thái -->
+                            <div class="col-md-6">
+                                <!-- Thời gian bắt đầu -->
+                                <div class="mb-3">
+                                    <label class="form-label">Ngày chiếu</label>
+                                    <input type="date" name="date" id="date" class="form-control" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Khung giờ chiếu</label>
+                                    <select name="timeSlot" id="timeSlot" class="form-select" required>
+                                        <option value="">-- Chọn khung giờ --</option>
+                                        <c:forEach var="slot" items="${timeSlots}">
+                                            <option value="${slot}">${slot}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Giá vé (VNĐ)</label>
+                                    <input type="number" name="baseTicketPrice" class="form-control" min="0" step="1000">
+                                </div>
+
+
                             </div>
 
                             <!-- Buttons -->
@@ -189,6 +197,12 @@
                     e.preventDefault();
                 }
             });
+        </script>
+        
+        <script>
+            // Giới hạn ngày chiếu chỉ từ hôm nay trở đi
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("date").setAttribute("min", today);
         </script>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

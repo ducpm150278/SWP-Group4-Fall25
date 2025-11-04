@@ -198,29 +198,35 @@ public class DiscountDAO extends DBContext {
     }
 
     //thêm discount
-    public void insertDiscount(String code, int maxUsage, int usageCount,
-            LocalDate startDate, LocalDate endDate,
-            String status, double discountPercentage, int createdBy) {
+public void insertDiscount(String code, int maxUsage, int usageCount,
+        LocalDate startDate, LocalDate endDate,
+        String status, double discountPercentage, int createdBy) {
 
-        String sql = """
-        INSERT INTO Discounts (CreatedBy, Code, MaxUsage, UsageCount, StartDate, EndDate, Status, DiscountPercentage)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    String sql = """
+        INSERT INTO Discounts (
+            CreatedBy, Code, DiscountType, DiscountPercentage, DiscountValue, 
+            MaxUsage, UsageCount, StartDate, EndDate, Status
+        )
+        VALUES (?, ?, 'Percentage', ?, NULL, ?, ?, ?, ?, ?)
     """;
 
-        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-            ps.setInt(1, createdBy);
-            ps.setString(2, code);
-            ps.setInt(3, maxUsage);
-            ps.setInt(4, usageCount);
-            ps.setTimestamp(5, Timestamp.valueOf(startDate.atStartOfDay()));
-            ps.setTimestamp(6, Timestamp.valueOf(endDate.atTime(23, 59, 59)));
-            ps.setString(7, status);
-            ps.setDouble(8, discountPercentage);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        ps.setInt(1, createdBy);
+        ps.setString(2, code);
+        ps.setDouble(3, discountPercentage);
+        ps.setInt(4, maxUsage);
+        ps.setInt(5, usageCount);
+        ps.setTimestamp(6, Timestamp.valueOf(startDate.atStartOfDay()));
+        ps.setTimestamp(7, Timestamp.valueOf(endDate.atTime(23, 59, 59)));
+        ps.setString(8, status);
+
+        ps.executeUpdate();
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+}
+    
 
 // Cập nhật CTKM
     public void updateDiscount(int id, String code, int maxUsage, int usageCount,

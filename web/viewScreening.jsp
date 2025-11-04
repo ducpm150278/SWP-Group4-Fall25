@@ -85,7 +85,7 @@
     <body class="bg-light">
 
         <div class="container mt-5">
-            <div class="card shadow-sm mx-auto" style="max-width: 1000px;">
+            <div class="card shadow-sm mx-auto" style="max-width: 800px;">
                 <div class="card-header bg-primary text-white text-center">
                     <h4 class="mb-0">Chi tiết lịch chiếu</h4>
                 </div>
@@ -97,35 +97,29 @@
                             <tr><th>Rạp chiếu</th><td>${detail.cinemaName}</td></tr>
                             <tr><th>Tên phòng</th><td>${detail.roomName}</td></tr>
                             <tr><th>Loại phòng</th><td>${detail.roomType}</td></tr>
-                            <tr><th>Thời gian chiếu</th>
-                                <td>${formattedStart} → ${formattedEnd}</td>
-                            </tr>
+                            <tr><th>Ngày chiếu</th><td>${formattedDate}</td></tr>
+                            <tr><th>Khung giờ</th><td>${detail.showtime}</td></tr>
                             <tr><th>Trạng thái</th><td>${detail.movieStatus}</td></tr>
-                            <tr><th>Số ghế khả dụng</th><td>${detail.availableSeats}</td></tr>
-                            <tr><th>Số ghế đã bán</th><td>${detail.soldSeats}</td></tr>
+                            <tr><th>Giá vé</th><td>${detail.baseTicketPrice} VNĐ</td></tr>
+                            <tr><th>Số ghế khả dụng</th><td>${availableSeats}</td></tr>
+                            <tr><th>Số ghế đã bán</th><td>${soldSeats}</td></tr>
                         </table>
                         <h5 class="text-center mt-4 mb-3">Sơ đồ ghế</h5>
                         <div class="seat-map">
-
-                            <!-- Màn hình -->
                             <div class="screen">MÀN HÌNH</div>
-
-                            <!-- Sơ đồ ghế -->
-                            <c:set var="rowLabels" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
                             <c:forEach var="i" begin="0" end="${rows - 1}">
                                 <div class="seat-row">
                                     <c:forEach var="j" begin="0" end="${cols - 1}">
                                         <c:set var="index" value="${i * cols + j}" />
-                                        <c:if test="${index < seatStatus.size()}">
-                                            <div class="seat ${seatStatus[index] ? 'booked' : 'available'}">
-                                                ${fn:substring(rowLabels, i, i + 1)}${j + 1}
+                                        <c:if test="${index < seatLabels.size()}">
+                                            <div class="seat available">
+                                                ${seatLabels[index]}
                                             </div>
                                         </c:if>
                                     </c:forEach>
                                 </div>
                             </c:forEach>
 
-                            <!-- Chú thích -->
                             <div class="seat-legend">
                                 <div class="d-flex align-items-center">
                                     <span class="seat available"></span> Còn trống
@@ -135,6 +129,7 @@
                                 </div>
                             </div>
                         </div>
+
 
 
 

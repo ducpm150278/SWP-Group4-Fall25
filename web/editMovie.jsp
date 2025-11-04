@@ -64,6 +64,14 @@
                                     <label class="form-label">Ngày công chiếu</label>
                                     <input type="date" name="releasedDate" class="form-control" value="${movie.releasedDate}" required>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Ngày kết thúc</label>
+                                    <input type="date" name="endDate" class="form-control"
+                                           value="${movie.endDate}" required>
+                                    <c:if test="${not empty errorDate}">
+                                        <div class="text-danger mt-1">${errorDate}</div>
+                                    </c:if>
+                                </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Poster URL</label>
@@ -106,4 +114,10 @@
         <!-- Bootstrap JS (optional, for components like dropdowns, modals) -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
+    <script>
+        // Lấy ngày hôm nay ở định dạng yyyy-mm-dd
+        const today = new Date().toISOString().split("T")[0];
+        document.querySelector('input[name="releasedDate"]').setAttribute('min', today);
+    </script>
+
 </html>

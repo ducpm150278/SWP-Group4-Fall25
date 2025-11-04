@@ -489,4 +489,23 @@ public class CinemaDAO {
         );
         return cinema;
     }
+      public List<Cinema> getCinemas() {
+        List<Cinema> list = new ArrayList<>();
+        String sql = "SELECT CinemaID, CinemaName FROM Cinemas WHERE IsActive = 1"; // chỉ lấy rạp đang hoạt động
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("CinemaID");
+                String name = rs.getString("CinemaName");
+                list.add(new Cinema(id, name));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

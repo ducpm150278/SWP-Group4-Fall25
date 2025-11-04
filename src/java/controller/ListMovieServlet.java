@@ -14,6 +14,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -57,42 +59,63 @@ public class ListMovieServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-     
-    String keyword = request.getParameter("keyword");
-    int page = 1;
-    int recordsPerPage = 6;
+            throws ServletException, IOException {
 
-    // Lấy trang hiện tại (nếu có)
-    String pageParam = request.getParameter("page");
-    if (pageParam != null) {
-        try {
-            page = Integer.parseInt(pageParam);
-        } catch (NumberFormatException e) {
-            page = 1;
+        String keyword = request.getParameter("keyword");
+        String fromStr = request.getParameter("from");
+        String toStr = request.getParameter("to");
+        String status = request.getParameter("status");
+        LocalDate from = null, to = null;
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        int page = 1;
+        int recordsPerPage = 6;
+
+        // Lấy trang hiện tại (nếu có)
+        String pageParam = request.getParameter("page");
+        if (pageParam != null) {
+            try {
+                page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
         }
+        try {
+            if (fromStr != null && !fromStr.isEmpty()) {
+                from = LocalDate.parse(fromStr, fmt);
+            }
+            if (toStr != null && !toStr.isEmpty()) {
+                to = LocalDate.parse(toStr, fmt);
+            }
+        } catch (Exception e) {
+            System.out.println("Error parsing date: " + e.getMessage());
+        }
+
+        MovieDAO dao = new MovieDAO();
+
+        int totalRecords = dao.getTotalMovies(keyword, from, to, status);
+        int totalPages = (int) Math.ceil(totalRecords / (double) recordsPerPage);
+
+        int offset = (page - 1) * recordsPerPage;
+
+        List<Movie> movies = dao.getMoviesPaginated(offset, offset, keyword, from, to, status);
+
+        // Gửi dữ liệu sang JSP
+        request.setAttribute("movies", movies);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("from", fromStr);
+        request.setAttribute("to", toStr);
+        request.setAttribute("status", status);
+
+        request.getRequestDispatcher("listMovie.jsp").forward(request, response);
     }
 
-    MovieDAO dao = new MovieDAO();
 
-    int totalRecords = dao.getTotalMovies(keyword);
-    int totalPages = (int) Math.ceil(totalRecords / (double) recordsPerPage);
-
-    int offset = (page - 1) * recordsPerPage;
-
-    List<Movie> movies = dao.getMoviesPaginated(offset, recordsPerPage, keyword);
-
-    // Gửi dữ liệu sang JSP
-    request.setAttribute("movies", movies);
-    request.setAttribute("currentPage", page);
-    request.setAttribute("totalPages", totalPages);
-    request.setAttribute("keyword", keyword);
-
-    request.getRequestDispatcher("listMovie.jsp").forward(request, response);
-    } 
-
-    /** 
+    /**
      * Handles the HTTP <code>POST</code> method.
+     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -100,7 +123,7 @@ public class ListMovieServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 

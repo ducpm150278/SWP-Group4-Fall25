@@ -11,8 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import entity.Language;
+import java.sql.Date;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -23,30 +24,34 @@ public class MovieDAO extends DBContext {
     public List<Movie> getAll() {
         List<Movie> list = new ArrayList<>();
         String sql = """
-                       SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
-                                      m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-                                      m.Status, l.LanguageName 
-                                      FROM Movies m 
-                                      JOIN Language l ON m.LanguageID = l.LanguageID""";
+                        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+                                                m.cast, m.director, m.duration, m.releasedDate, m.endDate, 
+                                                m.posterURL, m.status, l.languageName 
+                                         FROM Movies m 
+                                         JOIN Language l ON m.languageID = l.languageID""";
+
         try {
             PreparedStatement pre = getConnection().prepareStatement(sql);
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
 
-                int movieID = rs.getInt("MovieID");
-                String title = rs.getString("Title");
-                String genre = rs.getString("Genre");
-                String summary = rs.getString("Summary");
-                String trailerURL = rs.getString("TrailerURL");
-                String cast = rs.getString("Cast");
-                String director = rs.getString("Director");
-                int duration = rs.getInt("Duration"); // phút
-                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
-                String posterURL = rs.getString("PosterURL");
-                String status = rs.getString("Status"); // true = đang chiếu, false = ngừng
-                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
-                String languageName = rs.getString("LanguageName");
-                list.add(new Movie(movieID, title, genre, summary, trailerURL, cast, director, duration, releasedDate, posterURL, status, createdDate, languageName));
+                int movieID = rs.getInt("movieID");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
+                String summary = rs.getString("summary");
+                String trailerURL = rs.getString("trailerURL");
+                String cast = rs.getString("cast");
+                String director = rs.getString("director");
+                int duration = rs.getInt("duration"); // phút
+                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
+                LocalDate endDate = rs.getDate("endDate").toLocalDate();
+                String posterURL = rs.getString("posterURL");
+                String status = rs.getString("status"); // true = đang chiếu, false = ngừng
+
+                String languageName = rs.getString("languageName");
+                list.add(new Movie(movieID, title, genre, summary, trailerURL, cast, director, duration, releasedDate, endDate, posterURL, status, languageName));
+
+
             }
 
         } catch (SQLException e) {
@@ -56,10 +61,18 @@ public class MovieDAO extends DBContext {
     }
 
     public void addMovie(String title, String genre, String summary, String trailerURL,
-            String cast, String director, int duration, LocalDate releasedDate,
+
+            String cast, String director, int duration, LocalDate releasedDate, LocalDate endDate,
             String posterURL, int languageID, String status) {
-        String sql = "INSERT INTO Movies (Title, Genre, Summary, TrailerURL, Cast, Director, Duration, ReleasedDate, PosterURL, LanguageID, Status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        String sql = """
+        INSERT INTO Movies 
+        (Title, Genre, Summary, TrailerURL, Cast, Director, Duration, ReleasedDate, EndDate, 
+         PosterURL, LanguageID, Status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
+
+
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, title);
@@ -70,13 +83,14 @@ public class MovieDAO extends DBContext {
             pre.setString(6, director);
             pre.setInt(7, duration);
             pre.setDate(8, java.sql.Date.valueOf(releasedDate));
-            pre.setString(9, posterURL);
-            pre.setInt(10, languageID);   // ✅ truyền trực tiếp ID
-            pre.setString(11, status);
+            pre.setDate(9, java.sql.Date.valueOf(endDate)); // ✅ thêm dòng này
+            pre.setString(10, posterURL);
+            pre.setInt(11, languageID);
+            pre.setString(12, status);
 
             pre.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error addMovie: " + e.getMessage());
         }
     }
 
@@ -84,16 +98,21 @@ public class MovieDAO extends DBContext {
         List<Movie> list = new ArrayList<>();
         String sql = """
         SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, m.Cast, 
+<<<<<<< HEAD
+               m.Director, m.Duration, m.ReleasedDate, m.EndDate, m.PosterURL, 
+=======
                m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
+>>>>>>> 329185d30de73c790fa4e3314fb834db2db85570
                m.Status, l.LanguageName
         FROM Movies m
         JOIN Language l ON m.LanguageID = l.LanguageID
         WHERE m.Title LIKE ?
     """;
-        try {
-            PreparedStatement pre = getConnection().prepareStatement(sql);
+
+        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, "%" + keyword + "%");
             ResultSet rs = pre.executeQuery();
+
             while (rs.next()) {
                 Movie movie = new Movie(
                         rs.getInt("MovieID"),
@@ -105,29 +124,34 @@ public class MovieDAO extends DBContext {
                         rs.getString("Director"),
                         rs.getInt("Duration"),
                         rs.getDate("ReleasedDate").toLocalDate(),
+                        rs.getDate("EndDate").toLocalDate(), // ✅ đổi từ CreatedDate → EndDate
                         rs.getString("PosterURL"),
                         rs.getString("Status"),
-                        null, // Movies table doesn't have CreatedDate
-                        rs.getString("LanguageName") // ✅ lấy languageName
+
+                        rs.getString("LanguageName")
+
+                      
                 );
                 list.add(movie);
             }
         } catch (SQLException e) {
-            System.out.println(e);
+            System.out.println("Error getMoviesByTitle: " + e.getMessage());
         }
         return list;
     }
 
     public void updateMovie(int movieID, String title, String genre, String summary,
             String trailerURL, String cast, String director,
-            int duration, LocalDate releasedDate, String posterURL,
-            String status, int languageId) {
+            int duration, LocalDate releasedDate, LocalDate endDate, // ✅ thêm endDate
+            String posterURL, String status, int languageId) {
 
         String sql = """
         UPDATE Movies
-        SET Title=?, Genre=?, Summary=?, TrailerURL=?, Cast=?, Director=?, 
-            Duration=?, ReleasedDate=?, PosterURL=?, Status=?, LanguageID=?
-        WHERE MovieID=?""";
+        SET Title = ?, Genre = ?, Summary = ?, TrailerURL = ?, Cast = ?, Director = ?, 
+            Duration = ?, ReleasedDate = ?, EndDate = ?, PosterURL = ?, 
+            Status = ?, LanguageID = ?
+        WHERE MovieID = ?
+    """;
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, title);
@@ -138,10 +162,11 @@ public class MovieDAO extends DBContext {
             pre.setString(6, director);
             pre.setInt(7, duration);
             pre.setDate(8, java.sql.Date.valueOf(releasedDate));
-            pre.setString(9, posterURL);
-            pre.setString(10, status);
-            pre.setInt(11, languageId);   // ✅ truyền ID trực tiếp
-            pre.setInt(12, movieID);
+            pre.setDate(9, java.sql.Date.valueOf(endDate)); // ✅ thêm dòng này
+            pre.setString(10, posterURL);
+            pre.setString(11, status);
+            pre.setInt(12, languageId);
+            pre.setInt(13, movieID);
 
             pre.executeUpdate();
         } catch (SQLException e) {
@@ -162,39 +187,40 @@ public class MovieDAO extends DBContext {
 
     public Movie getMovieById(int id) {
         String sql = """
-        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, m.Cast, 
-               m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-               m.Status, l.LanguageName
+        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+               m.cast, m.director, m.duration, m.releasedDate, m.endDate, 
+               m.posterURL, m.status, l.languageName
         FROM Movies m
-        JOIN Language l ON m.LanguageID = l.LanguageID
-        WHERE m.MovieID = ?
-        """;
+        JOIN Language l ON m.languageID = l.languageID
+        WHERE m.movieID = ?
+    """;
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setInt(1, id);
             ResultSet rs = pre.executeQuery();
+
             if (rs.next()) {
-                Movie m = new Movie(
-                        rs.getInt("MovieID"),
-                        rs.getString("Title"),
-                        rs.getString("Genre"),
-                        rs.getString("Summary"),
-                        rs.getString("TrailerURL"),
-                        rs.getString("Cast"),
-                        rs.getString("Director"),
-                        rs.getInt("Duration"),
-                        rs.getDate("ReleasedDate").toLocalDate(),
-                        rs.getString("PosterURL"),
-                        rs.getString("Status"),
-                        null, // Movies table doesn't have CreatedDate
-                        rs.getString("LanguageName") // thêm languageName
-                );
-                return m;
+                int movieID = rs.getInt("movieID");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
+                String summary = rs.getString("summary");
+                String trailerURL = rs.getString("trailerURL");
+                String cast = rs.getString("cast");
+                String director = rs.getString("director");
+                int duration = rs.getInt("duration");
+                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
+                LocalDate endDate = rs.getDate("endDate").toLocalDate();
+                String posterURL = rs.getString("posterURL");
+                String status = rs.getString("status");
+                String language = rs.getString("languageName");
+
+                return new Movie(movieID, title, genre, summary, trailerURL, cast, director,
+                        duration, releasedDate, endDate, posterURL, status, language);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error getMovieById: " + e.getMessage());
         }
-        return null; // nếu không tìm thấy
+        return null;
     }
 
     public List<Language> getAllLanguages() {
@@ -214,70 +240,111 @@ public class MovieDAO extends DBContext {
         return list;
     }
 
-    public List<Movie> getMoviesPaginated(int offset, int limit, String keyword) {
-        List<Movie> list = new ArrayList<>();
+      public List<Movie> getMoviesPaginated(int offset, int limit, String keyword, LocalDate from, LocalDate to, String status) {
+    List<Movie> list = new ArrayList<>();
 
-        String sql = """
-        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
-               m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-               m.Status, l.LanguageName
-        FROM Movies m 
-        JOIN Language l ON m.LanguageID = l.LanguageID
-        WHERE 1=1
-    """;
-
-        if (keyword != null && !keyword.isBlank()) {
-            sql += " AND m.Title LIKE ? ";
-        }
-
-        sql += " ORDER BY m.ReleasedDate DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
-
-        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
-            int index = 1;
-            if (keyword != null && !keyword.isBlank()) {
-                pre.setString(index++, "%" + keyword + "%");
-            }
-            pre.setInt(index++, offset);
-            pre.setInt(index, limit);
-
-            ResultSet rs = pre.executeQuery();
-            while (rs.next()) {
-                int movieID = rs.getInt("MovieID");
-                String title = rs.getString("Title");
-                String genre = rs.getString("Genre");
-                String summary = rs.getString("Summary");
-                String trailerURL = rs.getString("TrailerURL");
-                String cast = rs.getString("Cast");
-                String director = rs.getString("Director");
-                int duration = rs.getInt("Duration");
-                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
-                String posterURL = rs.getString("PosterURL");
-                String status = rs.getString("Status");
-                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
-                String languageName = rs.getString("LanguageName");
-
-                list.add(new Movie(movieID, title, genre, summary, trailerURL,
-                        cast, director, duration, releasedDate, posterURL,
-                        status, createdDate, languageName));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error getMoviesPaginated: " + e.getMessage());
-        }
-
-        return list;
+    // ✅ Ngăn lỗi nếu limit = 0 hoặc âm
+    if (limit <= 0) {
+        limit = 6; // mặc định 6 phim mỗi trang
     }
-    //lay so ban ghi
 
-    public int getTotalMovies(String keyword) {
-        String sql = "SELECT COUNT(*) FROM Movies WHERE 1=1 ";
+    StringBuilder sql = new StringBuilder("""
+        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+               m.cast, m.director, m.duration, m.releasedDate, m.endDate,
+               m.posterURL, m.status, l.languageName
+        FROM Movies m 
+        JOIN Language l ON m.languageID = l.languageID
+        WHERE 1=1
+    """);
+
+    List<Object> params = new ArrayList<>();
+
+    if (keyword != null && !keyword.isBlank()) {
+        sql.append(" AND m.title LIKE ? ");
+        params.add("%" + keyword + "%");
+    }
+    if (from != null) {
+        sql.append(" AND m.releasedDate >= ? ");
+        params.add(Date.valueOf(from));
+    }
+    if (to != null) {
+        sql.append(" AND m.endDate <= ? ");
+        params.add(Date.valueOf(to));
+    }
+    if (status != null && !status.isBlank()) {
+        sql.append(" AND m.status = ? ");
+        params.add(status);
+    }
+
+    sql.append(" ORDER BY m.movieID DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+
+    try (PreparedStatement pre = getConnection().prepareStatement(sql.toString())) {
+        int index = 1;
+        for (Object param : params) {
+            pre.setObject(index++, param);
+        }
+        pre.setInt(index++, offset);
+        pre.setInt(index, limit);
+
+        ResultSet rs = pre.executeQuery();
+        while (rs.next()) {
+            list.add(new Movie(
+                    rs.getInt("movieID"),
+                    rs.getString("title"),
+                    rs.getString("genre"),
+                    rs.getString("summary"),
+                    rs.getString("trailerURL"),
+                    rs.getString("cast"),
+                    rs.getString("director"),
+                    rs.getInt("duration"),
+                    rs.getDate("releasedDate").toLocalDate(),
+                    rs.getDate("endDate").toLocalDate(),
+                    rs.getString("posterURL"),
+                    rs.getString("status"),
+                    rs.getString("languageName")
+            ));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error getMoviesPaginated: " + e.getMessage());
+    }
+
+    return list;
+}
+
+    //lay so ban ghi
+    public int getTotalMovies(String keyword, LocalDate from, LocalDate to, String status) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*) 
+        FROM Movies m 
+        JOIN Language l ON m.languageID = l.languageID
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
         if (keyword != null && !keyword.isBlank()) {
-            sql += " AND title LIKE ? ";
+            sql.append(" AND m.title LIKE ? ");
+            params.add("%" + keyword + "%");
+        }
+        if (from != null) {
+            sql.append(" AND m.releasedDate >= ? ");
+            params.add(Date.valueOf(from));
+        }
+        if (to != null) {
+            sql.append(" AND m.endDate <= ? ");
+            params.add(Date.valueOf(to));
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND m.status = ? ");
+            params.add(status);
         }
 
-        try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
-            if (keyword != null && !keyword.isBlank()) {
-                pre.setString(1, "%" + keyword + "%");
+        try (PreparedStatement pre = getConnection().prepareStatement(sql.toString())) {
+            int i = 1;
+            for (Object param : params) {
+                pre.setObject(i++, param);
             }
+
             ResultSet rs = pre.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -285,6 +352,7 @@ public class MovieDAO extends DBContext {
         } catch (SQLException e) {
             System.out.println("Error getTotalMovies: " + e.getMessage());
         }
+
         return 0;
     }
 
@@ -308,45 +376,45 @@ public class MovieDAO extends DBContext {
     public List<Movie> getMoviesByStatus(String status, String keyword) {
         List<Movie> list = new ArrayList<>();
         String sql = """
-        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
-               m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-               m.Status, l.LanguageName
+        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+               m.cast, m.director, m.duration, m.releasedDate, m.endDate, 
+               m.posterURL, m.status, l.languageName
         FROM Movies m 
-        JOIN Language l ON m.LanguageID = l.LanguageID
-        WHERE m.Status = ?
-        """;
-        
-        if (keyword != null && !keyword.isBlank()) {
-            sql += " AND m.Title LIKE ?";
+        JOIN Language l ON m.languageID = l.languageID
+        WHERE m.status = ?
+    """;
+
+        if (!keyword.isBlank()) {
+            sql += " AND m.title LIKE ?";
         }
-        
-        sql += " ORDER BY m.ReleasedDate DESC";
+
+        sql += " ORDER BY m.releasedDate DESC";
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             pre.setString(1, status);
-            if (keyword != null && !keyword.isBlank()) {
+            if (!keyword.isBlank()) {
                 pre.setString(2, "%" + keyword + "%");
             }
-            
+
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
-                int movieID = rs.getInt("MovieID");
-                String title = rs.getString("Title");
-                String genre = rs.getString("Genre");
-                String summary = rs.getString("Summary");
-                String trailerURL = rs.getString("TrailerURL");
-                String cast = rs.getString("Cast");
-                String director = rs.getString("Director");
-                int duration = rs.getInt("Duration");
-                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
-                String posterURL = rs.getString("PosterURL");
-                String movieStatus = rs.getString("Status");
-                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
-                String languageName = rs.getString("LanguageName");
+                int movieID = rs.getInt("movieID");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
+                String summary = rs.getString("summary");
+                String trailerURL = rs.getString("trailerURL");
+                String cast = rs.getString("cast");
+                String director = rs.getString("director");
+                int duration = rs.getInt("duration");
+                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
+                LocalDate endDate = rs.getDate("endDate").toLocalDate();
+                String posterURL = rs.getString("posterURL");
+                String movieStatus = rs.getString("status");
+                String languageName = rs.getString("languageName");
 
-                list.add(new Movie(movieID, title, genre, summary, trailerURL,
-                        cast, director, duration, releasedDate, posterURL,
-                        movieStatus, createdDate, languageName));
+                list.add(new Movie(movieID, title, genre, summary, trailerURL, cast,
+                        director, duration, releasedDate, endDate, posterURL,
+                        movieStatus, languageName));
             }
         } catch (SQLException e) {
             System.out.println("Error getMoviesByStatus: " + e.getMessage());
@@ -357,50 +425,50 @@ public class MovieDAO extends DBContext {
     public List<Movie> getActiveMoviesForGuest(String keyword) {
         List<Movie> list = new ArrayList<>();
         String sql = """
-        SELECT m.MovieID, m.Title, m.Genre, m.Summary, m.TrailerURL, 
-               m.Cast, m.Director, m.Duration, m.ReleasedDate, m.PosterURL, 
-               m.Status, l.LanguageName
+        SELECT m.movieID, m.title, m.genre, m.summary, m.trailerURL, 
+               m.cast, m.director, m.duration, m.releasedDate, m.endDate, 
+               m.posterURL, m.status, l.languageName
         FROM Movies m 
-        JOIN Language l ON m.LanguageID = l.LanguageID
-        WHERE m.Status IN ('Active', 'Upcoming')
-        """;
-        
+        JOIN Language l ON m.languageID = l.languageID
+        WHERE m.status IN ('Active', 'Upcoming')
+    """;
+
         if (keyword != null && !keyword.isBlank()) {
-            sql += " AND m.Title LIKE ?";
+            sql += " AND m.title LIKE ?";
         }
-        
-        sql += " ORDER BY m.ReleasedDate DESC";
+
+        sql += " ORDER BY m.releasedDate DESC";
 
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             if (keyword != null && !keyword.isBlank()) {
                 pre.setString(1, "%" + keyword + "%");
             }
-            
+
             ResultSet rs = pre.executeQuery();
             while (rs.next()) {
-                int movieID = rs.getInt("MovieID");
-                String title = rs.getString("Title");
-                String genre = rs.getString("Genre");
-                String summary = rs.getString("Summary");
-                String trailerURL = rs.getString("TrailerURL");
-                String cast = rs.getString("Cast");
-                String director = rs.getString("Director");
-                int duration = rs.getInt("Duration");
-                LocalDate releasedDate = rs.getDate("ReleasedDate").toLocalDate();
-                String posterURL = rs.getString("PosterURL");
-                String status = rs.getString("Status");
-                LocalDateTime createdDate = null; // Movies table doesn't have CreatedDate
-                String languageName = rs.getString("LanguageName");
+                int movieID = rs.getInt("movieID");
+                String title = rs.getString("title");
+                String genre = rs.getString("genre");
+                String summary = rs.getString("summary");
+                String trailerURL = rs.getString("trailerURL");
+                String cast = rs.getString("cast");
+                String director = rs.getString("director");
+                int duration = rs.getInt("duration");
+                LocalDate releasedDate = rs.getDate("releasedDate").toLocalDate();
+                LocalDate endDate = rs.getDate("endDate").toLocalDate();
+                String posterURL = rs.getString("posterURL");
+                String status = rs.getString("status");
+                String languageName = rs.getString("languageName");
 
-                list.add(new Movie(movieID, title, genre, summary, trailerURL,
-                        cast, director, duration, releasedDate, posterURL,
-                        status, createdDate, languageName));
+                list.add(new Movie(movieID, title, genre, summary, trailerURL, cast, director,
+                        duration, releasedDate, endDate, posterURL, status, languageName));
             }
         } catch (SQLException e) {
             System.out.println("Error getActiveMoviesForGuest: " + e.getMessage());
         }
         return list;
     }
+
 
     /**
      * Get all active movies for booking

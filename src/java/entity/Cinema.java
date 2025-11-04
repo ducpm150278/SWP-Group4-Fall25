@@ -20,6 +20,11 @@ public class Cinema {
     public Cinema() {
     }
 
+    public Cinema(int cinemaID, String cinemaName) {
+        this.cinemaID = cinemaID;
+        this.cinemaName = cinemaName;
+    }
+
     public Cinema(int cinemaID, String cinemaName, String location, String city, String district,
             int totalRooms, String phoneNumber, boolean isActive, LocalDateTime createdDate) {
         this.cinemaID = cinemaID;

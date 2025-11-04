@@ -59,7 +59,7 @@ public class EditMovieServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
+   @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
@@ -105,6 +105,7 @@ public class EditMovieServlet extends HttpServlet {
             String durationStr = request.getParameter("duration");
             String languageID = request.getParameter("languageName");
             String releasedDateStr = request.getParameter("releasedDate");
+            String endDateStr = request.getParameter("endDate");
             String posterURL = request.getParameter("posterURL");
             String status = request.getParameter("status");
 
@@ -117,6 +118,7 @@ public class EditMovieServlet extends HttpServlet {
             request.setAttribute("director", director);
             request.setAttribute("duration", durationStr);
             request.setAttribute("releasedDate", releasedDateStr);
+            request.setAttribute("endDate", endDateStr);
             request.setAttribute("posterURL", posterURL);
             request.setAttribute("status", status);
             request.setAttribute("selectedLanguage", languageID);
@@ -136,13 +138,26 @@ public class EditMovieServlet extends HttpServlet {
                 return;
             }
 
-            int languageId = Integer.parseInt(languageID);
             LocalDate releasedDate = LocalDate.parse(releasedDateStr);
+            LocalDate endDate = LocalDate.parse(endDateStr);
+
+            //ngày kết thúc phải sau ngày công chiếu
+            if (!endDate.isAfter(releasedDate)) {
+                request.setAttribute("errorDate", "Ngày kết thúc phải sau ngày công chiếu!");
+                MovieDAO dao = new MovieDAO();
+                Movie m = dao.getMovieById(movieID);
+                List<Language> listLanguage = dao.getAllLanguages();
+                request.setAttribute("movie", m);
+                request.setAttribute("listLanguage", listLanguage);
+                request.getRequestDispatcher("editMovie.jsp").forward(request, response);
+                return;
+            }
+
+            int languageId = Integer.parseInt(languageID);
 
             // Gọi DAO để cập nhật
             MovieDAO dao = new MovieDAO();
-            dao.updateMovie(movieID, title, genre, summary, trailerURL, cast, director,
-                    duration, releasedDate, posterURL, status, languageId);
+            dao.updateMovie(movieID, title, genre, summary, trailerURL, cast, director, duration, releasedDate, endDate, posterURL, status, languageId);
 
             // ✅ Thành công
             response.sendRedirect("list?updateSuccess=1");

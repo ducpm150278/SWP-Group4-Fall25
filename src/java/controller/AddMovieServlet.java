@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -59,7 +58,7 @@ public class AddMovieServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
+   @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         MovieDAO mvd = new MovieDAO();
@@ -89,6 +88,7 @@ public class AddMovieServlet extends HttpServlet {
             String director = request.getParameter("director");
             String durationStr = request.getParameter("duration");
             String releasedDateStr = request.getParameter("releasedDate");
+            String endDateStr = request.getParameter("endDate");
             String posterURL = request.getParameter("posterURL");
             String status = request.getParameter("status");
             String languageID = request.getParameter("languageName");
@@ -102,6 +102,7 @@ public class AddMovieServlet extends HttpServlet {
             request.setAttribute("director", director);
             request.setAttribute("duration", durationStr);
             request.setAttribute("releasedDate", releasedDateStr);
+            request.setAttribute("endDate", endDateStr);
             request.setAttribute("posterURL", posterURL);
             request.setAttribute("status", status);
             request.setAttribute("selectedLanguage", languageID);
@@ -117,28 +118,41 @@ public class AddMovieServlet extends HttpServlet {
                 return;
             }
 
-            int languageId = Integer.parseInt(languageID);
+            // Parse ngày
             LocalDate releasedDate = LocalDate.parse(releasedDateStr);
-            LocalDateTime createdDate = LocalDateTime.now();
+            LocalDate endDate = LocalDate.parse(endDateStr);
+
+            // ngày kết thúc phải sau ngày bắt đầu
+            if (!endDate.isAfter(releasedDate)) {
+                request.setAttribute("errorDate", "Ngày kết thúc phải sau ngày công chiếu!");
+                MovieDAO mvd = new MovieDAO();
+                List<Language> listLanguage = mvd.getAllLanguages();
+                request.setAttribute("listLanguage", listLanguage);
+                request.getRequestDispatcher("addMovie.jsp").forward(request, response);
+                return;
+            }
+
+            int languageId = Integer.parseInt(languageID);
 
             // Thêm phim
             MovieDAO dao = new MovieDAO();
-//            dao.addMovie(title, genre, summary, trailerURL, cast, director,
-//                    duration, releasedDate, posterURL, languageId, status, createdDate);
+
+            dao.addMovie(title, genre, summary, trailerURL, cast, director, duration, releasedDate, endDate, posterURL, languageId, status);
+
+
 
             // Thành công → redirect về danh sách
             response.sendRedirect("list?addSuccess=1");
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi khi thêm phim!" );
+            request.setAttribute("error", "Có lỗi khi thêm phim!");
             MovieDAO mvd = new MovieDAO();
             List<Language> listLanguage = mvd.getAllLanguages();
             request.setAttribute("listLanguage", listLanguage);
             request.getRequestDispatcher("addMovie.jsp").forward(request, response);
         }
     }
-
     /**
      * Returns a short description of the servlet.
      *

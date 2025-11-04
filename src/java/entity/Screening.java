@@ -4,6 +4,7 @@
  */
 package entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -20,6 +21,15 @@ public class Screening {
     private LocalDateTime endTime;
     private double ticketPrice;
     private int availableSeats;
+private int seatCapacity;
+
+    public int getSeatCapacity() {
+        return seatCapacity;
+    }
+
+    public void setSeatCapacity(int seatCapacity) {
+        this.seatCapacity = seatCapacity;
+    }
 
     // Thông tin join để hiển thị
     private String movieTitle;
@@ -28,6 +38,86 @@ public class Screening {
     private String movieStatus;
     private String roomType;
     private int soldSeats;
+    private LocalDate screeningDate;
+    private String showtime;
+    private double baseTicketPrice;
+    
+     public Screening(int screeningID, int movieID, int roomID,
+            LocalDate screeningDate, String showtime,
+            double baseTicketPrice,
+            String movieTitle, String cinemaName,
+            String roomName, String movieStatus, String roomType) {
+        this.screeningID = screeningID;
+        this.movieID = movieID;
+        this.roomID = roomID;
+        this.screeningDate = screeningDate;
+        this.showtime = showtime;
+        this.baseTicketPrice = baseTicketPrice;
+        this.movieTitle = movieTitle;
+        this.cinemaName = cinemaName;
+        this.roomName = roomName;
+        this.movieStatus = movieStatus;
+        this.roomType = roomType;
+    }
+
+    public Screening(int screeningID, int movieID, int roomID,
+            LocalDate screeningDate, String showtime,
+            double baseTicketPrice, int availableSeats,
+            String movieTitle, String cinemaName,
+            String roomName, String movieStatus) {
+        this.screeningID = screeningID;
+        this.movieID = movieID;
+        this.roomID = roomID;
+        this.screeningDate = screeningDate;
+        this.showtime = showtime;
+        this.baseTicketPrice = baseTicketPrice;
+        this.availableSeats = availableSeats;
+        this.movieTitle = movieTitle;
+        this.cinemaName = cinemaName;
+        this.roomName = roomName;
+        this.movieStatus = movieStatus;
+    }
+    
+    public Screening(int screeningID, int movieID, int roomID, LocalDate screeningDate, String showtime,
+                     double baseTicketPrice, String movieTitle, String cinemaName, String roomName,
+                     int seatCapacity, String movieStatus) {
+        this.screeningID = screeningID;
+        this.movieID = movieID;
+        this.roomID = roomID;
+        this.screeningDate = screeningDate;
+        this.showtime = showtime;
+        this.baseTicketPrice = baseTicketPrice;
+        this.movieTitle = movieTitle;
+        this.cinemaName = cinemaName;
+        this.roomName = roomName;
+        this.seatCapacity = seatCapacity;
+        this.movieStatus = movieStatus;
+    }
+
+
+    public String getShowtime() {
+        return showtime;
+    }
+
+    public void setShowtime(String showtime) {
+        this.showtime = showtime;
+    }
+
+    public double getBaseTicketPrice() {
+        return baseTicketPrice;
+    }
+
+    public void setBaseTicketPrice(double baseTicketPrice) {
+        this.baseTicketPrice = baseTicketPrice;
+    }
+    
+    public LocalDate getScreeningDate() {
+        return screeningDate;
+    }
+
+    public void setScreeningDate(LocalDate screeningDate) {
+        this.screeningDate = screeningDate;
+    }
 
     public Screening(int screeningID, int movieID, int roomID,
             LocalDateTime startTime, LocalDateTime endTime,
@@ -198,6 +288,10 @@ public class Screening {
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         return endTime.format(formatter);
+    }
+     public String getFormattedScreeningDate() {
+        if (screeningDate == null) return "";
+        return screeningDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
     @Override

@@ -4,11 +4,11 @@
  */
 package controller;
 
-import dal.CinemaMDAO;
+import dal.CinemaDAO;
 import dal.MovieDAO;
 import dal.ScreeningDAO;
 import dal.ScreeningRoomDAO;
-import entity.CinemaM;
+import entity.Cinema;
 import entity.Movie;
 import entity.Screening;
 import entity.ScreeningRoom;
@@ -19,8 +19,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -70,16 +71,22 @@ public class AddScreeningServlet extends HttpServlet {
             throws ServletException, IOException {
 
         MovieDAO mdao = new MovieDAO();
-        CinemaMDAO cdao = new CinemaMDAO();
+        CinemaDAO cdao = new CinemaDAO();
         ScreeningRoomDAO rdao = new ScreeningRoomDAO();
 
         List<Movie> movies = mdao.getAll();          // tất cả phim (có status)
-        List<CinemaM> cinemas = cdao.getAllCinemas();
+        List<Cinema> cinemas = cdao.getAllCinemas();
         List<ScreeningRoom> rooms = rdao.getAllRooms();
+        // Danh sách khung giờ cố định
+        List<String> timeSlots = List.of(
+                "08:00-10:00", "10:15-12:15", "12:30-14:30",
+                "14:45-16:45", "17:00-19:00", "19:15-21:15", "21:30-23:30"
+        );
 
         request.setAttribute("movies", movies);
         request.setAttribute("cinemas", cinemas);
         request.setAttribute("rooms", rooms);
+        request.setAttribute("timeSlots", timeSlots);
 
         request.getRequestDispatcher("addScreening.jsp").forward(request, response);
     }
@@ -98,49 +105,46 @@ public class AddScreeningServlet extends HttpServlet {
         try {
             int movieID = Integer.parseInt(request.getParameter("movieID"));
             int roomID = Integer.parseInt(request.getParameter("roomID"));
+            String selectedDate = request.getParameter("date");
+            String timeSlot = request.getParameter("timeSlot");
 
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-            LocalDateTime start = LocalDateTime.parse(request.getParameter("startTime"), fmt);
-            LocalDateTime end = LocalDateTime.parse(request.getParameter("endTime"), fmt);
-
-            // Kiểm tra điều kiện ràng buộc ngày
-            if (end.isBefore(start) || end.isEqual(start)) {
-                request.setAttribute("error", "Thời gian kết thúc phải sau thời gian bắt đầu!");
-
-                // Gửi lại dữ liệu để hiển thị form (tránh mất danh sách)
-                MovieDAO mdao = new MovieDAO();
-                CinemaMDAO cdao = new CinemaMDAO();
-                ScreeningRoomDAO rdao = new ScreeningRoomDAO();
-                request.setAttribute("movies", mdao.getAll());
-                request.setAttribute("cinemas", cdao.getAllCinemas());
-                request.setAttribute("rooms", rdao.getAllRooms());
-
-                request.getRequestDispatcher("addScreening.jsp").forward(request, response);
+            if (timeSlot == null || timeSlot.isBlank()) {
+                request.setAttribute("error", "Vui lòng chọn khung giờ chiếu!");
+                doGet(request, response);
                 return;
             }
 
+            String[] parts = timeSlot.split("-");
+            LocalTime startT = LocalTime.parse(parts[0]);
+            LocalTime endT = LocalTime.parse(parts[1]);
+            LocalDate date = LocalDate.parse(selectedDate);
+
+            LocalDateTime start = LocalDateTime.of(date, startT);
+            LocalDateTime end = LocalDateTime.of(date, endT);
+
+//            
             // Giá vé (có thể rỗng, mặc định 0)
-            double ticketPrice = 0.0;
+            double baseTicketPrice = 0.0;
             String t = request.getParameter("ticketPrice");
             if (t != null && !t.isBlank()) {
-                ticketPrice = Double.parseDouble(t);
+                baseTicketPrice = Double.parseDouble(t);
             }
 
             // ✅ Tự động lấy sức chứa của phòng (không nhập tay)
             ScreeningDAO dao = new ScreeningDAO();
-//            int availableSeats = dao.getSeatCapacityByRoomID(roomID);
+            int availableSeats = dao.getSeatCapacityByRoomID(roomID);
 
             // Gán dữ liệu vào model
             Screening sc = new Screening();
             sc.setMovieID(movieID);
             sc.setRoomID(roomID);
-            sc.setStartTime(start);
-            sc.setEndTime(end);
-            sc.setTicketPrice(ticketPrice);
-//            sc.setAvailableSeats(availableSeats);
+            sc.setScreeningDate(date);      // ✅ thêm dòng này
+            sc.setShowtime(timeSlot);
+            sc.setBaseTicketPrice(baseTicketPrice);
+            sc.setAvailableSeats(availableSeats);
 
             // Lưu vào DB
-//            dao.insertScreening(sc);
+            dao.insertScreening(sc);
 
             // Chuyển hướng về danh sách lịch chiếu
             response.sendRedirect(request.getContextPath() + "/listScreening?addSuccess=1");

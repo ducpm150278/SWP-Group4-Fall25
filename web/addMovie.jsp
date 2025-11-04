@@ -77,8 +77,17 @@
 
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Ngày công chiếu</label>
-                                        <input type="date" name="releasedDate" class="form-control" 
+                                        <input type="date" name="releasedDate" id="releasedDate" class="form-control" 
                                                value="${releasedDate}" required>
+
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Ngày kết thúc</label>
+                                        <input type="date" name="endDate" class="form-control" 
+                                               value="${endDate}" required>
+                                        <c:if test="${not empty errorDate}">
+                                            <div class="text-danger mt-1">${errorDate}</div>
+                                        </c:if>
                                     </div>
 
                                     <div class="col-md-4 mb-3">
@@ -125,6 +134,11 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Lấy ngày hiện tại (theo local timezone)
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("releasedDate").setAttribute("min", today);
+        </script>
 
     </body>
 </html>

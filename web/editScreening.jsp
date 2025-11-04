@@ -67,25 +67,6 @@
                                     </c:forEach>
                                 </select>
                             </div>
-                        </div>
-
-                        <!-- Cột phải -->
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Thời gian bắt đầu</label>
-                                <input type="datetime-local" name="startTime" id="startTime" class="form-control"
-                                       value="${screening.startTime}" required>
-                                <div id="startError" class="text-danger small mt-1"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Thời gian kết thúc</label>
-                                <input type="datetime-local" name="endTime" id="endTime" class="form-control"
-                                       value="${screening.endTime}" required>
-                                <div id="endError" class="text-danger small mt-1"></div>
-                            </div>
-
-
                             <div class="mb-3">
                                 <label class="form-label">Trạng thái</label>
                                 <select name="status" class="form-select" required>
@@ -97,8 +78,44 @@
                             </div>
                         </div>
 
+                        <!-- Cột phải -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Ngày chiếu</label>
+                                <input type="date" 
+                                       name="screeningDate" 
+                                       class="form-control" 
+                                       value="${screening.screeningDate}">
+
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Khung giờ chiếu</label>
+                                <select name="showtime" class="form-select">
+                                    <c:forEach var="time" items="${showtimes}">
+                                        <option value="${time}" 
+                                                ${screening.showtime == time ? 'selected' : ''}>${time}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Giá vé (VNĐ)</label>
+                                <input type="number" 
+                                       name="baseTicketPrice" 
+                                       class="form-control" 
+                                       min="0" 
+                                       step="1000"
+                                       value="${screening.baseTicketPrice}">
+                            </div>
+
+
+
+
+                        </div>
+
                         <!-- Nút thao tác -->
-                        <div class="col-12 text-center">
+                        <div class="col-12 mt-3">
                             <button type="submit" class="btn btn-primary px-4">Lưu thay đổi</button>
                             <a href="${pageContext.request.contextPath}/listScreening" class="btn btn-secondary px-4">Quay lại</a>
                         </div>
@@ -128,44 +145,51 @@
             });
         </script>
         <script>
-document.querySelector("form").addEventListener("submit", function (e) {
-    const startInput = document.getElementById("startTime");
-    const endInput = document.getElementById("endTime");
-    const startError = document.getElementById("startError");
-    const endError = document.getElementById("endError");
+            document.querySelector("form").addEventListener("submit", function (e) {
+                const startInput = document.getElementById("startTime");
+                const endInput = document.getElementById("endTime");
+                const startError = document.getElementById("startError");
+                const endError = document.getElementById("endError");
 
-    // Xóa lỗi cũ
-    startError.textContent = "";
-    endError.textContent = "";
+                // Xóa lỗi cũ
+                startError.textContent = "";
+                endError.textContent = "";
 
-    // Lấy giá trị ngày
-    const start = new Date(startInput.value);
-    const end = new Date(endInput.value);
-    let valid = true;
+                // Lấy giá trị ngày
+                const start = new Date(startInput.value);
+                const end = new Date(endInput.value);
+                let valid = true;
 
-    // Kiểm tra bỏ trống
-    if (!startInput.value) {
-        startError.textContent = "Vui lòng chọn thời gian bắt đầu.";
-        valid = false;
-    }
-    if (!endInput.value) {
-        endError.textContent = "Vui lòng chọn thời gian kết thúc.";
-        valid = false;
-    }
+                // Kiểm tra bỏ trống
+                if (!startInput.value) {
+                    startError.textContent = "Vui lòng chọn thời gian bắt đầu.";
+                    valid = false;
+                }
+                if (!endInput.value) {
+                    endError.textContent = "Vui lòng chọn thời gian kết thúc.";
+                    valid = false;
+                }
 
-    // Kiểm tra logic thời gian
-    if (startInput.value && endInput.value && end <= start) {
-        endError.textContent = "Thời gian kết thúc phải sau thời gian bắt đầu.";
-        valid = false;
-    }
+                // Kiểm tra logic thời gian
+                if (startInput.value && endInput.value && end <= start) {
+                    endError.textContent = "Thời gian kết thúc phải sau thời gian bắt đầu.";
+                    valid = false;
+                }
 
-    // Nếu có lỗi thì chặn submit
-    if (!valid) {
-        e.preventDefault();
-    }
-});
-</script>
-
+                // Nếu có lỗi thì chặn submit
+                if (!valid) {
+                    e.preventDefault();
+                }
+            });
+        </script>
+        <script>
+            // Giới hạn ngày chiếu chỉ được chọn từ hôm nay trở đi
+            document.addEventListener("DOMContentLoaded", function () {
+                const dateInput = document.querySelector('input[name="screeningDate"]');
+                const today = new Date().toISOString().split("T")[0];
+                dateInput.setAttribute("min", today);
+            });
+        </script>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
