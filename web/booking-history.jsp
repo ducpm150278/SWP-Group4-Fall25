@@ -15,6 +15,9 @@
     DecimalFormat priceFormat = new DecimalFormat("#,###");
     
     if (statusFilter == null) statusFilter = "all";
+    
+    List<Integer> reviewedMovieIds = (List<Integer>) request.getAttribute("reviewedMovieIds");
+    if (reviewedMovieIds == null) reviewedMovieIds = new java.util.ArrayList<Integer>();
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -817,7 +820,11 @@
         // Store booking data for modal
         const bookingsData = {
             <% for (BookingDetailDTO booking : bookingDetails) { %>
+                <% boolean isReviewed = reviewedMovieIds.contains(booking.getMovieID()); %>    
                 <%= booking.getBookingID() %>: {
+                    movieID: <%= booking.getMovieID() %>, 
+                    isReviewed: <%= isReviewed %>,
+                    
                     bookingID: <%= booking.getBookingID() %>,
                     bookingCode: '<%= booking.getBookingCode() %>',
                     bookingDate: '<%= dateFormat.format(java.sql.Timestamp.valueOf(booking.getBookingDate())) %>',
@@ -952,6 +959,19 @@
             
             html += '</div></div>';
             
+            if (booking.status === 'Completed' && !booking.isReviewed) {
+                html += '<div class="invoice-section" style="text-align: center; margin-top: 15px;">';
+                html += '<a href="<%= request.getContextPath() %>/writeReview?movieId=' + booking.movieID + '" class="btn-primary-cinema btn-cinema">'; 
+                html += '<i class="fas fa-star"></i> Đánh giá phim';
+                html += '</a></div>';
+            }
+            
+            if (booking.status === 'Completed' && booking.isReviewed) {
+                html += '<div class="invoice-section" style="text-align: center; margin-top: 15px;">';
+                html += '<button class="btn-secondary-cinema btn-cinema" disabled style="opacity: 0.7; cursor: not-allowed;">';
+                html += '<i class="fas fa-check-circle"></i> Đã đánh giá';
+                html += '</button></div>';
+            }
             if (booking.canBeCancelled) {
                 html += '<div class="invoice-section" style="text-align: right;">';
                 html += '<form method="post" action="<%= request.getContextPath() %>/booking-history" style="display: inline;" ';

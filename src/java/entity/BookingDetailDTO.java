@@ -8,6 +8,7 @@ import java.util.ArrayList;
  * Data Transfer Object for complete booking details
  * Includes booking, screening, movie, tickets, and food information
  */
+
 public class BookingDetailDTO {
     // Booking information
     private int bookingID;
@@ -40,6 +41,9 @@ public class BookingDetailDTO {
     
     // Discount information
     private String discountCode;
+    
+    //For review
+    private int movieID;
     
     public BookingDetailDTO() {
         this.seatLabels = new ArrayList<>();
@@ -311,6 +315,15 @@ public class BookingDetailDTO {
      */
     public boolean canBeCancelled() {
         return ("Pending".equals(status) || "Confirmed".equals(status)) && !isPast();
+    }
+    
+    //For review
+    public int getMovieID() {
+        return movieID;
+    }
+
+    public void setMovieID(int movieID) {
+        this.movieID = movieID;
     }
 }
 

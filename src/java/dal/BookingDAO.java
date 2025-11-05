@@ -356,7 +356,7 @@ public class BookingDAO extends DBContext {
                      "b.BookingID, b.BookingCode, b.BookingDate, b.TotalAmount, " +
                      "b.DiscountAmount, b.FinalAmount, b.Status, b.PaymentStatus, " +
                      "b.PaymentMethod, b.PaymentDate, " +
-                     "m.Title AS MovieTitle, m.PosterURL AS MoviePosterURL, m.Duration AS MovieDuration, " +
+                     "m.MovieID, m.Title AS MovieTitle, m.PosterURL AS MoviePosterURL, m.Duration AS MovieDuration, " +
                      "c.CinemaName, r.RoomName, s.ScreeningDate, s.Showtime " +
                      "FROM Bookings b " +
                      "JOIN Screenings s ON b.ScreeningID = s.ScreeningID " +
@@ -406,6 +406,7 @@ public class BookingDAO extends DBContext {
                     LocalDateTime[] times = parseShowtime(screeningDate.toLocalDate(), showtime);
                     detail.setScreeningTime(times[0]);
                 }
+                detail.setMovieID(rs.getInt("MovieID"));
                 
                 detail.setDiscountCode(null); // TODO: Get discount code from DiscountID if needed
                 
@@ -730,6 +731,28 @@ public class BookingDAO extends DBContext {
             LocalDateTime now = LocalDateTime.now();
             return new LocalDateTime[]{now, now.plusHours(2)};
         }
+    }
+    //Customer
+    public boolean hasUserCompletedMovie(int userId, int movieId) {
+        String sql = "SELECT COUNT(b.BookingID) " +
+                     "FROM Bookings b " +
+                     "JOIN Screenings s ON b.ScreeningID = s.ScreeningID " +
+                     "WHERE b.UserID = ? " +
+                     "AND s.MovieID = ? " +
+                     "AND b.[Status] = 'Completed'"; // Chỉ tính vé đã hoàn thành
+        
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, movieId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // Trả về true nếu tìm thấy > 0 booking
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error hasUserCompletedMovie: " + e.getMessage());
+        }
+        return false;
     }
 }
 

@@ -8,7 +8,31 @@
         <title>Hồ Sơ Cá Nhân - Cinema Booking</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-        <link href="${pageContext.request.contextPath}/css/cinema-dark-theme.css" rel="stylesheet">
+<style>
+        .badge-success {
+            background: rgba(46, 160, 67, 0.2) !important; 
+            color: #3fb950 !important;
+        }
+        .badge-success i {
+            color: #3fb950 !important; 
+        }
+        .badge-warning {
+            background: rgba(255, 149, 0, 0.2) !important;
+            color: #ff9500 !important;
+        }
+        .badge-warning i {
+            color: #ff9500 !important;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+    </style>
     </head>
     <body>
         <!-- Include Navbar -->
@@ -48,8 +72,19 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-cinema">
-                                    <label class="form-label-cinema">
-                                        <i class="fas fa-envelope"></i> Email
+                                    <label class="form-label-cinema" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <span>
+                                            <i class="fas fa-envelope"></i> Email
+                                        </span>
+                                        <div style="font-size: 13px;">
+                                            <strong style="color: #fff;">Trạng thái:</strong>
+                                            <c:if test="${user.emailVerified}">
+                                                <span class="badge badge-success"><i class="fas fa-check-circle"></i> Đã xác minh</span>
+                                            </c:if>
+                                            <c:if test="${!user.emailVerified}">
+                                                <span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Chưa xác minh</span>
+                                            </c:if>
+                                        </div>
                                     </label>
                                     <input type="email" class="form-control-cinema" 
                                            value="${user.email}" disabled>

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
-    
     <!-- USER PROFILE & ACCOUNT MANAGEMENT -->
-    
     <!-- Customer profile management -->
     <servlet>
         <servlet-name>CustomerProfileServlet</servlet-name>
         <servlet-class>controller.CustomerProfileServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>WriteReviewServlet</servlet-name>
+        <servlet-class>controller.WriteReviewServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>CustomerProfileServlet</servlet-name>
         <url-pattern>/CustomerProfile</url-pattern>
     </servlet-mapping>
-        
     <!-- Change password functionality -->
     <servlet>
         <servlet-name>ChangePasswordServlet</servlet-name>
@@ -22,7 +23,6 @@
         <servlet-name>ChangePasswordServlet</servlet-name>
         <url-pattern>/ChangePassword</url-pattern>
     </servlet-mapping>
-    
     <!-- User logout -->
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
@@ -32,7 +32,6 @@
         <servlet-name>LogoutServlet</servlet-name>
         <url-pattern>/logout</url-pattern>
     </servlet-mapping>
-
     <!-- Google OAuth callback -->
     <servlet>
         <servlet-name>GoogleAuthCallbackServlet</servlet-name>
@@ -42,9 +41,7 @@
         <servlet-name>GoogleAuthCallbackServlet</servlet-name>
         <url-pattern>/GoogleAuthCallback</url-pattern>
     </servlet-mapping>
-    
     <!-- FOOD & COMBO MANAGEMENT -->
-    
     <!-- Food management -->
     <servlet>
         <servlet-name>FoodManagementServlet</servlet-name>
@@ -54,7 +51,6 @@
         <servlet-name>FoodManagementServlet</servlet-name>
         <url-pattern>/food-management</url-pattern>
     </servlet-mapping>
-    
     <!-- Combo management -->
     <servlet>
         <servlet-name>ComboManagementServlet</servlet-name>
@@ -64,7 +60,6 @@
         <servlet-name>ComboManagementServlet</servlet-name>
         <url-pattern>/combo-management</url-pattern>
     </servlet-mapping>
-    
     <!-- ComboFood relationships -->
     <servlet>
         <servlet-name>ComboFoodManagementServlet</servlet-name>
@@ -74,9 +69,7 @@
         <servlet-name>ComboFoodManagementServlet</servlet-name>
         <url-pattern>/combo-food-management</url-pattern>
     </servlet-mapping>
-    
     <!-- AUTHENTICATION & EMAIL VERIFICATION -->
-    
     <!-- Main authentication controller -->
     <servlet>
         <servlet-name>AuthController</servlet-name>
@@ -86,7 +79,6 @@
         <servlet-name>AuthController</servlet-name>
         <url-pattern>/auth/*</url-pattern>
     </servlet-mapping>
-    
     <!-- Google OAuth authentication -->
     <servlet>
         <servlet-name>GoogleAuthController</servlet-name>
@@ -96,7 +88,6 @@
         <servlet-name>GoogleAuthController</servlet-name>
         <url-pattern>/auth/google</url-pattern>
     </servlet-mapping>
-    
     <!-- Email verification -->
     <servlet>
         <servlet-name>VerifyEmailServlet</servlet-name>
@@ -106,9 +97,7 @@
         <servlet-name>VerifyEmailServlet</servlet-name>
         <url-pattern>/VerifyEmail</url-pattern>
     </servlet-mapping>
-    
     <!-- GUEST MOVIE BROWSING -->
-    
     <!-- Guest movie list -->
     <servlet>
         <servlet-name>GuestMovieListServlet</servlet-name>
@@ -118,7 +107,6 @@
         <servlet-name>GuestMovieListServlet</servlet-name>
         <url-pattern>/guest-movies</url-pattern>
     </servlet-mapping>
-    
     <!-- Guest movie detail -->
     <servlet>
         <servlet-name>GuestMovieDetailServlet</servlet-name>
@@ -128,9 +116,7 @@
         <servlet-name>GuestMovieDetailServlet</servlet-name>
         <url-pattern>/guest-movie-detail</url-pattern>
     </servlet-mapping>
-    
     <!-- BOOKING SYSTEM -->
-    
     <!-- Test servlet for booking system -->
     <servlet>
         <servlet-name>BookingTestServlet</servlet-name>
@@ -140,7 +126,6 @@
         <servlet-name>BookingTestServlet</servlet-name>
         <url-pattern>/booking/test</url-pattern>
     </servlet-mapping>
-    
     <!-- Step 1: Select screening -->
     <servlet>
         <servlet-name>BookingSelectScreeningServlet</servlet-name>
@@ -150,7 +135,6 @@
         <servlet-name>BookingSelectScreeningServlet</servlet-name>
         <url-pattern>/booking/select-screening</url-pattern>
     </servlet-mapping>
-    
     <!-- Step 2: Select seats -->
     <servlet>
         <servlet-name>BookingSeatSelectionServlet</servlet-name>
@@ -160,7 +144,6 @@
         <servlet-name>BookingSeatSelectionServlet</servlet-name>
         <url-pattern>/booking/select-seats</url-pattern>
     </servlet-mapping>
-    
     <!-- Step 3: Select food (optional) -->
     <servlet>
         <servlet-name>BookingFoodSelectionServlet</servlet-name>
@@ -170,7 +153,6 @@
         <servlet-name>BookingFoodSelectionServlet</servlet-name>
         <url-pattern>/booking/select-food</url-pattern>
     </servlet-mapping>
-    
     <!-- Step 4: Payment -->
     <servlet>
         <servlet-name>BookingPaymentServlet</servlet-name>
@@ -180,7 +162,6 @@
         <servlet-name>BookingPaymentServlet</servlet-name>
         <url-pattern>/booking/payment</url-pattern>
     </servlet-mapping>
-    
     <!-- VNPay callback -->
     <servlet>
         <servlet-name>VNPayCallbackServlet</servlet-name>
@@ -190,7 +171,6 @@
         <servlet-name>VNPayCallbackServlet</servlet-name>
         <url-pattern>/vnpay-callback</url-pattern>
     </servlet-mapping>
-    
     <!-- VNPay IPN (Instant Payment Notification) -->
     <servlet>
         <servlet-name>VNPayIPNServlet</servlet-name>
@@ -200,9 +180,11 @@
         <servlet-name>VNPayIPNServlet</servlet-name>
         <url-pattern>/vnpay-ipn</url-pattern>
     </servlet-mapping>
-    
     <!-- SESSION CONFIGURATION -->
-    
+    <servlet-mapping>
+        <servlet-name>WriteReviewServlet</servlet-name>
+        <url-pattern>/writeReview</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
