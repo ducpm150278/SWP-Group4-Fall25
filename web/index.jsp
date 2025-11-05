@@ -871,7 +871,7 @@
                 </a>
 
                 <!-- User Profile -->
-                <a href="${pageContext.request.contextPath}/profile" class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <a href="${pageContext.request.contextPath}/CustomerProfile" class="feature-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="feature-icon icon-profile">
                         <i class="fas fa-user-circle"></i>
                     </div>

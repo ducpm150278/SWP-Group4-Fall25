@@ -4,6 +4,7 @@
  */
 package controller;
 
+import jakarta.servlet.http.HttpSession;
 import dal.UserDAO;
 import entity.User;
 import java.io.IOException;
@@ -13,7 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.sql.Date;
 /**
  *
  * @author leanh
@@ -75,20 +76,25 @@ public class ChangePasswordServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User userFromSession = (User) session.getAttribute("user");
 
-        // Simulate user login (replace later)
-        String email = "customer1@gmail.com";
-        User user = userDAO.getUserByEmail(email);
+        if (userFromSession == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
 
-        String oldPassword = request.getParameter("oldPassword");
-        String confirmPassword = request.getParameter("newPassword");
-        String newPassword = request.getParameter("confirmPassword");
+        User user = userDAO.getUserById(userFromSession.getUserID());
 
         if (user == null) {
             request.setAttribute("error", "Không tìm thấy người dùng!");
             request.getRequestDispatcher("changePassword.jsp").forward(request, response);
             return;
         }
+
+        String oldPassword = request.getParameter("oldPassword");
+        String newPassword = request.getParameter("newPassword");
+        String confirmPassword = request.getParameter("confirmPassword");
 
         if (user.getPassword() == null || !user.getPassword().equals(oldPassword)) {
             request.setAttribute("error", "Mật khẩu cũ không chính xác!");
