@@ -1,8 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
-
 package controller;
 
 import dal.UserDAO;
@@ -35,10 +30,6 @@ public class VerifyEmailServlet extends HttpServlet {
         userDAO = new UserDAO();
     }
 
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     * Forwards the user to the verification page.
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -51,10 +42,6 @@ public class VerifyEmailServlet extends HttpServlet {
         request.getRequestDispatcher("verifyEmail.jsp").forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     * Manages two actions: 'sendcode' and 'verify'.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -62,7 +49,6 @@ public class VerifyEmailServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        // check user login chua
         if (user == null) {
             request.setAttribute("error", "You must be logged in to perform this action.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
@@ -77,49 +63,35 @@ public class VerifyEmailServlet extends HttpServlet {
             return;
         }
 
-        // gui verify
         if (action.equals("sendcode")) {
-            String newEmail = request.getParameter("newEmail");
-
-            // check trung email nguoi khac khong
-            User existingUser = userDAO.getUserByEmail(newEmail);
-            if (existingUser != null && existingUser.getUserID() != user.getUserID()) {
-                request.setAttribute("error", "This email is already in use by another account.");
-                request.getRequestDispatcher("verifyEmail.jsp").forward(request, response);
-                return;
-            }
-
-            // tao code 6 so
+            String emailToSend = user.getEmail();
             String code = String.format("%06d", new Random().nextInt(999999));
-            boolean emailSent = sendVerificationEmail(newEmail, code);
+            boolean emailSent = sendVerificationEmail(emailToSend, code);
 
             if (emailSent) {
                 session.setAttribute("verificationCode", code);
-                session.setAttribute("verificationEmail", newEmail);
+                session.setAttribute("verificationEmail", emailToSend); 
                 session.setAttribute("verificationExpiry", System.currentTimeMillis() + 600000);
-                request.setAttribute("emailSent", newEmail);
-                request.setAttribute("message", "A verification code has been sent to " + newEmail + ". It will expire in 10 minutes.");
+                request.setAttribute("emailSent", emailToSend);
+                request.setAttribute("message", "A verification code has been sent to " + emailToSend + ".");
             } else {
-                request.setAttribute("error", "Failed to send verification email. Please check the email address or try again later.");
+                request.setAttribute("error", "Failed to send verification email. Please try again later.");
             }
 
             request.getRequestDispatcher("verifyEmail.jsp").forward(request, response);
         
-        // verify code
         } else if (action.equals("verify")) {
             String formCode = request.getParameter("verificationCode");
             String savedCode = (String) session.getAttribute("verificationCode");
             String savedEmail = (String) session.getAttribute("verificationEmail");
             Long expiryTime = (Long) session.getAttribute("verificationExpiry");
 
-            // Check data session
             if (savedCode == null || savedEmail == null || expiryTime == null) {
                 request.setAttribute("error", "Your verification session has expired. Please request a new code.");
                 request.getRequestDispatcher("verifyEmail.jsp").forward(request, response);
                 return;
             }
 
-            // Check xem expire chua
             if (System.currentTimeMillis() > expiryTime) {
                 request.setAttribute("error", "Your verification code has expired. Please request a new one.");
                 session.removeAttribute("verificationCode");
@@ -129,19 +101,17 @@ public class VerifyEmailServlet extends HttpServlet {
                 return;
             }
 
-            // check code dung chua
             if (formCode.equals(savedCode)) {
-                boolean success = userDAO.updateEmailAndVerification(user.getUserID(), savedEmail, true);
+                boolean success = userDAO.updateVerificationStatus(user.getUserID(), true);
                 if (success) {
-                    user.setEmail(savedEmail);
                     user.setEmailVerified(true);
                     session.setAttribute("user", user);
-                    request.setAttribute("message", "Email successfully verified and updated!");
+                    request.setAttribute("message", "Email successfully verified!");
                     session.removeAttribute("verificationCode");
                     session.removeAttribute("verificationEmail");
                     session.removeAttribute("verificationExpiry");
                 } else {
-                    request.setAttribute("error", "A database error occurred. Could not update email.");
+                    request.setAttribute("error", "A database error occurred. Could not update status.");
                     request.setAttribute("emailSent", savedEmail);
                 }
 
@@ -159,7 +129,7 @@ public class VerifyEmailServlet extends HttpServlet {
         final String password = "zkmg qcqk vvup kyad"; 
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587"); // TLS Port
+        props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         
@@ -183,7 +153,6 @@ public class VerifyEmailServlet extends HttpServlet {
                     + "Cinema Management Team";
             
             msg.setText(emailBody);
-
             Transport.send(msg);
             return true; 
         } catch (MessagingException e) {

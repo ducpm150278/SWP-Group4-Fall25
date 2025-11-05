@@ -201,7 +201,7 @@
                         <i class="fas fa-cog"></i> Quản Lý
                     </a>
                 <% } %>
-                <a href="${pageContext.request.contextPath}/profile" class="nav-link-cinema">
+                <a href="${pageContext.request.contextPath}/CustomerProfile" class="nav-link-cinema">
                     <i class="fas fa-user"></i> Hồ Sơ
                 </a>
                 <span class="navbar-text-cinema">

@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import dal.ReviewDAO;
 import java.io.IOException;
 import java.util.List;
-
+import java.util.ArrayList;
 /**
  * Servlet to handle user booking history and management
  */
@@ -19,10 +19,11 @@ import java.util.List;
 public class BookingHistoryServlet extends HttpServlet {
     
     private BookingDAO bookingDAO;
-    
+    private ReviewDAO reviewDAO;
     @Override
     public void init() throws ServletException {
         bookingDAO = new BookingDAO();
+        reviewDAO = new ReviewDAO();
     }
     
     @Override
@@ -36,6 +37,18 @@ public class BookingHistoryServlet extends HttpServlet {
         if (userID == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
+        }
+        
+        // Đọc thông báo error
+        String message = (String) session.getAttribute("message");
+        if (message != null) {
+            request.setAttribute("message", message);
+            session.removeAttribute("message");
+        }
+        String error = (String) session.getAttribute("error");
+        if (error != null) {
+            request.setAttribute("error", error);
+            session.removeAttribute("error");
         }
         
         // Get filter parameter
@@ -54,6 +67,11 @@ public class BookingHistoryServlet extends HttpServlet {
         } else {
             // Get all bookings
             bookingDetails = bookingDAO.getUserBookingDetails(userID);
+        }
+        // Lấy ra danh sách các id của movie mà user này đã đánh giá
+        List<Integer> reviewedMovieIds = reviewDAO.getReviewedMovieIds(userID);
+        if (reviewedMovieIds == null) {
+            reviewedMovieIds = new ArrayList<>(); // Đảm bảo không bị null
         }
         
         // Set attributes

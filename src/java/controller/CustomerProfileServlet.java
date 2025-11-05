@@ -94,18 +94,26 @@ public class CustomerProfileServlet extends HttpServlet {
         }
         int userId = userFromSession.getUserID();
         String fullName = request.getParameter("fullName");
-        String phone = request.getParameter("phone");
+        String phone = request.getParameter("phoneNumber");
         String gender = request.getParameter("gender");
-        String dob = request.getParameter("birthdate");
+        String dob_str = request.getParameter("dateOfBirth");
         String address = request.getParameter("address");
+        Date sqlDateOfBirth = null;
+        if (dob_str != null && !dob_str.isEmpty()) {
+            try {
+                sqlDateOfBirth = Date.valueOf(dob_str);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid date format: " + dob_str);
+            }
+        }
         User updatedUser = new User();
         updatedUser.setUserID(userId);
         updatedUser.setFullName(fullName);
         updatedUser.setPhoneNumber(phone);
         updatedUser.setGender(gender);
-        updatedUser.setDateOfBirth(Date.valueOf(dob));
         updatedUser.setAddress(address);
-
+        updatedUser.setDateOfBirth(sqlDateOfBirth);
+        
         boolean success = userDAO.updateUser(updatedUser);
         if (success) {
             User refreshedUser = userDAO.getUserById(userId);

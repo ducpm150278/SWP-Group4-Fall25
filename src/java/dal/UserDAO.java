@@ -697,4 +697,23 @@ public class UserDAO extends DBContext {
         user.setLastModifiedDate(toLocalDateTime(rs.getTimestamp("LastModifiedDate")));
         return user;
     }
+    
+    //Customer verify email
+    public boolean updateVerificationStatus(int userId, boolean status) {
+    String sql = "UPDATE Users SET EmailVerified = ?, LastModifiedDate = GETDATE() WHERE UserID = ?";
+    
+    try (Connection conn = new DBContext().getConnection(); // (Hoặc cách bạn lấy connection)
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        ps.setBoolean(1, status);
+        ps.setInt(2, userId);
+        
+        int rowsAffected = ps.executeUpdate();
+        return rowsAffected > 0;
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 }

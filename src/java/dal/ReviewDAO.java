@@ -131,4 +131,39 @@ public class ReviewDAO extends DBContext {
         }
         return 0;
     }
+    //Customer
+    public List<Integer> getReviewedMovieIds(int userId) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT MovieID FROM Reviews WHERE UserID = ?";
+        
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ids.add(rs.getInt("MovieID"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error getReviewedMovieIds: " + e.getMessage());
+        }
+        return ids;
+    }
+    //Customer
+public boolean hasUserReviewedMovie(int userId, int movieId) {
+    String sql = "SELECT COUNT(*) FROM Reviews WHERE UserID = ? AND MovieID = ?";
+    
+    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        ps.setInt(1, userId);
+        ps.setInt(2, movieId); //
+        
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.out.println("Error hasUserReviewedMovie: " + e.getMessage());
+    }
+    return false;
+}
 }
