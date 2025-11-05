@@ -301,8 +301,7 @@
                         <!-- Status Alert -->
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> 
-                            <strong>Note:</strong> New accounts will be created with "Temporary" status. 
-                            Users must change their password on first login.
+                            <strong>Note:</strong> New accounts will be created with "Active" status.
                         </div>
                     </div>
                     
@@ -358,7 +357,12 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">View User</h5>
+                    <h5 class="modal-title">
+                        <c:choose>
+                            <c:when test="${param.mode == 'edit'}">Edit User</c:when>
+                            <c:otherwise>View User</c:otherwise>
+                        </c:choose>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="userForm" action="dashboard" method="POST">
@@ -366,13 +370,22 @@
                     <input type="hidden" name="section" value="user-management">
                     <input type="hidden" name="userId" value="${requestScope.viewUser.userID}">
                     <div class="modal-body">
-                        <div class="mb-2"><label>Full Name</label><input type="text" class="form-control" name="fullname" value="${requestScope.viewUser.fullName}" readonly></div>
-                        <div class="mb-2"><label>Email</label><input type="text" class="form-control" name="email" value="${requestScope.viewUser.email}" readonly></div>
-                        <div class="mb-2"><label>Phone Number</label><input type="text" class="form-control" name="phonenumber" value="${requestScope.viewUser.phoneNumber}" readonly></div>
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" value="${requestScope.viewUser.fullName}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control" value="${requestScope.viewUser.email}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" value="${requestScope.viewUser.phoneNumber}" readonly>
+                        </div>
 
-                        <!-- Role field - editable when in edit mode -->
-                        <div class="mb-2">
-                            <label>Role</label>
+                        <!-- Role field -->
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
                             <select class="form-select" name="role" id="roleField" ${param.mode != 'edit' ? 'disabled' : ''}>
                                 <option value="Admin" ${viewUser.role == 'Admin' ? 'selected' : ''}>Admin</option>
                                 <option value="Staff" ${viewUser.role == 'Staff' ? 'selected' : ''}>Staff</option>
@@ -380,9 +393,9 @@
                             </select>
                         </div>
 
-                        <!-- Status field - editable when in edit mode -->
-                        <div class="mb-2">
-                            <label>Status</label>
+                        <!-- Status field -->
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
                             <select class="form-select" name="status" id="statusField" ${param.mode != 'edit' ? 'disabled' : ''}>
                                 <option value="Active" ${viewUser.accountStatus == 'Active' ? 'selected' : ''}>Active</option>
                                 <option value="Suspended" ${viewUser.accountStatus == 'Suspended' ? 'selected' : ''}>Suspended</option>
@@ -392,25 +405,34 @@
                         </div>
 
                         <!-- Các trường khác (readonly) -->
-                        <div class="mb-2"><label>Gender</label><input type="text" class="form-control" value="${requestScope.viewUser.gender}" readonly></div>
-                        <div class="mb-2"><label>Date of Birth</label><input type="text" class="form-control" value="${requestScope.viewUser.dateOfBirth}" readonly></div>
-                        <div class="mb-2"><label>Address</label><textarea class="form-control" readonly>${requestScope.viewUser.address}</textarea></div>
-                        <div class="mb-2 position-relative">
-                            <label>Password</label>
-                            <input type="password" class="form-control" value="${requestScope.viewUser.password}" readonly id="passwordField">
-                            <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                        <div class="mb-3">
+                            <label class="form-label">Gender</label>
+                            <input type="text" class="form-control" value="${requestScope.viewUser.gender}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="text" class="form-control" value="${requestScope.viewUser.dateOfBirth}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" rows="3" readonly>${requestScope.viewUser.address}</textarea>
+                        </div>
+                        <div class="mb-3 position-relative">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control pe-5" value="${requestScope.viewUser.password}" readonly id="passwordField">
+                            <button type="button" class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword()" style="z-index: 5;">
                                 <span class="eye-icon">👁</span>
                             </button>
                         </div>
                     </div>
-                    <div class="modal-footer justify-content-between">
+                    <div class="modal-footer">
                         <c:choose>
                             <c:when test="${param.mode == 'edit'}">
-                                <button type="submit" class="btn btn-success" id="saveButton">Save</button>
-                                <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                                <button type="submit" class="btn btn-success">Save Changes</button>
+                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.userID}" class="btn btn-secondary">Cancel</a>
                             </c:when>
                             <c:otherwise>
-                                <button type="button" class="btn btn-warning" id="editButton">Edit</button>
+                                <a href="dashboard?section=user-management&action=view&userId=${requestScope.viewUser.userID}&mode=edit" class="btn btn-warning">Edit</a>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </c:otherwise>
                         </c:choose>
@@ -420,596 +442,86 @@
         </div>
     </div>
 
-    <!-- Toasts -->
+    <!-- Toasts Container -->-
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-        <!-- Add Toast -->
-        <div id="successAddToast" class="toast align-items-center text-bg-success border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <!-- Success Toast Template -->
+        <div id="successToastTemplate" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">✅ New user has been created successfully! Credentials sent to email!</div>
+                <div class="toast-body" id="successToastMessage"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
-        <div id="successAddToastButNoEmail" class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        
+        <!-- Error Toast Template -->
+        <div id="errorToastTemplate" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">❌ New user has been created successfully! But get error when send credentials to the email!</div>
+                <div class="toast-body" id="errorToastMessage"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
-        <div id="errorAddToast" class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        
+        <!-- Warning Toast Template -->
+        <div id="warningToastTemplate" class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">❌ Failed to add user! ${sessionScope.showError}</div>
+                <div class="toast-body" id="warningToastMessage"></div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <div id="errorPhoneAddToast" class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to add user! Error case: The phone is existed!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <div id="errorEmailAddToast" class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to add user! Error case: The email is existed!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <!-- Update Toast -->
-        <div id="successUpdateToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">✅ User updated successfully!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        <div id="errorUpdateToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to update user! ${sessionScope.showError}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        <!-- Delete Toast -->
-        <div id="successDeleteToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">🗑️ User has been deleted successfully!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <div id="errorDeleteToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to delete user! ${sessionScope.showError}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
     </div>
 
     <!-- JavaScript functions -->
     <script>
-        // JavaScript functions for User Management
+        // ===== MAIN INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize all functions
             initializeAddUserForm();
             initializeViewUserModal();
             showToasts();
-            
-            // Password toggle functionality
-            initializePasswordToggle();
-            
-            // Debug form elements
-            debugFormElements();
         });
 
-        // Show toast notifications
+        // ===== TOAST SYSTEM =====
         function showToasts() {
             <c:if test="${not empty sessionScope.showToast}">
                 <c:choose>
                     <c:when test="${sessionScope.showToast == 'add_success'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successAddToast'));
-                        successToast.show();
+                        showToast('✅ New user created successfully! Credentials sent to email!', 'success');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_success_no_email'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successAddToastButNoEmail'));
-                        successToast.show();
-                    </c:when>
-                    <c:when test="${sessionScope.ExceptionError == 'add_failed'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorAddToast'));
-                        errorToast.show();
+                        showToast('⚠️ User created but email sending failed!', 'warning');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_error_email'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorEmailAddToast'));
-                        errorToast.show();
+                        showToast('❌ Email already exists!', 'error');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_error_phone'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorPhoneAddToast'));
-                        errorToast.show();
+                        showToast('❌ Phone number already exists!', 'error');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'update_success'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successUpdateToast'));
-                        successToast.show();
-                    </c:when>
-                    <c:when test="${sessionScope.ExceptionError == 'update_failed'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorUpdateToast'));
-                        errorToast.show();
+                        showToast('✅ User updated successfully!', 'success');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'delete_success'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successDeleteToast'));
-                        successToast.show();
+                        showToast('🗑️ User deleted successfully!', 'success');
                     </c:when>
-                    <c:when test="${sessionScope.ExceptionError == 'delete_failed'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorDeleteToast'));
-                        errorToast.show();
-                    </c:when>
+                    <c:otherwise>
+                        showToast('❌ Operation failed!', 'error');
+                    </c:otherwise>
                 </c:choose>
                 <c:remove var="showToast" scope="session"/>
                 <c:remove var="ExceptionError" scope="session"/>
             </c:if>
         }
 
-        // Debug function to check if all required elements exist
-        function debugFormElements() {
-            console.log('=== DEBUG FORM ELEMENTS ===');
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
             
-            const elements = {
-                'addUserForm': document.getElementById('addUserForm'),
-                'submitBtn': document.getElementById('submitBtn'),
-                'addUserModal': document.getElementById('addUserModal'),
-                'email': document.getElementById('email'),
-                'phonenumber': document.getElementById('phonenumber'),
-                'fullname': document.getElementById('fullname'),
-                'role': document.getElementById('role')
-            };
-            
-            Object.entries(elements).forEach(([name, element]) => {
-                console.log(`${name}:`, element ? 'FOUND' : 'NOT FOUND');
-            });
-            
-            console.log('=== DEBUG COMPLETED ===');
-        }
+            const bgClass = {
+                'success': 'text-bg-success',
+                'error': 'text-bg-danger',
+                'warning': 'text-bg-warning',
+                'info': 'text-bg-info'
+            }[type] || 'text-bg-info';
 
-        // Add User Form Handling - FIXED VERSION
-        function initializeAddUserForm() {
-            const addUserForm = document.getElementById('addUserForm');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (!addUserForm) {
-                console.warn('Add user form not found in DOM');
-                return;
-            }
-            
-            console.log('Initializing add user form...');
-            
-            // Real-time validation for all fields
-            const fields = addUserForm.querySelectorAll('input[required], select[required]');
-            fields.forEach(field => {
-                field.addEventListener('input', function() {
-                    validateField(this);
-                    updateSubmitButton();
-                });
-                
-                field.addEventListener('blur', function() {
-                    validateField(this);
-                    updateSubmitButton();
-                });
-                
-                field.addEventListener('change', function() {
-                    validateField(this);
-                    updateSubmitButton();
-                });
-            });
-            
-            // Special validation for email
-            const emailField = document.getElementById('email');
-            if (emailField) {
-                emailField.addEventListener('input', function() {
-                    validateEmailField(this);
-                    updateSubmitButton();
-                });
-            } else {
-                console.warn('Email field not found');
-            }
-            
-            // Special validation for phone
-            const phoneField = document.getElementById('phonenumber');
-            if (phoneField) {
-                phoneField.addEventListener('input', function() {
-                    validatePhoneField(this);
-                    updateSubmitButton();
-                });
-            } else {
-                console.warn('Phone field not found');
-            }
-            
-            // Form submission
-            addUserForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                console.log('Form submission started...');
-                
-                if (validateAddUserForm()) {
-                    // Show loading state
-                    setSubmitButtonLoading(true);
-                    
-                    console.log('Form is valid, submitting...');
-                    
-                    // Submit form after a small delay to show loading state
-                    setTimeout(() => {
-                        this.submit();
-                    }, 500);
-                } else {
-                    console.log('Form validation failed');
-                    // Scroll to first invalid field
-                    const firstInvalid = addUserForm.querySelector('.is-invalid');
-                    if (firstInvalid) {
-                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstInvalid.focus();
-                    }
-                }
-            });
-            
-            // Reset form when modal is hidden
-            const addUserModal = document.getElementById('addUserModal');
-            if (addUserModal) {
-                addUserModal.addEventListener('hidden.bs.modal', function() {
-                    console.log('Modal hidden, resetting form...');
-                    resetAddUserForm();
-                });
-                
-                // Also reset when modal is shown (in case of previous errors)
-                addUserModal.addEventListener('show.bs.modal', function() {
-                    console.log('Modal shown, resetting form...');
-                    resetAddUserForm();
-                });
-            } else {
-                console.warn('Add user modal not found');
-            }
-            
-            console.log('Add user form initialization completed');
-        }
-
-        // Field validation - IMPROVED VERSION
-        function validateField(field) {
-            const value = field.value.trim();
-            
-            // Skip validation for empty optional fields
-            if (!field.hasAttribute('required') && !value) {
-                field.classList.remove('is-valid', 'is-invalid');
-                return true;
-            }
-            
-            // For required fields
-            if (field.hasAttribute('required') && !value) {
-                field.classList.add('is-invalid');
-                field.classList.remove('is-valid');
-                return false;
-            }
-            
-            try {
-                // Use checkValidity but catch pattern errors
-                if (field.checkValidity() && value) {
-                    field.classList.remove('is-invalid');
-                    field.classList.add('is-valid');
-                    return true;
-                } else {
-                    field.classList.remove('is-valid');
-                    if (value) {
-                        field.classList.add('is-invalid');
-                    }
-                    return false;
-                }
-            } catch (error) {
-                console.warn('Validation error for field:', field.name, error);
-                // Fallback validation for problematic patterns
-                return fallbackValidation(field, value);
-            }
-        }
-
-        // Fallback validation for problematic patterns
-        function fallbackValidation(field, value) {
-            const fieldType = field.type.toLowerCase();
-            const fieldName = field.name.toLowerCase();
-            
-            // Email validation fallback
-            if (fieldType === 'email' || fieldName.includes('email')) {
-                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                const isValid = emailRegex.test(value);
-                
-                if (isValid) {
-                    field.classList.remove('is-invalid');
-                    field.classList.add('is-valid');
-                } else {
-                    field.classList.remove('is-valid');
-                    field.classList.add('is-invalid');
-                }
-                return isValid;
-            }
-            
-            // Phone validation fallback
-            if (fieldName.includes('phone')) {
-                const phoneRegex = /^[0-9]{10,15}$/;
-                const isValid = phoneRegex.test(value);
-                
-                if (isValid) {
-                    field.classList.remove('is-invalid');
-                    field.classList.add('is-valid');
-                } else {
-                    field.classList.remove('is-valid');
-                    field.classList.add('is-invalid');
-                }
-                return isValid;
-            }
-            
-            // Default: assume valid if we can't validate
-            field.classList.remove('is-invalid');
-            field.classList.add('is-valid');
-            return true;
-        }
-
-        // Email field validation - FIXED REGEX
-        function validateEmailField(field) {
-            const value = field.value.trim();
-            // Fixed regex pattern - removed the problematic 'v' flag and $ anchor
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            
-            if (!value) {
-                field.classList.remove('is-valid', 'is-invalid');
-                return false;
-            }
-            
-            if (emailRegex.test(value)) {
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-                return true;
-            } else {
-                field.classList.remove('is-valid');
-                field.classList.add('is-invalid');
-                return false;
-            }
-        }
-
-        // Phone field validation - FIXED REGEX
-        function validatePhoneField(field) {
-            const value = field.value.trim();
-            // Fixed regex pattern - removed problematic anchors if any
-            const phoneRegex = /^[0-9]{10,15}$/;
-            
-            if (!value) {
-                field.classList.remove('is-valid', 'is-invalid');
-                return false;
-            }
-            
-            if (phoneRegex.test(value)) {
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-                return true;
-            } else {
-                field.classList.remove('is-valid');
-                field.classList.add('is-invalid');
-                return false;
-            }
-        }
-
-        // Form validation - IMPROVED VERSION
-        function validateAddUserForm() {
-            const form = document.getElementById('addUserForm');
-            const fields = form.querySelectorAll('input[required], select[required]');
-            let isValid = true;
-            
-            console.log('=== FORM VALIDATION START ===');
-            
-            // Validate all required fields
-            fields.forEach(field => {
-                const fieldResult = validateField(field);
-                console.log(`Field ${field.name}: ${fieldResult}`);
-                
-                if (!fieldResult) {
-                    isValid = false;
-                }
-            });
-            
-            // Special validation for email (using our custom function)
-            const emailField = document.getElementById('email');
-            if (emailField) {
-                const emailResult = validateEmailField(emailField);
-                console.log(`Email field: ${emailResult}`);
-                
-                if (!emailResult) {
-                    isValid = false;
-                }
-            }
-            
-            // Special validation for phone (using our custom function)
-            const phoneField = document.getElementById('phonenumber');
-            if (phoneField) {
-                const phoneResult = validatePhoneField(phoneField);
-                console.log(`Phone field: ${phoneResult}`);
-                
-                if (!phoneResult) {
-                    isValid = false;
-                }
-            }
-            
-            console.log('=== FORM VALIDATION RESULT: ' + isValid + ' ===');
-            return isValid;
-        }
-
-        // Update submit button state
-        function updateSubmitButton() {
-            const submitBtn = document.getElementById('submitBtn');
-            if (!submitBtn) {
-                console.warn('Submit button not found');
-                return;
-            }
-            
-            const form = document.getElementById('addUserForm');
-            if (!form) {
-                console.warn('Add user form not found');
-                return;
-            }
-            
-            if (form.checkValidity()) {
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
-            }
-        }
-
-        // Set submit button loading state - FIXED VERSION
-        function setSubmitButtonLoading(isLoading) {
-            const submitBtn = document.getElementById('submitBtn');
-            if (!submitBtn) {
-                console.warn('Submit button not found, skipping loading state');
-                return;
-            }
-            
-            const spinner = submitBtn.querySelector('.spinner-border');
-            const originalText = 'Create User Account';
-            
-            if (isLoading) {
-                submitBtn.disabled = true;
-                if (spinner) {
-                    spinner.classList.remove('d-none');
-                }
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
-            } else {
-                submitBtn.disabled = false;
-                if (spinner) {
-                    spinner.classList.add('d-none');
-                }
-                submitBtn.textContent = originalText;
-            }
-        }
-
-        // Reset form - FIXED VERSION
-        function resetAddUserForm() {
-            const form = document.getElementById('addUserForm');
-            if (!form) {
-                console.warn('Add user form not found');
-                return;
-            }
-            
-            const fields = form.querySelectorAll('input, select');
-            fields.forEach(field => {
-                if (field.type !== 'hidden') {
-                    field.value = '';
-                    field.classList.remove('is-valid', 'is-invalid');
-                }
-            });
-            
-            setSubmitButtonLoading(false);
-        }
-
-        // Delete User Modal
-        function showDeleteModal(userId, fullName, email, phone, role) {
-            // Set user details in the modal
-            document.getElementById('deleteUserName').textContent = fullName;
-            document.getElementById('deleteUserEmail').textContent = email;
-            document.getElementById('deleteUserPhone').textContent = phone;
-            document.getElementById('deleteUserRole').textContent = role;
-            document.getElementById('deleteUserIdInput').value = userId;
-
-            // Show the modal
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            deleteModal.show();
-        }
-
-        // Password toggle functionality
-        function initializePasswordToggle() {
-            const toggleBtn = document.querySelector('.password-toggle-btn');
-            const passwordField = document.getElementById('passwordField');
-            
-            if (toggleBtn && passwordField) {
-                toggleBtn.addEventListener('click', function() {
-                    togglePassword();
-                });
-            }
-        }
-
-        function togglePassword() {
-            const input = document.getElementById("passwordField");
-            const eyeIcon = document.querySelector(".eye-icon");
-            if (!input || !eyeIcon) return;
-            
-            if (input.type === "password") {
-                input.type = "text";
-                eyeIcon.textContent = "🙈";
-                eyeIcon.title = "Hide password";
-            } else {
-                input.type = "password";
-                eyeIcon.textContent = "👁";
-                eyeIcon.title = "Show password";
-            }
-        }
-
-        // View User Modal initialization
-        function initializeViewUserModal() {
-            // Khởi tạo và hiển thị modal ngay khi trang load xong
-            <c:if test="${requestScope.viewUser != null}">
-                var viewModal = new bootstrap.Modal(document.getElementById('viewUserModal'));
-                viewModal.show();
-            </c:if>
-            
-            // Xử lý sự kiện khi modal bị ẩn
-            const viewUserModal = document.getElementById('viewUserModal');
-            if (viewUserModal) {
-                viewUserModal.addEventListener('hidden.bs.modal', function () {
-                    // Chuyển hướng về trang quản lý user khi đóng modal
-                    const currentPage = '${requestScope.currentPage}' || '1';
-                    window.location.href = 'dashboard?section=user-management&page=' + currentPage;
-                });
-            }
-            
-            // Edit mode handling
-            const editButton = document.getElementById('editButton');
-            const saveButton = document.getElementById('saveButton');
-            const cancelButton = document.getElementById('cancelButton');
-            
-            if (editButton) {
-                editButton.addEventListener('click', function() {
-                    enableEditMode();
-                });
-            }
-            
-            if (cancelButton) {
-                cancelButton.addEventListener('click', function() {
-                    disableEditMode();
-                });
-            }
-        }
-
-        function enableEditMode() {
-            // Bật chỉnh sửa cho các trường được phép
-            document.getElementById('roleField').disabled = false;
-            document.getElementById('statusField').disabled = false;
-
-            // Thay đổi hiển thị các nút
-            document.getElementById('editButton').classList.add('d-none');
-            document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.add('d-none');
-            document.getElementById('saveButton').classList.remove('d-none');
-            document.getElementById('cancelButton').classList.remove('d-none');
-        }
-
-        function disableEditMode() {
-            // Tắt chỉnh sửa các trường
-            document.getElementById('roleField').disabled = true;
-            document.getElementById('statusField').disabled = true;
-            
-            // Khôi phục giá trị ban đầu từ server 
-            document.getElementById('roleField').value = '${requestScope.viewUser.role}';
-            document.getElementById('statusField').value = '${requestScope.viewUser.accountStatus}';
-            
-            // Thay đổi hiển thị các nút
-            document.getElementById('editButton').classList.remove('d-none');
-            document.querySelector('.modal-footer .btn-secondary[data-bs-dismiss="modal"]').classList.remove('d-none');
-            document.getElementById('saveButton').classList.add('d-none');
-            document.getElementById('cancelButton').classList.add('d-none');
-        }
-
-        // Utility function to show error message
-        function showError(message, type = 'error') {
-            const toastContainer = document.querySelector('.position-fixed.bottom-0.end-0');
-            if (!toastContainer) return;
-            
-            const toastId = 'customToast-' + Date.now();
-            const toastHtml = `
-                <div id="${toastId}" class="toast align-items-center text-bg-${type == 'error' ? 'danger' : 'success'} border-0 mb-2" role="alert">
+            const toastHTML = `
+                <div id="${toastId}" class="toast ${bgClass} border-0 mb-2" role="alert">
                     <div class="d-flex">
                         <div class="toast-body">${message}</div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -1017,30 +529,180 @@
                 </div>
             `;
             
-            toastContainer.insertAdjacentHTML('afterbegin', toastHtml);
-            const toast = new bootstrap.Toast(document.getElementById(toastId));
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toast = new bootstrap.Toast(document.getElementById(toastId), {
+                autohide: true,
+                delay: 5000
+            });
             toast.show();
             
-            // Remove toast from DOM after hide
+            // Remove from DOM after hide
             document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
                 this.remove();
             });
         }
 
-        // Auto-hide success toasts after delay
-        function autoHideToasts() {
-            const successToasts = document.querySelectorAll('.toast.text-bg-success');
-            successToasts.forEach(toast => {
-                const bsToast = new bootstrap.Toast(toast);
-                setTimeout(() => {
-                    bsToast.hide();
-                }, 5000);
+        // ===== ADD USER FORM =====
+        function initializeAddUserForm() {
+            const form = document.getElementById('addUserForm');
+            if (!form) return;
+
+            // Real-time validation
+            const fields = form.querySelectorAll('input[required], select[required]');
+            fields.forEach(field => {
+                field.addEventListener('input', function() {
+                    this.classList.remove('is-invalid', 'is-valid');
+                    if (this.checkValidity()) {
+                        this.classList.add('is-valid');
+                    }
+                });
+                
+                field.addEventListener('blur', function() {
+                    if (!this.checkValidity()) {
+                        this.classList.add('is-invalid');
+                    }
+                });
             });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!validateForm(this)) {
+                    e.preventDefault();
+                    showToast('❌ Please fix the validation errors!', 'error');
+                } else {
+                    setSubmitButtonLoading(true);
+                }
+            });
+
+            // Reset form when modal closes
+            const modal = document.getElementById('addUserModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    form.reset();
+                    form.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                        el.classList.remove('is-valid', 'is-invalid');
+                    });
+                    setSubmitButtonLoading(false);
+                });
+            }
         }
 
-        // Initialize auto-hide when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            autoHideToasts();
-        });
+        function validateForm(form) {
+            let isValid = true;
+            const fields = form.querySelectorAll('input[required], select[required]');
+            
+            fields.forEach(field => {
+                field.classList.remove('is-invalid', 'is-valid');
+                if (!field.checkValidity()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            });
+            
+            return isValid;
+        }
+
+        function setSubmitButtonLoading(loading) {
+            const btn = document.getElementById('submitBtn');
+            if (!btn) return;
+            
+            if (loading) {
+                btn.disabled = true;
+                btn.querySelector('.spinner-border')?.classList.remove('d-none');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+            } else {
+                btn.disabled = false;
+                btn.querySelector('.spinner-border')?.classList.add('d-none');
+                btn.textContent = 'Create User Account';
+            }
+        }
+
+        // ===== VIEW USER MODAL =====
+        function initializeViewUserModal() {
+            // Auto-show modal if viewUser exists
+            <c:if test="${requestScope.viewUser != null}">
+                const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+                modal.show();
+            </c:if>
+
+            // Handle modal close redirect
+            const viewModal = document.getElementById('viewUserModal');
+            if (viewModal) {
+                viewModal.addEventListener('hidden.bs.modal', function() {
+                    window.location.href = 'dashboard?section=user-management&page=${currentPage}';
+                });
+            }
+        }
+
+        // ===== DELETE MODAL =====
+        function showDeleteModal(userId, fullName, email, phone, role) {
+            document.getElementById('deleteUserName').textContent = fullName;
+            document.getElementById('deleteUserEmail').textContent = email;
+            document.getElementById('deleteUserPhone').textContent = phone;
+            document.getElementById('deleteUserRole').textContent = role;
+            document.getElementById('deleteUserIdInput').value = userId;
+
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
+        }
+
+        // ===== PASSWORD TOGGLE =====
+        function togglePassword() {
+            const input = document.getElementById('passwordField');
+            const eyeIcon = document.querySelector('.eye-icon');
+            
+            if (input && eyeIcon) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eyeIcon.textContent = '🙈';
+                } else {
+                    input.type = 'password';
+                    eyeIcon.textContent = '👁';
+                }
+            }
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function enableEditMode() {
+            // This function is called via URL parameter - no JavaScript manipulation needed
+            console.log('Edit mode enabled');
+        }
+
+        // Phone number validation
+        function validatePhone(input) {
+            const phone = input.value.replace(/\D/g, '');
+            if (phone.length >= 10 && phone.length <= 15) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                return true;
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+                return false;
+            }
+        }
+
+        // Email validation
+        function validateEmail(input) {
+            const email = input.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (emailRegex.test(email)) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                return true;
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+                return false;
+            }
+        }
+
+        // Simple debug logger
+        function log(message) {
+            console.log(`[User Management] ${message}`);
+        }
     </script>
-</div>0
+</div>

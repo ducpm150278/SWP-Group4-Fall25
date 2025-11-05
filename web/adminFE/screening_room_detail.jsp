@@ -15,7 +15,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="dashboard?section=screening-room-management">Screening Rooms</a></li>
-                    <c:if test="${param.action != 'create'}">
+                        <c:if test="${param.action != 'create'}">
                         <li class="breadcrumb-item">
                             <a href="dashboard?section=screening-room-management&action=edit&id=${viewRoom.roomID}">
                                 ${viewRoom.roomName}
@@ -233,13 +233,28 @@
                                             </div>
                                         </div>
 
+                                        <!-- Thay thế phần seats-container hiện tại -->
                                         <div class="seats-container">
                                             <c:forEach var="seat" items="${seats}">
-                                                <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()}"
-                                                     data-bs-toggle="tooltip" 
-                                                     title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
-                                                    ${seat.seatRow}${seat.seatNumber}
-                                                </div>
+                                                <c:choose>
+                                                    <c:when test="${param.action == 'edit'}">
+                                                        <!-- Trong chế độ edit, ghế có thể click -->
+                                                        <a href="dashboard?section=screening-room-management&action=editSeat&seatId=${seat.seatID}&roomId=${viewRoom.roomID}&mode=edit" 
+                                                           class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()} seat-clickable"
+                                                           data-bs-toggle="tooltip" 
+                                                           title="Click to edit - Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
+                                                            ${seat.seatRow}${seat.seatNumber}
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <!-- Trong chế độ view, ghế chỉ hiển thị -->
+                                                        <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()}"
+                                                             data-bs-toggle="tooltip" 
+                                                             title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
+                                                            ${seat.seatRow}${seat.seatNumber}
+                                                        </div>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:forEach>
                                         </div>
 
@@ -403,7 +418,33 @@
         border: 1px solid #dee2e6;
         color: white;
     }
+    .seat-clickable {
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        transform: scale(1);
+    }
 
+    .seat-clickable:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        z-index: 10;
+        position: relative;
+    }
+
+    /* Đảm bảo màu chữ hiển thị đúng trên link */
+    .seat-clickable.standard {
+        color: white !important;
+    }
+    .seat-clickable.vip {
+        color: black !important;
+    }
+    .seat-clickable.couple {
+        color: white !important;
+    }
+    .seat-clickable.disabled {
+        color: white !important;
+    }
     /* Seat type colors */
     .seat.standard {
         background-color: #6c757d;
@@ -462,7 +503,7 @@
         if (roomRow) {
             const cinemaName = roomRow.cells[2].textContent;
             const seatCapacity = roomRow.cells[4].textContent;
-            
+
             document.getElementById('deleteRoomName').textContent = roomName;
             document.getElementById('deleteCinemaName').textContent = cinemaName;
             document.getElementById('deleteSeatCapacity').textContent = seatCapacity;
@@ -472,9 +513,9 @@
             document.getElementById('deleteCinemaName').textContent = '${viewRoom.cinema.cinemaName}';
             document.getElementById('deleteSeatCapacity').textContent = '${viewRoom.seatCapacity}';
         }
-        
+
         document.getElementById('deleteRoomId').value = roomId;
-        
+
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
         deleteModal.show();
     }
@@ -489,17 +530,17 @@
         // Form validation
         const roomForm = document.getElementById('roomForm');
         if (roomForm) {
-            roomForm.addEventListener('submit', function(e) {
+            roomForm.addEventListener('submit', function (e) {
                 const roomName = this.querySelector('input[name="roomName"]');
                 const seatCapacity = this.querySelector('input[name="seatCapacity"]');
-                
+
                 if (roomName && roomName.value.trim() === '') {
                     e.preventDefault();
                     alert('Please enter a room name');
                     roomName.focus();
                     return;
                 }
-                
+
                 if (seatCapacity && (seatCapacity.value < 1 || seatCapacity.value > 500)) {
                     e.preventDefault();
                     alert('Seat capacity must be between 1 and 500');

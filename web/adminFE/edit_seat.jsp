@@ -153,20 +153,26 @@
                             </select>
                         </div>
 
+                        <!-- Warning message for booked seats -->
+                        <c:if test="${!editSeat.canBeModified()}">
+                            <div class="alert alert-warning py-2 mt-3">
+                                <small>
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    This seat has booking history and cannot be modified
+                                </small>
+                            </div>
+                        </c:if>
+
                         <!-- Action Buttons -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
                             <a href="dashboard?section=screening-room-management&action=edit&id=${viewRoom.roomID}" 
                                class="btn btn-outline-secondary btn-sm me-md-1 px-3">
                                 <i class="bi bi-x-circle me-1"></i>Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary btn-sm px-3">
-                                <i class="bi bi-check-lg me-1"></i>Update
+                            <button type="submit" class="btn btn-primary btn-sm px-3" 
+                                    ${!editSeat.canBeModified() ? 'disabled' : ''}>
+                                <i class="bi bi-check-lg me-1"></i>Update Seat
                             </button>
-                            <a href="dashboard?section=screening-room-management&action=deleteSeat&seatId=${editSeat.seatID}&roomId=${viewRoom.roomID}&mode=edit" 
-                               class="btn btn-danger btn-sm ms-md-1 px-3" 
-                               onclick="return confirm('Delete seat ${editSeat.seatRow}${editSeat.seatNumber}?')">
-                                <i class="bi bi-trash me-1"></i>Delete
-                            </a>
                         </div>
                     </form>
                 </div>
@@ -314,6 +320,12 @@
 .current-seat-info {
     border-left: 3px solid #6c757d;
     font-size: 0.875rem;
+}
+
+/* Alert Styles */
+.alert-warning {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
 }
 
 /* Responsive Design */
