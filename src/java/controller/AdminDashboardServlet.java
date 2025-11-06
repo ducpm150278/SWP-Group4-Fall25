@@ -9,1092 +9,1220 @@ import entity.ScreeningRoom;
 import entity.SeatM;
 import entity.User;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import utils.EmailService;
 import utils.SeatLayout;
 
-/**
- *
- * @author dungv
- */
 @WebServlet(name = "AdminDashboardServlet", urlPatterns = {"/adminFE/dashboard"})
 public class AdminDashboardServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet NewServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet NewServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        UserMDAO ud = new UserMDAO();
-        CinemaMDAO cd = new CinemaMDAO();
+
+        String section = request.getParameter("section");
+        System.out.println("=== ADMIN DASHBOARD GET ===");
+        System.out.println("Section: " + section);
+
         try {
-            String section = request.getParameter("section");
-            System.out.println(section);
-            if (section != null && section.equals("user-management")) {
-                try {
-                    String action = request.getParameter("action");
-                    if (action != null) {
-                        // Check view list or view detail
-                        if (action.equals("view")) {
-                            int user_Id = Integer.parseInt(request.getParameter("userId"));
-                            User user = ud.getUserByID(user_Id);
-                            if (user != null) {
-                                System.out.println("User found: " + user.getFullName());
-                            }
-                            request.setAttribute("viewUser", user);
-                        }
+            if (section == null) {
+                showDefaultDashboard(request, response);
+                request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+            } else {
+                switch (section) {
+                    case "user-management" -> {
+                        handleUserManagementGet(request, response);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
                     }
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing user ID: " + e.getMessage());
-                }
-
-                // Get param for filter list
-                String search = request.getParameter("search");
-                String roleFilter = request.getParameter("role");
-                String statusFilter = request.getParameter("status");
-                String sortBy = request.getParameter("sort");
-
-                // Set value get all in case role or status filter is null
-                if (roleFilter == null) {
-                    roleFilter = "all";
-                }
-                if (statusFilter == null) {
-                    statusFilter = "all";
-                }
-
-                // Get list user after filter và sort
-                List<User> listU = ud.getAllUsers(search, roleFilter, statusFilter, sortBy);
-                System.out.println(listU);
-                // Page setting
-                int page = 1;
-                int recordsPerPage = 10;
-                try {
-                    page = Integer.parseInt(request.getParameter("page"));
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing page number: " + e.getMessage());
-                }
-
-                // Kiểm tra nếu danh sách rỗng
-                boolean isEmptyList = listU.isEmpty();
-                request.setAttribute("isEmptyList", isEmptyList);
-
-                // Phân trang (chỉ thực hiện nếu danh sách không rỗng)
-                if (!isEmptyList) {
-                    List<User> usersPerPage = listU.stream()
-                            .skip((page - 1) * recordsPerPage)
-                            .limit(recordsPerPage)
-                            .collect(Collectors.toList());
-                    int noOfRecords = listU.size();
-                    int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
-
-                    request.setAttribute("listU", usersPerPage);
-                    request.setAttribute("recordsPerPage", recordsPerPage);
-                    request.setAttribute("noOfPages", noOfPages);
-                }
-                request.setAttribute("currentPage", page);
-                request.setAttribute("search", search);
-                request.setAttribute("roleFilter", roleFilter);
-                request.setAttribute("statusFilter", statusFilter);
-                request.setAttribute("section", section);
-            } else if (section != null && section.equals("cinema-management")) {
-                try {
-                    String action = request.getParameter("action");
-                    if (action != null) {
-                        // Check view list or view detail
-                        if (action.equals("view")) {
-                            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
-                            CinemaM cinema = cd.getCinemaById(cinemaId);
-                            if (cinema != null) {
-                                System.out.println("Cinema found: " + cinema.getCinemaName());
-                            }
-
-                            ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
-                            List<ScreeningRoom> screeningRooms = roomDAO.getScreeningRoomsByCinemaId(cinemaId);
-                            request.setAttribute("screeningRooms", screeningRooms);
-                            request.setAttribute("viewCinema", cinema);
-                        }
+                    case "cinema-management" -> {
+                        handleCinemaManagementGet(request, response);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
                     }
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing cinema ID: " + e.getMessage());
-                }
-
-                // Get param for filter list
-                String search = request.getParameter("search");
-                String statusFilter = request.getParameter("status");
-                String locationFilter = request.getParameter("location"); // Thêm location filter
-                String sortBy = request.getParameter("sort");
-
-                // Set default values if filters are null
-                if (statusFilter == null) {
-                    statusFilter = "all";
-                }
-                if (locationFilter == null) {
-                    locationFilter = "all";
-                }
-
-                // Get list cinema after filter và sort (cập nhật thêm locationFilter)
-                List<CinemaM> listCinemas = cd.getAllCinemas(search, statusFilter, locationFilter, sortBy);
-                System.out.println("Cinemas found: " + listCinemas.size());
-
-                // Page setting
-                int page = 1;
-                int recordsPerPage = 10;
-                try {
-                    page = Integer.parseInt(request.getParameter("page"));
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing page number: " + e.getMessage());
-                }
-
-                // Kiểm tra nếu danh sách rỗng
-                boolean isEmptyList = listCinemas.isEmpty();
-                request.setAttribute("isEmptyList", isEmptyList);
-
-                // Phân trang (chỉ thực hiện nếu danh sách không rỗng)
-                if (!isEmptyList) {
-                    List<CinemaM> cinemasPerPage = listCinemas.stream()
-                            .skip((page - 1) * recordsPerPage)
-                            .limit(recordsPerPage)
-                            .collect(Collectors.toList());
-                    int noOfRecords = listCinemas.size();
-                    int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
-
-                    request.setAttribute("listCinemas", cinemasPerPage);
-                    request.setAttribute("recordsPerPage", recordsPerPage);
-                    request.setAttribute("noOfPages", noOfPages);
-                }
-
-                // Lấy danh sách locations để hiển thị trong dropdown
-                List<String> allLocations = cd.getAllLocations();
-                request.setAttribute("allLocations", allLocations);
-
-                request.setAttribute("currentPage", page);
-                request.setAttribute("search", search);
-                request.setAttribute("statusFilter", statusFilter);
-                request.setAttribute("locationFilter", locationFilter); // Thêm locationFilter
-                request.setAttribute("section", section);
-            } else if (section != null && section.equals("screening-room-management")) {
-                ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
-                CinemaMDAO cinemaDAO = new CinemaMDAO();
-                SeatMDAO seatDAO = new SeatMDAO();
-
-                try {
-                    String action = request.getParameter("action");
-
-//                    System.out.println("=== SCREENING ROOM MANAGEMENT DEBUG ===");
-//                    System.out.println("Action: " + action);
-//                    System.out.println("Section: " + section);
-                    // Xử lý generate seats
-                    if ("generateSeats".equals(action)) {
-                        try {
-                            int roomId = Integer.parseInt(request.getParameter("roomId"));
-
-                            ScreeningRoom room = roomDAO.getRoomById(roomId);
-                            if (room == null) {
-                                request.getSession().setAttribute("showToast", "generate_error");
-                                request.getSession().setAttribute("showError", "Room not found");
-                                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
-                                return;
-                            }
-
-                            // Tạo seats mặc định
-                            SeatLayout layout = new SeatLayout();
-                            List<SeatM> seats = layout.generateSeats(roomId, room.getRoomType());
-
-                            // Xóa seats cũ (nếu có)
-                            seatDAO.deleteSeatsByRoom(roomId);
-
-                            // Lưu seats mới
-                            boolean seatsCreated = seatDAO.createBulkSeats(seats);
-
-                            if (seatsCreated) {
-                                // Cập nhật seat capacity
-                                room.setSeatCapacity(seats.size());
-                                roomDAO.updateRoom(room);
-
-                                request.getSession().setAttribute("showToast", "generate_success");
-                                request.getSession().setAttribute("showMessage", "Generated " + seats.size() + " seats successfully");
-                            } else {
-                                request.getSession().setAttribute("showToast", "generate_error");
-                                request.getSession().setAttribute("showError", "Failed to generate seats");
-                            }
-
-                            response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
-                            return;
-
-                        } catch (NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "generate_error");
-                            request.getSession().setAttribute("showError", "Invalid room ID");
-                            response.sendRedirect("dashboard?section=screening-room-management");
-                            return;
-                        }
+                    case "screening-room-management" ->
+                        handleScreeningRoomManagementGet(request, response);
+                    default -> {
+                        showDefaultDashboard(request, response);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
                     }
-
-                    // Xử lý edit seat - PHẢI ĐẶT Ở ĐẦU VÀ RETURN SAU KHI XỬ LÝ
-                    if ("editSeat".equals(action)) {
-                        try {
-                            int seatId = Integer.parseInt(request.getParameter("seatId"));
-                            int roomId = Integer.parseInt(request.getParameter("roomId"));
-
-//                            System.out.println("=== EDIT SEAT PROCESSING ===");
-//                            System.out.println("SeatID: " + seatId);
-//                            System.out.println("RoomID: " + roomId);
-                            // Lấy thông tin seat
-                            SeatM seat = seatDAO.getSeatById(seatId);
-//                            System.out.println("Seat found: " + (seat != null));
-
-                            // Lấy thông tin room
-                            ScreeningRoom room = roomDAO.getRoomById(roomId);
-//                            System.out.println("Room found: " + (room != null));
-
-                            if (seat != null && room != null) {
-                                // Set attributes cho JSP
-                                request.setAttribute("editSeat", seat);
-                                request.setAttribute("viewRoom", room);
-
-                                // Lấy danh sách seats để hiển thị layout
-                                List<SeatM> seats = seatDAO.getSeatsByRoom(roomId);
-                                request.setAttribute("seats", seats);
-
-//                                System.out.println("Seat position: " + seat.getSeatPosition());
-//                                System.out.println("Room name: " + room.getRoomName());
-//                                System.out.println("Total seats: " + (seats != null ? seats.size() : 0));
-                                // QUAN TRỌNG: Set section và forward
-                                request.setAttribute("section", section);
-
-//                                System.out.println("=== FORWARDING TO EDIT_SEAT.JSP ===");
-                                request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
-                                return;
-
-                            } else {
-                                System.out.println("ERROR: Seat or Room not found");
-                                request.getSession().setAttribute("showToast", "error");
-                                request.getSession().setAttribute("showError", "Seat or room not found");
-                                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
-                                return;
-                            }
-
-                        } catch (NumberFormatException e) {
-                            System.out.println("ERROR parsing IDs: " + e.getMessage());
-                            request.getSession().setAttribute("showToast", "error");
-                            request.getSession().setAttribute("showError", "Invalid seat or room ID");
-                            response.sendRedirect("dashboard?section=screening-room-management");
-                            return;
-                        }
-                    }
-
-                    // Xử lý view, edit, create, list
-                    if (action != null && (action.equals("view") || action.equals("edit") || action.equals("create"))) {
-                        if (action.equals("view") || action.equals("edit")) {
-                            int roomId = Integer.parseInt(request.getParameter("id"));
-                            ScreeningRoom room = roomDAO.getRoomById(roomId);
-                            if (room != null) {
-//                                System.out.println("Room found: " + room.getRoomName());
-                                request.setAttribute("viewRoom", room);
-
-                                // Lấy danh sách ghế
-                                List<SeatM> seats = seatDAO.getSeatsByRoom(roomId);
-                                request.setAttribute("seats", seats);
-//                                System.out.println("Seats loaded: " + (seats != null ? seats.size() : 0));
-                            }
-                        } else if (action.equals("create")) {
-                            // Xử lý cho create action
-                            String cinemaIdParam = request.getParameter("cinemaId");
-                            if (cinemaIdParam != null) {
-                                try {
-                                    int cinemaId = Integer.parseInt(cinemaIdParam);
-                                    CinemaM cinema = cinemaDAO.getCinemaById(cinemaId);
-                                    request.setAttribute("cinema", cinema);
-                                } catch (NumberFormatException e) {
-                                    System.out.println("Invalid cinema ID: " + cinemaIdParam);
-                                }
-                            }
-                        }
-                        request.setAttribute("section", section);
-                    } else {
-                        // Get parameters for filtering
-                        String search = request.getParameter("search");
-                        String statusFilter = request.getParameter("status");
-                        String roomTypeFilter = request.getParameter("roomType");
-                        String locationFilter = request.getParameter("locationFilter");
-                        String cinemaFilter = request.getParameter("cinemaFilter");
-
-                        // Set default values
-                        if (statusFilter == null) {
-                            statusFilter = "all";
-                        }
-                        if (roomTypeFilter == null) {
-                            roomTypeFilter = "all";
-                        }
-                        if (locationFilter == null || locationFilter.isEmpty()) {
-                            locationFilter = "none";
-                        }
-                        if (cinemaFilter == null || cinemaFilter.isEmpty()) {
-                            cinemaFilter = "none";
-                        }
-
-                        // Parse cinema filter
-                        Integer cinemaId = null;
-                        if (cinemaFilter != null && !cinemaFilter.isEmpty()) {
-                            try {
-                                cinemaId = Integer.valueOf(cinemaFilter);
-//                                System.out.println("Parsed cinemaId: " + cinemaId);
-                            } catch (NumberFormatException e) {
-                                System.out.println("Error parsing cinema filter: " + e.getMessage());
-                            }
-                        }
-
-                        // Page settings
-                        int page = 1;
-                        int recordsPerPage = 10;
-                        try {
-                            page = Integer.parseInt(request.getParameter("page"));
-                        } catch (NumberFormatException e) {
-                            System.out.println("Error parsing page number: " + e.getMessage());
-                        }
-
-                        // THÊM: Kiểm tra xem đã chọn đủ location và cinema chưa
-                        boolean hasValidFilters = !"none".equals(locationFilter) && !"none".equals(cinemaFilter);
-
-                        List<ScreeningRoom> rooms = new ArrayList<>();
-                        int totalRecords = 0;
-                        int noOfPages = 0;
-
-                        // Chỉ lấy dữ liệu nếu đã chọn đủ filter
-                        if (hasValidFilters) {
-                            // Get rooms with filters
-                            rooms = roomDAO.getRoomsWithFilters(
-                                    locationFilter, cinemaId, roomTypeFilter, statusFilter,
-                                    search, (page - 1) * recordsPerPage, recordsPerPage
-                            );
-
-                            // Count total for pagination
-                            totalRecords = roomDAO.countRoomsWithFilters(
-                                    locationFilter, cinemaId, roomTypeFilter, statusFilter, search
-                            );
-                            noOfPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
-                        }
-
-                        System.out.println("Total records: " + totalRecords + ", Pages: " + noOfPages);
-
-                        // Get available data for filters
-                        List<String> locations = cinemaDAO.getAllLocations();
-                        List<String> roomTypes = roomDAO.getAvailableRoomTypes();
-                        List<CinemaM> cinemas = new ArrayList<>();
-
-                        // Load cinemas based on location filter
-                        if (locationFilter != null && !locationFilter.isEmpty() && !locationFilter.equals("none")) {
-                            cinemas = cinemaDAO.getCinemasByLocation(locationFilter);
-                            System.out.println("Cinemas for location '" + locationFilter + "': " + cinemas.size());
-                        }
-
-                        // THÊM: Thêm option "None" vào danh sách locations và cinemas
-                        List<String> allLocationsWithNone = new ArrayList<>();
-                        allLocationsWithNone.add("none");
-                        allLocationsWithNone.addAll(locations);
-
-                        List<CinemaM> cinemasWithNone = new ArrayList<>();
-                        // Tạo một cinema "None" giả
-                        CinemaM noneCinema = new CinemaM();
-                        noneCinema.setCinemaID(-1);
-                        noneCinema.setCinemaName("None");
-                        noneCinema.setLocation("none");
-                        cinemasWithNone.add(noneCinema);
-                        cinemasWithNone.addAll(cinemas);
-
-                        // Set request attributes
-                        request.setAttribute("listRooms", rooms);
-                        request.setAttribute("currentPage", page);
-                        request.setAttribute("recordsPerPage", recordsPerPage);
-                        request.setAttribute("noOfPages", noOfPages);
-                        request.setAttribute("search", search);
-                        request.setAttribute("statusFilter", statusFilter);
-                        request.setAttribute("roomTypeFilter", roomTypeFilter);
-                        request.setAttribute("locationFilter", locationFilter);
-                        request.setAttribute("cinemaFilter", cinemaFilter);
-                        request.setAttribute("allLocations", allLocationsWithNone); // Sử dụng danh sách mới
-                        request.setAttribute("allRoomTypes", roomTypes);
-                        request.setAttribute("cinemasByLocation", cinemasWithNone); // Sử dụng danh sách mới
-                        request.setAttribute("section", section);
-                        request.setAttribute("hasValidFilters", hasValidFilters); // THÊM: flag để kiểm tra trong JSP
-                    }
-
-                } catch (NumberFormatException e) {
-                    System.out.println("Error in room-management doGet: " + e.getMessage());
                 }
             }
 
-            response.setContentType("text/html;charset=UTF-8");
-            request.setCharacterEncoding("UTF-8");
-            request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
         } catch (ServletException | IOException e) {
-            System.out.println("Error in doGet: " + e.getMessage());
+            handleError(request, response, e, "doGet");
         }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        String section = request.getParameter("section");
+        System.out.println("=== ADMIN DASHBOARD POST ===");
+        System.out.println("Section: " + section);
+
         try {
-            String section = request.getParameter("section");
-            if (section != null && section.equals("user-management")) {
-                UserMDAO ud = new UserMDAO();
-                EmailService es = new EmailService();
-//                LogHistoryDAO lhd = new LogHistoryDAO();
-
-                String action = request.getParameter("action");
-                switch (action) {
-                    case "add" -> {
-                        try {
-                            // Get and trim data
-                            String fullname = request.getParameter("fullname").trim();
-                            String email = request.getParameter("email").trim().toLowerCase();
-                            String phone = request.getParameter("phonenumber").trim();
-                            String role = request.getParameter("role");
-
-                            System.out.println("=== ADD USER DEBUG ===");
-                            System.out.println("Fullname: " + fullname);
-                            System.out.println("Email: " + email);
-                            System.out.println("Phone: " + phone);
-                            System.out.println("Role: " + role);
-
-                            // Validate required fields
-                            if (fullname.isEmpty() || email.isEmpty() || phone.isEmpty() || role == null || role.isEmpty()) {
-                                request.getSession().setAttribute("showToast", "add_failed");
-                                request.getSession().setAttribute("showError", "All fields are required");
-                                response.sendRedirect("dashboard?section=user-management");
-                                return;
-                            }
-
-                            // Check existing email
-                            if (ud.checkExistedEmail(email)) {
-                                request.getSession().setAttribute("showToast", "add_error_email");
-                                response.sendRedirect("dashboard?section=user-management");
-                                return;
-                            }
-
-                            // Check existing phone
-                            if (ud.checkExistedPhone(phone)) {
-                                request.getSession().setAttribute("showToast", "add_error_phone");
-                                response.sendRedirect("dashboard?section=user-management");
-                                return;
-                            }
-
-                            // Generate temporary password
-                            String temp_pass = ud.generatePassword(12);
-                            System.out.println("Generated temp password: " + temp_pass);
-
-                            // Create user
-                            boolean isCreated = ud.addNewUser(fullname, email, phone, temp_pass, "Male",
-                                    role, ud.generateAddress(),
-                                    Date.valueOf(ud.generateRandomDOB(18, 60)),
-                                    "Temporary");
-
-                            System.out.println("User creation result: " + isCreated);
-
-                            if (isCreated) {
-                                // Send email with credentials using the new method
-                                boolean emailSent = es.sendAccountCreationEmail(email, fullname, email, phone, role, temp_pass);
-                                System.out.println("Email sent result: " + emailSent);
-
-                                if (emailSent) {
-                                    request.getSession().setAttribute("showToast", "add_success");
-                                } else {
-                                    request.getSession().setAttribute("showToast", "add_success_no_email");
-                                    System.err.println("User created but email not sent to: " + email);
-                                }
-                            } else {
-                                request.getSession().setAttribute("showToast", "add_failed");
-                                request.getSession().setAttribute("showError", "Failed to create user in database");
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            request.getSession().setAttribute("ExceptionError", "add_failed");
-                            request.getSession().setAttribute("showError", "System error: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=user-management");
-                    }
-                    case "delete" -> {
-                        try {
-                            int userId = Integer.parseInt(request.getParameter("userId"));
-                            // Call your service to delete the user
-                            boolean isDeleted = ud.deleteUser(userId);
-
-                            if (isDeleted) {
-//                                boolean addLog = lhd.addNewLog(new LogHistory(1, "DELETE", "USER", userId, "N/A", "N/A", "Delete an user for testing", "N/A"));
-//                                System.out.println("Delete log added: " + addLog);
-                                request.getSession().setAttribute("showToast", "delete_success");
-                            } else {
-                                request.getSession().setAttribute("ExceptionError", "delete_failed");
-                                request.getSession().setAttribute("showError", "Error deleting user: User not found or deletion failed");
-                            }
-                        } catch (NumberFormatException e) {
-                            request.getSession().setAttribute("ExceptionError", "delete_failed");
-                            request.getSession().setAttribute("showError", "Error deleting user: " + e.getMessage());
-                            System.out.println("Error in delete user: " + e.getMessage());
-                        }
-
-                        // Redirect back to user list
-                        response.sendRedirect("dashboard?section=user-management");
-                    }
-
-                    case "update" -> {
-                        try {
-                            int userId = Integer.parseInt(request.getParameter("userId"));
-                            String role = request.getParameter("role");
-                            String status = request.getParameter("status");
-
-                            User user = ud.getUserByID(userId);
-
-                            if (user == null) {
-                                request.getSession().setAttribute("ExceptionError", "update_failed");
-                                request.getSession().setAttribute("showError", "Error update user: User not found");
-                                response.sendRedirect("dashboard?section=user-management");
-                                return;
-                            }
-
-                            // Log get input
-                            System.out.println("Current Role: " + user.getRole());
-                            System.out.println("New Role: " + role);
-                            System.out.println("Current Status: " + user.getAccountStatus());
-                            System.out.println("New Status: " + status);
-
-                            //Set value
-//                            String old_value = "Role: " + user.getRole() + " , Status: " + user.getAccountStatus() + ".";
-//                            String new_value = "Role: " + role + " , Status: " + status + ".";
-                            boolean isUpdated = ud.updateSettingUser(role, status, userId);
-
-                            if (isUpdated) {
-                                request.getSession().setAttribute("showToast", "update_success");
-
-//                                boolean addLog = lhd.addNewLog(new LogHistory(1, "UPDATE", "USER", userId, old_value, new_value, "Update setting for user account.", "N/A"));
-//                                System.out.println("Update log added: " + addLog);
-                            } else {
-                                request.getSession().setAttribute("ExceptionError", "update_failed");
-                                request.getSession().setAttribute("showError", "Error update user: Update failed");
-                            }
-                        } catch (NumberFormatException e) {
-                            request.getSession().setAttribute("ExceptionError", "update_failed");
-                            request.getSession().setAttribute("showError", "Error update user: " + e.getMessage());
-                            System.out.println("Error in update user: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=user-management");
-                    }
-                    default ->
-                        response.sendRedirect("dashboard?section=user-management");
-                }
-            } else if (section != null && section.equals("cinema-management")) {
-                CinemaMDAO cd = new CinemaMDAO();
-                //  LogHistoryDAO lhd = new LogHistoryDAO();
-
-                String action = request.getParameter("action");
-                switch (action) {
-                    case "add" -> {
-                        try {
-                            // Get data
-                            String cinemaName = request.getParameter("cinemaName");
-                            String location = request.getParameter("location");
-                            String address = request.getParameter("address"); // Thêm address
-                            boolean isActive = request.getParameter("isActive") != null;
-
-                            // Validate input
-                            if (cinemaName == null || cinemaName.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Cinema name is required");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            if (location == null || location.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Location is required");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            if (address == null || address.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Address is required");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            // Check if cinema name already exists
-                            if (cd.checkCinemaNameExists(cinemaName)) {
-                                request.getSession().setAttribute("showToast", "add_error_name");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            // Save cinema to database
-                            CinemaM newCinema = new CinemaM();
-                            newCinema.setCinemaName(cinemaName);
-                            newCinema.setLocation(location);
-                            newCinema.setAddress(address); // Set address
-                            newCinema.setActive(isActive);
-                            boolean isCreated = cd.addCinema(newCinema);
-                            System.out.println("Cinema created: " + isCreated);
-
-                            if (isCreated) {
-                                // Record logs
-//                  boolean addLog = lhd.addNewLog(new LogHistory(1, "CREATE", "CINEMA", null, "N/A", "N/A", "Add new cinema: <br>"
-//                          + "Cinema Details:<br>"
-//                          + "Name: " + cinemaName + "<br>"
-//                          + "Location: " + location + "<br>"
-//                          + "Address: " + address + "<br>"
-//                          + "Status: " + (isActive ? "Active" : "Inactive"), "N/A"));
-//                  System.out.println("Log added: " + addLog);
-
-                                request.getSession().setAttribute("showToast", "add_success");
-                            } else {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Failed to create cinema");
-                            }
-                        } catch (IOException e) {
-                            request.getSession().setAttribute("showToast", "add_error");
-                            request.getSession().setAttribute("showError", "Error creating cinema: " + e.getMessage());
-                            System.out.println("Error in add cinema: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=cinema-management");
-                    }
-
-                    case "delete" -> {
-                        try {
-                            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
-                            // Call your service to delete the cinema (soft delete)
-//                            boolean isDeleted = cd.deleteCinema(cinemaId);
-                            // Call your service to delete the cinema (hard delete)
-                            boolean isDeleted = cd.deleteH_Cinema(cinemaId);
-
-                            if (isDeleted) {
-//                  boolean addLog = lhd.addNewLog(new LogHistory(1, "DELETE", "CINEMA", cinemaId, "N/A", "N/A", "Delete cinema for testing", "N/A"));
-//                  System.out.println("Delete log added: " + addLog);
-                                request.getSession().setAttribute("showToast", "delete_success");
-                            } else {
-                                request.getSession().setAttribute("showToast", "delete_error");
-                                request.getSession().setAttribute("showError", "Error deleting cinema: Cinema not found or deletion failed");
-                            }
-                        } catch (NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "delete_error");
-                            request.getSession().setAttribute("showError", "Error deleting cinema: " + e.getMessage());
-                            System.out.println("Error in delete cinema: " + e.getMessage());
-                        }
-
-                        // Redirect back to cinema list
-                        response.sendRedirect("dashboard?section=cinema-management");
-                    }
-
-                    case "update" -> {
-                        try {
-                            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
-                            String cinemaName = request.getParameter("cinemaName");
-                            String location = request.getParameter("location");
-                            String address = request.getParameter("address"); // Thêm address
-                            boolean isActive = request.getParameter("isActive") != null;
-
-                            CinemaM cinema = cd.getCinemaById(cinemaId);
-
-                            if (cinema == null) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Error update cinema: Cinema not found");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            // Validate required fields
-                            if (cinemaName == null || cinemaName.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Cinema name is required");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            if (location == null || location.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Location is required");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            if (address == null || address.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Address is required");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            // Check if cinema name exists (excluding current cinema)
-                            if (cd.checkCinemaNameExists(cinemaName, cinemaId)) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Cinema name already exists");
-                                response.sendRedirect("dashboard?section=cinema-management");
-                                return;
-                            }
-
-                            // Log get input
-                            System.out.println("Current Cinema: " + cinema.getCinemaName());
-                            System.out.println("New Cinema Name: " + cinemaName);
-                            System.out.println("Current Location: " + cinema.getLocation());
-                            System.out.println("New Location: " + location);
-                            System.out.println("Current Address: " + cinema.getAddress()); // Thêm address
-                            System.out.println("New Address: " + address);
-                            System.out.println("Current Status: " + cinema.isActive());
-                            System.out.println("New Status: " + isActive);
-
-                            // Set value for log (commented out for now)
-//              String old_value = "Name: " + cinema.getCinemaName() + ", Location: " + cinema.getLocation() + 
-//                      ", Address: " + cinema.getAddress() + ", Status: " + cinema.isActive() + ".";
-//              String new_value = "Name: " + cinemaName + ", Location: " + location + 
-//                      ", Address: " + address + ", Status: " + isActive + ".";
-                            // Gọi phương thức update mới (không có totalRooms)
-                            boolean isUpdated = cd.updateCinema(cinemaId, cinemaName, location, address, isActive);
-
-                            if (isUpdated) {
-                                request.getSession().setAttribute("showToast", "update_success");
-
-//                  boolean addLog = lhd.addNewLog(new LogHistory(1, "UPDATE", "CINEMA", cinemaId, old_value, new_value, "Update cinema information.", "N/A"));
-//                  System.out.println("Update log added: " + addLog);
-                            } else {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Error update cinema: Update failed");
-                            }
-                        } catch (IOException | NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "update_error");
-                            request.getSession().setAttribute("showError", "Error update cinema: " + e.getMessage());
-                            System.out.println("Error in update cinema: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=cinema-management");
-                    }
-
-                    default ->
-                        response.sendRedirect("dashboard?section=cinema-management");
-                }
-            } else if (section != null && section.equals("screening-room-management")) {
-                ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
-                SeatMDAO seatDAO = new SeatMDAO();
-                // LogHistoryDAO lhd = new LogHistoryDAO();
-
-                String action = request.getParameter("action");
-                switch (action) {
-                    case "create" -> {
-                        try {
-                            // Get form data
-                            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
-                            String roomName = request.getParameter("roomName");
-                            int seatCapacity = Integer.parseInt(request.getParameter("seatCapacity"));
-                            String roomType = request.getParameter("roomType");
-                            boolean isActive = request.getParameter("isActive") != null;
-
-                            // Validate input
-                            if (roomName == null || roomName.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Room name is required");
-                                response.sendRedirect("dashboard?section=screening-room-management");
-                                return;
-                            }
-
-                            // Check if room name already exists in the same cinema
-                            if (roomDAO.isRoomNameExists(cinemaId, roomName)) {
-                                request.getSession().setAttribute("showToast", "add_error_name");
-                                response.sendRedirect("dashboard?section=screening-room-management");
-                                return;
-                            }
-
-                            // Create screening room
-                            ScreeningRoom room = new ScreeningRoom();
-                            room.setCinemaID(cinemaId);
-                            room.setRoomName(roomName);
-                            room.setSeatCapacity(seatCapacity);
-                            room.setRoomType(roomType);
-                            room.setActive(isActive);
-
-                            int roomId = roomDAO.createRoom(room);
-
-                            if (roomId > 0) {
-                                // Auto-generate seats based on room type
-                                SeatLayout layout = new SeatLayout();
-                                List<SeatM> seats = layout.generateSeats(roomId, roomType);
-
-                                // Save seats to database
-                                boolean seatsCreated = seatDAO.createBulkSeats(seats);
-
-                                if (seatsCreated) {
-                                    // Update seat capacity with actual generated seats count
-                                    room.setSeatCapacity(seats.size());
-                                    roomDAO.updateRoom(room);
-
-                                    // Record log
-                                    // boolean addLog = lhd.addNewLog(new LogHistory(1, "CREATE", "SCREENING_ROOM", roomId, "N/A", "N/A", 
-                                    //     "Add new screening room: " + roomName + " with " + seats.size() + " seats", "N/A"));
-                                    request.getSession().setAttribute("showToast", "add_success");
-                                } else {
-                                    // Rollback room creation if seats creation failed
-                                    roomDAO.deleteRoom(roomId);
-                                    request.getSession().setAttribute("showToast", "add_error");
-                                    request.getSession().setAttribute("showError", "Failed to create seats layout");
-                                }
-                            } else {
-                                request.getSession().setAttribute("showToast", "add_error");
-                                request.getSession().setAttribute("showError", "Failed to create screening room");
-                            }
-
-                        } catch (IOException | NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "add_error");
-                            request.getSession().setAttribute("showError", "Error creating room: " + e.getMessage());
-                            System.out.println("Error in create room: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=screening-room-management");
-                    }
-
-                    case "update" -> {
-                        try {
-                            int roomId = Integer.parseInt(request.getParameter("roomId"));
-                            String roomName = request.getParameter("roomName");
-                            int seatCapacity = Integer.parseInt(request.getParameter("seatCapacity"));
-                            String roomType = request.getParameter("roomType");
-                            boolean isActive = request.getParameter("isActive") != null;
-
-                            ScreeningRoom room = roomDAO.getRoomById(roomId);
-
-                            if (room == null) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Room not found");
-                                response.sendRedirect("dashboard?section=screening-room-management");
-                                return;
-                            }
-
-                            // Validate input
-                            if (roomName == null || roomName.trim().isEmpty()) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Room name is required");
-                                response.sendRedirect("dashboard?section=screening-room-management");
-                                return;
-                            }
-
-                            // Check if room name exists (excluding current room)
-                            if (roomDAO.isRoomNameExists(room.getCinemaID(), roomName, roomId)) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Room name already exists in this cinema");
-                                response.sendRedirect("dashboard?section=screening-room-management");
-                                return;
-                            }
-
-                            // Update room
-                            room.setRoomName(roomName);
-                            room.setSeatCapacity(seatCapacity);
-                            room.setRoomType(roomType);
-                            room.setActive(isActive);
-
-                            boolean isUpdated = roomDAO.updateRoom(room);
-
-                            if (isUpdated) {
-                                // Record log
-                                // boolean addLog = lhd.addNewLog(new LogHistory(1, "UPDATE", "SCREENING_ROOM", roomId, 
-                                //     "Old: " + room.getRoomName() + ", " + room.getSeatCapacity() + " seats, " + room.getRoomType(),
-                                //     "New: " + roomName + ", " + seatCapacity + " seats, " + roomType,
-                                //     "Update screening room information", "N/A"));
-
-                                request.getSession().setAttribute("showToast", "update_success");
-                            } else {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Failed to update room");
-                            }
-
-                        } catch (IOException | NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "update_error");
-                            request.getSession().setAttribute("showError", "Error updating room: " + e.getMessage());
-                            System.out.println("Error in update room: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=screening-room-management");
-                    }
-
-                    case "delete" -> {
-                        try {
-                            int roomId = Integer.parseInt(request.getParameter("id"));
-
-                            // Soft delete the room
-                            boolean isDeleted = roomDAO.deleteRoom(roomId);
-
-                            if (isDeleted) {
-                                // Record log
-                                // boolean addLog = lhd.addNewLog(new LogHistory(1, "DELETE", "SCREENING_ROOM", roomId, 
-                                //     "N/A", "N/A", "Delete screening room", "N/A"));
-
-                                request.getSession().setAttribute("showToast", "delete_success");
-                            } else {
-                                request.getSession().setAttribute("showToast", "delete_error");
-                                request.getSession().setAttribute("showError", "Failed to delete room");
-                            }
-
-                        } catch (NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "delete_error");
-                            request.getSession().setAttribute("showError", "Error deleting room: " + e.getMessage());
-                            System.out.println("Error in delete room: " + e.getMessage());
-                        }
-                        response.sendRedirect("dashboard?section=screening-room-management");
-                    }
-
-                    case "updateSeat" -> {
-                        try {
-                            int seatId = Integer.parseInt(request.getParameter("seatId"));
-                            int roomId = Integer.parseInt(request.getParameter("roomId"));
-                            // KHÔNG lấy seatRow và seatNumber từ parameter nữa
-                            String seatType = request.getParameter("seatType");
-                            String status = request.getParameter("status");
-                            String mode = request.getParameter("mode");
-
-                            SeatM seat = seatDAO.getSeatById(seatId);
-
-                            if (seat == null) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Seat not found");
-                                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
-                                return;
-                            }
-
-                            // Check if seat can be modified
-                            if (!seat.canBeModified()) {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Cannot modify booked seat");
-                                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
-                                return;
-                            }
-
-                            // CHỈ update type và status, giữ nguyên row và number
-                            seat.setSeatType(seatType);
-                            seat.setStatus(status);
-
-                            boolean isUpdated = seatDAO.updateSeat(seat);
-
-                            if (isUpdated) {
-                                request.getSession().setAttribute("showToast", "update_success");
-                                request.getSession().setAttribute("showMessage", "Seat updated successfully");
-                            } else {
-                                request.getSession().setAttribute("showToast", "update_error");
-                                request.getSession().setAttribute("showError", "Failed to update seat");
-                            }
-
-                        } catch (IOException | NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "update_error");
-                            request.getSession().setAttribute("showError", "Error updating seat: " + e.getMessage());
-                            System.out.println("Error in update seat: " + e.getMessage());
-                        }
-
-                        String roomId = request.getParameter("roomId");
-                        String mode = request.getParameter("mode");
-                        response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
-                    }
-
-                    case "deleteSeat" -> {
-                        try {
-                            int seatId = Integer.parseInt(request.getParameter("seatId"));
-                            int roomId = Integer.parseInt(request.getParameter("roomId"));
-                            String mode = request.getParameter("mode");
-
-                            SeatM seat = seatDAO.getSeatById(seatId);
-                            if (seat == null) {
-                                request.getSession().setAttribute("showToast", "delete_error");
-                                request.getSession().setAttribute("showError", "Seat not found");
-                                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
-                                return;
-                            }
-
-                            if (!seat.canBeModified()) {
-                                request.getSession().setAttribute("showToast", "delete_error");
-                                request.getSession().setAttribute("showError", "Cannot delete booked seat");
-                                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
-                                return;
-                            }
-
-                            boolean isDeleted = seatDAO.deleteSeat(seatId);
-
-                            if (isDeleted) {
-                                request.getSession().setAttribute("showToast", "delete_success");
-                                request.getSession().setAttribute("showMessage", "Seat deleted successfully");
-                            } else {
-                                request.getSession().setAttribute("showToast", "delete_error");
-                                request.getSession().setAttribute("showError", "Failed to delete seat");
-                            }
-
-                        } catch (NumberFormatException e) {
-                            request.getSession().setAttribute("showToast", "delete_error");
-                            request.getSession().setAttribute("showError", "Error deleting seat: " + e.getMessage());
-                            System.out.println("Error in delete seat: " + e.getMessage());
-                        }
-
-                        String roomId = request.getParameter("roomId");
-                        String mode = request.getParameter("mode");
-                        response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
-                    }
-
-                    default -> {
-                        response.sendRedirect("dashboard?section=screening-room-management");
-                    }
-                }
+            if (section == null) {
+                response.sendRedirect("dashboard");
+                return;
             }
-        } catch (IOException e) {
-            System.out.println("Error in doPost: " + e.getMessage());
+
+            switch (section) {
+                case "user-management" ->
+                    handleUserManagementPost(request, response);
+                case "cinema-management" ->
+                    handleCinemaManagementPost(request, response);
+                case "screening-room-management" ->
+                    handleScreeningRoomManagementPost(request, response);
+                default ->
+                    response.sendRedirect("dashboard?section=" + section);
+            }
+
+        } catch (ServletException | IOException e) {
+            handleError(request, response, e, "doPost");
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
+    // ========== USER MANAGEMENT HANDLERS ==========
+    private void handleUserManagementGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processToastMessages(request);
+        UserMDAO ud = new UserMDAO();
+
+        try {
+            String action = request.getParameter("action");
+            if (action != null && action.equals("view")) {
+                int user_Id = Integer.parseInt(request.getParameter("userId"));
+                User user = ud.getUserByID(user_Id);
+                request.setAttribute("viewUser", user);
+            }
+
+            // Get parameters for filtering
+            String search = request.getParameter("search");
+            String roleFilter = request.getParameter("role");
+            String statusFilter = request.getParameter("status");
+            String sortBy = request.getParameter("sort");
+
+            // Set default values
+            if (roleFilter == null) {
+                roleFilter = "all";
+            }
+            if (statusFilter == null) {
+                statusFilter = "all";
+            }
+
+            // Get filtered list
+            List<User> listU = ud.getAllUsers(search, roleFilter, statusFilter, sortBy);
+
+            // Pagination
+            int page = 1;
+            int recordsPerPage = 10;
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                // Use default page
+            }
+
+            boolean isEmptyList = listU.isEmpty();
+            request.setAttribute("isEmptyList", isEmptyList);
+
+            if (!isEmptyList) {
+                List<User> usersPerPage = listU.stream()
+                        .skip((page - 1) * recordsPerPage)
+                        .limit(recordsPerPage)
+                        .collect(Collectors.toList());
+                int noOfRecords = listU.size();
+                int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
+
+                request.setAttribute("listU", usersPerPage);
+                request.setAttribute("noOfPages", noOfPages);
+            }
+
+            request.setAttribute("currentPage", page);
+            request.setAttribute("recordsPerPage", recordsPerPage);
+            request.setAttribute("search", search);
+            request.setAttribute("roleFilter", roleFilter);
+            request.setAttribute("statusFilter", statusFilter);
+            request.setAttribute("section", "user-management");
+
+        } catch (NumberFormatException e) {
+            throw new ServletException("Error in user management GET", e);
+        }
+    }
+
+    private void handleUserManagementPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        UserMDAO ud = new UserMDAO();
+        EmailService es = new EmailService();
+
+        String action = request.getParameter("action");
+        if (action == null) {
+            response.sendRedirect("dashboard?section=user-management");
+            return;
+        }
+
+        try {
+            switch (action) {
+                case "add" ->
+                    handleUserAdd(request, response, ud, es);
+                case "delete" ->
+                    handleUserDelete(request, response, ud);
+                case "update" ->
+                    handleUserUpdate(request, response, ud);
+                default ->
+                    response.sendRedirect("dashboard?section=user-management");
+            }
+
+        } catch (IOException e) {
+            sendToast(request, "error", "Error: " + e.getMessage());
+            response.sendRedirect("dashboard?section=user-management");
+        }
+    }
+
+    private void handleUserAdd(HttpServletRequest request, HttpServletResponse response,
+            UserMDAO ud, EmailService es) throws IOException {
+
+        // Get and trim data
+        String fullname = request.getParameter("fullname").trim();
+        String email = request.getParameter("email").trim().toLowerCase();
+        String phone = request.getParameter("phonenumber").trim();
+        String role = request.getParameter("role");
+
+        // Validation
+        if (fullname.isEmpty() || email.isEmpty() || phone.isEmpty() || role == null || role.isEmpty()) {
+            sendToast(request, "error", "All fields are required");
+            response.sendRedirect("dashboard?section=user-management");
+            return;
+        }
+
+        // Check existing email
+        if (ud.checkExistedEmail(email)) {
+            sendToast(request, "error", "Email already exists");
+            response.sendRedirect("dashboard?section=user-management");
+            return;
+        }
+
+        // Check existing phone
+        if (ud.checkExistedPhone(phone)) {
+            sendToast(request, "error", "Phone number already exists");
+            response.sendRedirect("dashboard?section=user-management");
+            return;
+        }
+
+        // Generate temporary password
+        String temp_pass = ud.generatePassword(12);
+
+        // Create user
+        boolean isCreated = ud.addNewUser(fullname, email, phone, temp_pass, "Male",
+                role, ud.generateAddress(),
+                Date.valueOf(ud.generateRandomDOB(18, 60)),
+                "Temporary");
+
+        if (isCreated) {
+            // Send email
+            boolean emailSent = es.sendAccountCreationEmail(email, fullname, email, phone, role, temp_pass);
+
+            if (emailSent) {
+                sendToast(request, "success", "User created successfully and email sent");
+            } else {
+                sendToast(request, "success", "User created but email not sent");
+            }
+        } else {
+            sendToast(request, "error", "Failed to create user");
+        }
+
+        response.sendRedirect("dashboard?section=user-management");
+    }
+
+    private void handleUserDelete(HttpServletRequest request, HttpServletResponse response,
+            UserMDAO ud) throws IOException {
+
+        try {
+            int userId = Integer.parseInt(request.getParameter("userId"));
+            boolean isDeleted = ud.deleteUser(userId);
+
+            if (isDeleted) {
+                sendToast(request, "success", "User deleted successfully");
+            } else {
+                sendToast(request, "error", "Failed to delete user");
+            }
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid user ID");
+        }
+
+        response.sendRedirect("dashboard?section=user-management");
+    }
+
+    private void handleUserUpdate(HttpServletRequest request, HttpServletResponse response,
+            UserMDAO ud) throws IOException {
+
+        try {
+            int userId = Integer.parseInt(request.getParameter("userId"));
+            String role = request.getParameter("role");
+            String status = request.getParameter("status");
+
+            User user = ud.getUserByID(userId);
+            if (user == null) {
+                sendToast(request, "error", "User not found");
+                response.sendRedirect("dashboard?section=user-management");
+                return;
+            }
+
+            boolean isUpdated = ud.updateSettingUser(role, status, userId);
+
+            if (isUpdated) {
+                sendToast(request, "success", "User updated successfully");
+            } else {
+                sendToast(request, "error", "Failed to update user");
+            }
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid user ID");
+        }
+
+        response.sendRedirect("dashboard?section=user-management");
+    }
+
+    // ========== CINEMA MANAGEMENT HANDLERS ==========
+    private void handleCinemaManagementGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processToastMessages(request);
+        CinemaMDAO cd = new CinemaMDAO();
+
+        try {
+            String action = request.getParameter("action");
+            if (action != null && action.equals("view")) {
+                int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
+                CinemaM cinema = cd.getCinemaById(cinemaId);
+
+                ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
+                List<ScreeningRoom> screeningRooms = roomDAO.getScreeningRoomsByCinemaId(cinemaId);
+
+                request.setAttribute("screeningRooms", screeningRooms);
+                request.setAttribute("viewCinema", cinema);
+            }
+
+            // Get parameters for filtering
+            String search = request.getParameter("search");
+            String statusFilter = request.getParameter("status");
+            String locationFilter = request.getParameter("location");
+            String sortBy = request.getParameter("sort");
+
+            // Set default values
+            if (statusFilter == null) {
+                statusFilter = "all";
+            }
+            if (locationFilter == null) {
+                locationFilter = "all";
+            }
+
+            // Get filtered list
+            List<CinemaM> listCinemas = cd.getAllCinemas(search, statusFilter, locationFilter, sortBy);
+            System.out.println(listCinemas);
+            // Pagination
+            int page = 1;
+            int recordsPerPage = 10;
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                // Use default page
+            }
+
+            boolean isEmptyList = listCinemas.isEmpty();
+            request.setAttribute("isEmptyList", isEmptyList);
+
+            if (!isEmptyList) {
+                List<CinemaM> cinemasPerPage = listCinemas.stream()
+                        .skip((page - 1) * recordsPerPage)
+                        .limit(recordsPerPage)
+                        .collect(Collectors.toList());
+                int noOfRecords = listCinemas.size();
+                int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / recordsPerPage);
+
+                request.setAttribute("listCinemas", cinemasPerPage);
+                request.setAttribute("noOfPages", noOfPages);
+            }
+
+            // Get all locations for filter dropdown
+            List<String> allLocations = cd.getAllLocations();
+
+            request.setAttribute("currentPage", page);
+            request.setAttribute("recordsPerPage", recordsPerPage);
+            request.setAttribute("search", search);
+            request.setAttribute("statusFilter", statusFilter);
+            request.setAttribute("locationFilter", locationFilter);
+            request.setAttribute("allLocations", allLocations);
+            request.setAttribute("section", "cinema-management");
+
+        } catch (NumberFormatException e) {
+            throw new ServletException("Error in cinema management GET", e);
+        }
+    }
+
+    private void handleCinemaManagementPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        CinemaMDAO cd = new CinemaMDAO();
+
+        String action = request.getParameter("action");
+        if (action == null) {
+            response.sendRedirect("dashboard?section=cinema-management");
+            return;
+        }
+
+        try {
+            switch (action) {
+                case "add" ->
+                    handleCinemaAdd(request, response, cd);
+                case "delete" ->
+                    handleCinemaDelete(request, response, cd);
+                case "update" ->
+                    handleCinemaUpdate(request, response, cd);
+                default ->
+                    response.sendRedirect("dashboard?section=cinema-management");
+            }
+
+        } catch (IOException e) {
+            sendToast(request, "error", "Error: " + e.getMessage());
+            response.sendRedirect("dashboard?section=cinema-management");
+        }
+    }
+
+    private void handleCinemaAdd(HttpServletRequest request, HttpServletResponse response,
+            CinemaMDAO cd) throws IOException {
+
+        String cinemaName = request.getParameter("cinemaName");
+        String location = request.getParameter("location");
+        String address = request.getParameter("address");
+        boolean isActive = request.getParameter("isActive") != null;
+
+        // Validation
+        if (cinemaName == null || cinemaName.trim().isEmpty()) {
+            sendToast(request, "error", "Cinema name is required");
+            response.sendRedirect("dashboard?section=cinema-management");
+            return;
+        }
+
+        if (location == null || location.trim().isEmpty()) {
+            sendToast(request, "error", "Location is required");
+            response.sendRedirect("dashboard?section=cinema-management");
+            return;
+        }
+
+        if (address == null || address.trim().isEmpty()) {
+            sendToast(request, "error", "Address is required");
+            response.sendRedirect("dashboard?section=cinema-management");
+            return;
+        }
+
+        // Check duplicate cinema name
+        if (cd.checkCinemaNameExists(cinemaName)) {
+            sendToast(request, "error", "Cinema name already exists");
+            response.sendRedirect("dashboard?section=cinema-management");
+            return;
+        }
+
+        // Create cinema
+        CinemaM newCinema = new CinemaM();
+        newCinema.setCinemaName(cinemaName);
+        newCinema.setLocation(location);
+        newCinema.setAddress(address);
+        newCinema.setActive(isActive);
+
+        boolean isCreated = cd.addCinema(newCinema);
+
+        if (isCreated) {
+            sendToast(request, "success", "Cinema created successfully");
+        } else {
+            sendToast(request, "error", "Failed to create cinema");
+        }
+
+        response.sendRedirect("dashboard?section=cinema-management");
+    }
+
+    private void handleCinemaDelete(HttpServletRequest request, HttpServletResponse response,
+            CinemaMDAO cd) throws IOException {
+
+        try {
+            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
+            boolean isDeleted = cd.deleteH_Cinema(cinemaId);
+
+            if (isDeleted) {
+                sendToast(request, "success", "Cinema deleted successfully");
+            } else {
+                sendToast(request, "error", "Failed to delete cinema");
+            }
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid cinema ID");
+        }
+
+        response.sendRedirect("dashboard?section=cinema-management");
+    }
+
+    private void handleCinemaUpdate(HttpServletRequest request, HttpServletResponse response,
+            CinemaMDAO cd) throws IOException {
+
+        try {
+            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
+            String cinemaName = request.getParameter("cinemaName");
+            String location = request.getParameter("location");
+            String address = request.getParameter("address");
+            boolean isActive = request.getParameter("isActive") != null;
+
+            CinemaM cinema = cd.getCinemaById(cinemaId);
+            if (cinema == null) {
+                sendToast(request, "error", "Cinema not found");
+                response.sendRedirect("dashboard?section=cinema-management");
+                return;
+            }
+
+            // Validation
+            if (cinemaName == null || cinemaName.trim().isEmpty()) {
+                sendToast(request, "error", "Cinema name is required");
+                response.sendRedirect("dashboard?section=cinema-management&action=view&cinemaId=" + cinemaId);
+                return;
+            }
+
+            // Check duplicate (excluding current cinema)
+            if (cd.checkCinemaNameExists(cinemaName, cinemaId)) {
+                sendToast(request, "error", "Cinema name already exists");
+                response.sendRedirect("dashboard?section=cinema-management&action=view&cinemaId=" + cinemaId);
+                return;
+            }
+
+            // Update cinema
+            boolean isUpdated = cd.updateCinema(cinemaId, cinemaName, location, address, isActive);
+
+            if (isUpdated) {
+                sendToast(request, "success", "Cinema updated successfully");
+            } else {
+                sendToast(request, "error", "Failed to update cinema");
+            }
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid cinema ID");
+        }
+
+        response.sendRedirect("dashboard?section=cinema-management");
+    }
+
+    // ========== SCREENING ROOM MANAGEMENT HANDLERS ==========
+    private void handleScreeningRoomManagementGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processToastMessages(request);
+        ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
+        CinemaMDAO cinemaDAO = new CinemaMDAO();
+        SeatMDAO seatDAO = new SeatMDAO();
+
+        try {
+            String action = request.getParameter("action");
+            System.out.println("=== SCREENING ROOM MANAGEMENT ===");
+            System.out.println("Action: " + action);
+
+            if (action == null) {
+                handleRoomList(request, response, roomDAO, cinemaDAO);
+                request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+            } else {
+                switch (action) {
+                    case "view", "edit" -> {
+                        handleViewEditRoom(request, response, roomDAO, seatDAO);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+                    }
+                    case "create" -> {
+                        handleCreateRoom(request, response, cinemaDAO);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+                    }
+                    case "generateSeats" ->
+                        handleGenerateSeats(request, response, roomDAO, seatDAO);
+                    // Already redirects in method
+                    case "editSeat" -> {
+                        handleEditSeat(request, response, roomDAO, seatDAO);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+                    }
+                    case "seatStatistics" -> {
+                        handleSeatStatistics(request, response, roomDAO);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+                    }
+                    default -> {
+                        handleRoomList(request, response, roomDAO, cinemaDAO);
+                        request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
+                    }
+                }
+            }
+
+        } catch (ServletException | IOException e) {
+            System.out.println("Error in screening room management: " + e.getMessage());
+            sendToast(request, "error", "System error: " + e.getMessage());
+            response.sendRedirect("dashboard?section=screening-room-management");
+        }
+    }
+
+    private void handleRoomList(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO, CinemaMDAO cinemaDAO)
+            throws ServletException, IOException {
+
+        // Get parameters for filtering
+        String search = request.getParameter("search");
+        String statusFilter = request.getParameter("status");
+        String roomTypeFilter = request.getParameter("roomType");
+        String locationFilter = request.getParameter("locationFilter");
+        String cinemaFilter = request.getParameter("cinemaFilter");
+
+        // Set default values
+        if (statusFilter == null) {
+            statusFilter = "all";
+        }
+        if (roomTypeFilter == null) {
+            roomTypeFilter = "all";
+        }
+        if (locationFilter == null || locationFilter.isEmpty()) {
+            locationFilter = "none";
+        }
+        if (cinemaFilter == null || cinemaFilter.isEmpty()) {
+            cinemaFilter = "none";
+        }
+
+        // Parse cinema filter
+        Integer cinemaId = null;
+        if (!"none".equals(cinemaFilter)) {
+            try {
+                cinemaId = Integer.valueOf(cinemaFilter);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid cinema filter: " + cinemaFilter);
+            }
+        }
+
+        // Pagination
+        int page = 1;
+        int recordsPerPage = 10;
+        try {
+            page = Integer.parseInt(request.getParameter("page"));
+        } catch (NumberFormatException e) {
+            // Use default page
+        }
+
+        // Get data - SỬA: Không cần kiểm tra hasValidFilters nữa
+        List<ScreeningRoom> rooms = roomDAO.getRoomsWithFilters(
+                "none".equals(locationFilter) ? null : locationFilter, 
+                cinemaId, 
+                "all".equals(roomTypeFilter) ? null : roomTypeFilter, 
+                "all".equals(statusFilter) ? null : statusFilter,
+                search, 
+                (page - 1) * recordsPerPage, 
+                recordsPerPage
+        );
+        
+        int totalRecords = roomDAO.countRoomsWithFilters(
+                "none".equals(locationFilter) ? null : locationFilter, 
+                cinemaId, 
+                "all".equals(roomTypeFilter) ? null : roomTypeFilter, 
+                "all".equals(statusFilter) ? null : statusFilter, 
+                search
+        );
+        
+        System.out.println("Rooms found: " + rooms.size());
+        System.out.println("Total records: " + totalRecords);
+
+        int noOfPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
+        // Get data for filters
+        List<String> locations = cinemaDAO.getAllLocations();
+        List<String> roomTypes = roomDAO.getAvailableRoomTypes();
+        List<CinemaM> cinemas = new ArrayList<>();
+
+        if (!"none".equals(locationFilter)) {
+            cinemas = cinemaDAO.getCinemasByLocation(locationFilter);
+        }
+
+        // Set request attributes
+        request.setAttribute("listRooms", rooms);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("recordsPerPage", recordsPerPage);
+        request.setAttribute("noOfPages", noOfPages);
+        request.setAttribute("search", search);
+        request.setAttribute("statusFilter", statusFilter);
+        request.setAttribute("roomTypeFilter", roomTypeFilter);
+        request.setAttribute("locationFilter", locationFilter);
+        request.setAttribute("cinemaFilter", cinemaFilter);
+        request.setAttribute("allLocations", getLocationsWithNone(locations));
+        request.setAttribute("allRoomTypes", roomTypes);
+        request.setAttribute("cinemasByLocation", getCinemasWithNone(cinemas));
+        request.setAttribute("hasValidFilters", true); // SỬA: Luôn true vì DAO mới xử lý được null
+        request.setAttribute("section", "screening-room-management");
+    }
+
+    private void handleViewEditRoom(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO, SeatMDAO seatDAO)
+            throws ServletException, IOException {
+
+        try {
+            int roomId = Integer.parseInt(request.getParameter("id"));
+            ScreeningRoom room = roomDAO.getRoomById(roomId);
+
+            if (room == null) {
+                sendToast(request, "error", "Room not found");
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+
+            List<SeatM> seats = seatDAO.getSeatsByRoom(roomId);
+            
+            // Lấy thống kê ghế chi tiết từ DAO mới
+            Map<String, Integer> seatStatusCounts = roomDAO.countSeatsByStatus(roomId);
+            Map<String, Integer> seatTypeCounts = roomDAO.countSeatsByType(roomId);
+            
+            request.setAttribute("viewRoom", room);
+            request.setAttribute("seats", seats);
+            request.setAttribute("seatStatusCounts", seatStatusCounts);
+            request.setAttribute("seatTypeCounts", seatTypeCounts);
+            request.setAttribute("section", "screening-room-management");
+
+            System.out.println("Loaded room: " + room.getRoomName() + 
+                             ", seats: " + seats.size() + 
+                             ", capacity: " + room.getSeatCapacity());
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid room ID");
+            response.sendRedirect("dashboard?section=screening-room-management");
+        }
+    }
+
+    private void handleCreateRoom(HttpServletRequest request, HttpServletResponse response,
+            CinemaMDAO cinemaDAO) throws ServletException, IOException {
+
+        String cinemaIdParam = request.getParameter("cinemaId");
+        if (cinemaIdParam != null) {
+            try {
+                int cinemaId = Integer.parseInt(cinemaIdParam);
+                CinemaM cinema = cinemaDAO.getCinemaById(cinemaId);
+                request.setAttribute("cinema", cinema);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid cinema ID: " + cinemaIdParam);
+            }
+        }
+        request.setAttribute("section", "screening-room-management");
+    }
+
+    private void handleEditSeat(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO, SeatMDAO seatDAO) throws ServletException, IOException {
+
+        try {
+            int seatId = Integer.parseInt(request.getParameter("seatId"));
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+
+            SeatM seat = seatDAO.getSeatById(seatId);
+            ScreeningRoom room = roomDAO.getRoomById(roomId);
+
+            if (seat == null || room == null) {
+                sendToast(request, "error", "Seat or room not found");
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+
+            List<SeatM> seats = seatDAO.getSeatsByRoom(roomId);
+            request.setAttribute("editSeat", seat);
+            request.setAttribute("viewRoom", room);
+            request.setAttribute("seats", seats);
+            request.setAttribute("section", "screening-room-management");
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid seat or room ID");
+            response.sendRedirect("dashboard?section=screening-room-management");
+        }
+    }
+
+    private void handleSeatStatistics(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO) throws ServletException, IOException {
+        
+        try {
+            int roomId = Integer.parseInt(request.getParameter("id"));
+            ScreeningRoom room = roomDAO.getRoomById(roomId);
+            
+            if (room == null) {
+                sendToast(request, "error", "Room not found");
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+            
+            // Lấy thống kê chi tiết từ DAO mới
+            Map<String, Object> seatStats = roomDAO.getDetailedSeatStatistics(roomId);
+            
+            request.setAttribute("viewRoom", room);
+            request.setAttribute("seatStats", seatStats);
+            request.setAttribute("section", "screening-room-management");
+            
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid room ID");
+            response.sendRedirect("dashboard?section=screening-room-management");
+        }
+    }
+
+    private void handleGenerateSeats(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO, SeatMDAO seatDAO) throws ServletException, IOException {
+
+        try {
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+            System.out.println("=== START GENERATE SEATS FOR ROOM: " + roomId + " ===");
+
+            ScreeningRoom room = roomDAO.getRoomById(roomId);
+            if (room == null) {
+                System.out.println("ERROR: Room not found with ID: " + roomId);
+                sendToast(request, "error", "Room not found");
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+
+            System.out.println("Found room: " + room.getRoomName() + ", type: " + room.getRoomType());
+
+            // Generate seats layout
+            SeatLayout layout = new SeatLayout();
+            List<SeatM> seats = layout.generateSeats(roomId, room.getRoomType());
+
+            if (seats == null || seats.isEmpty()) {
+                System.out.println("ERROR: No seats generated by SeatLayout");
+                sendToast(request, "error", "No seats were generated");
+                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                return;
+            }
+
+            System.out.println("Successfully generated " + seats.size() + " seats");
+
+            // Delete existing seats first
+            try {
+                boolean deleted = seatDAO.deleteSeatsByRoom(roomId);
+                System.out.println("Deleted existing seats: " + deleted);
+            } catch (Exception e) {
+                System.out.println("Error deleting existing seats: " + e.getMessage());
+                // Continue anyway - maybe no seats existed
+            }
+
+            // Create new seats
+            boolean seatsCreated = seatDAO.createBulkSeats(seats);
+            System.out.println("Seats creation result: " + seatsCreated);
+
+            if (seatsCreated) {
+                // KHÔNG cần update room capacity nữa vì DAO tự động tính
+                sendToast(request, "success", "Successfully generated " + seats.size() + " seats");
+                System.out.println("=== SEAT GENERATION COMPLETED SUCCESSFULLY ===");
+            } else {
+                sendToast(request, "error", "Failed to save seats to database");
+                System.out.println("=== SEAT GENERATION FAILED - DATABASE ERROR ===");
+            }
+
+            response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+
+        } catch (NumberFormatException e) {
+            System.out.println("ERROR: Invalid room ID format");
+            sendToast(request, "error", "Invalid room ID");
+            response.sendRedirect("dashboard?section=screening-room-management");
+        } catch (IOException e) {
+            System.out.println("ERROR in generateSeats: " + e.getMessage());
+            sendToast(request, "error", "System error: " + e.getMessage());
+            response.sendRedirect("dashboard?section=screening-room-management");
+        }
+    }
+
+    private void handleScreeningRoomManagementPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        ScreeningRoomDAO roomDAO = new ScreeningRoomDAO();
+        SeatMDAO seatDAO = new SeatMDAO();
+
+        try {
+            String action = request.getParameter("action");
+            System.out.println("=== SCREENING ROOM MANAGEMENT POST ===");
+            System.out.println("Action: " + action);
+
+            if (action == null) {
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+
+            switch (action) {
+                case "create" ->
+                    handleCreateRoomPost(request, response, roomDAO, seatDAO);
+                case "update" ->
+                    handleUpdateRoomPost(request, response, roomDAO);
+                case "delete" ->
+                    handleDeleteRoomPost(request, response, roomDAO);
+                case "updateSeat" ->
+                    handleUpdateSeatPost(request, response, seatDAO);
+                case "deleteSeat" ->
+                    handleDeleteSeatPost(request, response, seatDAO);
+                case "bulkSeatAction" ->
+                    handleBulkSeatActionPost(request, response, seatDAO);
+                default ->
+                    response.sendRedirect("dashboard?section=screening-room-management");
+            }
+
+        } catch (ServletException | IOException e) {
+            System.out.println("Error in screening room management POST: " + e.getMessage());
+            sendToast(request, "error", "System error: " + e.getMessage());
+            response.sendRedirect("dashboard?section=screening-room-management");
+        }
+    }
+
+    private void handleCreateRoomPost(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO, SeatMDAO seatDAO) throws ServletException, IOException {
+
+        try {
+            int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
+            String roomName = request.getParameter("roomName");
+            String roomType = request.getParameter("roomType");
+            boolean isActive = request.getParameter("isActive") != null;
+
+            // Validation
+            if (roomName == null || roomName.trim().isEmpty()) {
+                sendToast(request, "error", "Room name is required");
+                response.sendRedirect("dashboard?section=screening-room-management&action=create&cinemaId=" + cinemaId);
+                return;
+            }
+
+            // Check duplicate room name
+            if (roomDAO.isRoomNameExists(cinemaId, roomName)) {
+                sendToast(request, "error", "Room name already exists in this cinema");
+                response.sendRedirect("dashboard?section=screening-room-management&action=create&cinemaId=" + cinemaId);
+                return;
+            }
+
+            // Create room - KHÔNG cần set seatCapacity nữa
+            ScreeningRoom room = new ScreeningRoom();
+            room.setCinemaID(cinemaId);
+            room.setRoomName(roomName);
+            room.setRoomType(roomType);
+            room.setActive(isActive);
+
+            int roomId = roomDAO.createRoom(room);
+
+            if (roomId > 0) {
+                // Auto-generate seats
+                SeatLayout layout = new SeatLayout();
+                List<SeatM> seats = layout.generateSeats(roomId, roomType);
+
+                boolean seatsCreated = seatDAO.createBulkSeats(seats);
+
+                if (seatsCreated) {
+                    sendToast(request, "success", "Room created with " + seats.size() + " seats");
+                } else {
+                    // Rollback room creation
+                    roomDAO.deleteRoom(roomId);
+                    sendToast(request, "error", "Failed to create seat layout");
+                }
+            } else {
+                sendToast(request, "error", "Failed to create room");
+            }
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid input data");
+        }
+
+        response.sendRedirect("dashboard?section=screening-room-management");
+    }
+
+    private void handleUpdateRoomPost(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO) throws ServletException, IOException {
+
+        try {
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+            String roomName = request.getParameter("roomName");
+            String roomType = request.getParameter("roomType");
+            boolean isActive = request.getParameter("isActive") != null;
+
+            ScreeningRoom room = roomDAO.getRoomById(roomId);
+            if (room == null) {
+                sendToast(request, "error", "Room not found");
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+
+            // Validation
+            if (roomName == null || roomName.trim().isEmpty()) {
+                sendToast(request, "error", "Room name is required");
+                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                return;
+            }
+
+            // Check duplicate (excluding current room)
+            if (roomDAO.isRoomNameExists(room.getCinemaID(), roomName, roomId)) {
+                sendToast(request, "error", "Room name already exists in this cinema");
+                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                return;
+            }
+
+            // Update room - KHÔNG cần update seatCapacity nữa
+            room.setRoomName(roomName);
+            room.setRoomType(roomType);
+            room.setActive(isActive);
+
+            boolean success = roomDAO.updateRoom(room);
+
+            if (success) {
+                sendToast(request, "success", "Room updated successfully");
+            } else {
+                sendToast(request, "error", "Failed to update room");
+            }
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid input data");
+        }
+
+        response.sendRedirect("dashboard?section=screening-room-management");
+    }
+
+    private void handleDeleteRoomPost(HttpServletRequest request, HttpServletResponse response,
+            ScreeningRoomDAO roomDAO) throws ServletException, IOException {
+
+        try {
+            int roomId = Integer.parseInt(request.getParameter("id"));
+            boolean success = roomDAO.deleteRoom(roomId);
+
+            if (success) {
+                sendToast(request, "success", "Room deleted successfully");
+            } else {
+                sendToast(request, "error", "Failed to delete room");
+            }
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid room ID");
+        }
+
+        response.sendRedirect("dashboard?section=screening-room-management");
+    }
+
+    private void handleUpdateSeatPost(HttpServletRequest request, HttpServletResponse response,
+            SeatMDAO seatDAO) throws ServletException, IOException {
+
+        try {
+            int seatId = Integer.parseInt(request.getParameter("seatId"));
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+            String seatType = request.getParameter("seatType");
+            String status = request.getParameter("status");
+            String mode = request.getParameter("mode");
+
+            SeatM seat = seatDAO.getSeatById(seatId);
+            if (seat == null) {
+                sendToast(request, "error", "Seat not found");
+                response.sendRedirect("dashboard?section=screening-room-management");
+                return;
+            }
+
+            if (!seat.canBeModified()) {
+                sendToast(request, "error", "Cannot modify booked seat");
+                // Redirect back với đầy đủ parameters
+                redirectBackToRoom(request, response, roomId, mode);
+                return;
+            }
+
+            seat.setSeatType(seatType);
+            seat.setStatus(status);
+
+            boolean success = seatDAO.updateSeat(seat);
+
+            if (success) {
+                sendToast(request, "success", "Seat updated successfully");
+            } else {
+                sendToast(request, "error", "Failed to update seat");
+            }
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid seat data");
+        }
+
+        // Redirect back với đầy đủ parameters
+        redirectBackToRoom(request, response,
+                Integer.parseInt(request.getParameter("roomId")),
+                request.getParameter("mode"));
+    }
+
+    private void handleDeleteSeatPost(HttpServletRequest request, HttpServletResponse response,
+            SeatMDAO seatDAO) throws ServletException, IOException {
+
+        try {
+            int seatId = Integer.parseInt(request.getParameter("seatId"));
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+            String mode = request.getParameter("mode");
+
+            SeatM seat = seatDAO.getSeatById(seatId);
+            if (seat == null) {
+                sendToast(request, "error", "Seat not found");
+                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
+                return;
+            }
+
+            if (!seat.canBeModified()) {
+                sendToast(request, "error", "Cannot delete booked seat");
+                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
+                return;
+            }
+
+            boolean success = seatDAO.deleteSeat(seatId);
+
+            if (success) {
+                sendToast(request, "success", "Seat deleted successfully");
+            } else {
+                sendToast(request, "error", "Failed to delete seat");
+            }
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid seat ID");
+        }
+
+        String roomId = request.getParameter("roomId");
+        String mode = request.getParameter("mode");
+        response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
+    }
+
+    private void handleBulkSeatActionPost(HttpServletRequest request, HttpServletResponse response,
+            SeatMDAO seatDAO) throws ServletException, IOException {
+
+        try {
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+            String operation = request.getParameter("operation");
+
+            String[] seatIdsParam = request.getParameterValues("seatIds");
+            if (seatIdsParam == null || seatIdsParam.length == 0) {
+                sendToast(request, "error", "No seats selected");
+                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                return;
+            }
+
+            List<Integer> seatIds = new ArrayList<>();
+            for (String seatIdStr : seatIdsParam) {
+                seatIds.add(Integer.valueOf(seatIdStr));
+            }
+
+            boolean success = false;
+            String message = "";
+
+            switch (operation) {
+                case "changeType" -> {
+                    String newType = request.getParameter("newType");
+                    success = seatDAO.bulkUpdateSeatType(seatIds, newType);
+                    message = "Updated type for " + seatIds.size() + " seats";
+                }
+                case "changeStatus" -> {
+                    String newStatus = request.getParameter("newStatus");
+                    success = seatDAO.bulkUpdateSeatStatus(seatIds, newStatus);
+                    message = "Updated status for " + seatIds.size() + " seats";
+                }
+                default ->
+                    message = "Unknown operation";
+            }
+
+            if (success) {
+                sendToast(request, "success", message);
+            } else {
+                sendToast(request, "error", "Failed to update seats");
+            }
+
+        } catch (NumberFormatException e) {
+            sendToast(request, "error", "Invalid seat IDs");
+        }
+
+        String roomId = request.getParameter("roomId");
+        response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+    }
+
+    // ========== HELPER METHODS ==========
+    private void showDefaultDashboard(HttpServletRequest request, HttpServletResponse response) {
+        request.setAttribute("section", "dashboard");
+    }
+
+    private void handleError(HttpServletRequest request, HttpServletResponse response,
+            Exception e, String context) throws IOException {
+
+        System.err.println("Error in " + context + ": " + e.getMessage());
+
+        sendToast(request, "error", "System error occurred");
+        response.sendRedirect("dashboard");
+    }
+
+    private void sendToast(HttpServletRequest request, String type, String message) {
+        request.getSession().setAttribute("toastType", type);
+        request.getSession().setAttribute("toastMessage", message);
+        System.out.println("Toast set: " + type + " - " + message);
+    }
+
+    private List<String> getLocationsWithNone(List<String> locations) {
+        List<String> result = new ArrayList<>();
+        result.add("none");
+        result.addAll(locations);
+        return result;
+    }
+
+    private List<CinemaM> getCinemasWithNone(List<CinemaM> cinemas) {
+        List<CinemaM> result = new ArrayList<>();
+        // Add "None" option
+        CinemaM noneCinema = new CinemaM();
+        noneCinema.setCinemaID(-1);
+        noneCinema.setCinemaName("None");
+        noneCinema.setLocation("none");
+        result.add(noneCinema);
+        result.addAll(cinemas);
+        return result;
+    }
+
+    private void processToastMessages(HttpServletRequest request) {
+        try {
+            String toastType = (String) request.getSession().getAttribute("toastType");
+            String toastMessage = (String) request.getSession().getAttribute("toastMessage");
+
+            if (toastType != null && toastMessage != null) {
+                request.setAttribute("toastType", toastType);
+                request.setAttribute("toastMessage", toastMessage);
+
+                request.getSession().removeAttribute("toastType");
+                request.getSession().removeAttribute("toastMessage");
+
+                System.out.println("Toast message processed: " + toastType + " - " + toastMessage);
+            }
+        } catch (Exception e) {
+            System.out.println("Error processing toast messages: " + e.getMessage());
+        }
+    }
+
+    // Helper method để redirect back với đầy đủ parameters
+    private void redirectBackToRoom(HttpServletRequest request, HttpServletResponse response,
+            int roomId, String mode) throws IOException {
+
+        StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management");
+        redirectUrl.append("&action=").append(mode != null ? mode : "edit");
+        redirectUrl.append("&id=").append(roomId);
+
+        // Thêm các filter parameters
+        addFilterParameter(request, redirectUrl, "locationFilter");
+        addFilterParameter(request, redirectUrl, "cinemaFilter");
+        addFilterParameter(request, redirectUrl, "roomType");
+        addFilterParameter(request, redirectUrl, "status");
+        addFilterParameter(request, redirectUrl, "search");
+        addFilterParameter(request, redirectUrl, "page");
+
+        response.sendRedirect(redirectUrl.toString());
+    }
+
+    // Helper method để thêm parameter nếu có giá trị
+    private void addFilterParameter(HttpServletRequest request,
+            StringBuilder url, String paramName) {
+        String value = request.getParameter(paramName);
+        if (value != null && !value.trim().isEmpty() && !value.equals("none") && !value.equals("all")) {
+            try {
+                url.append("&").append(paramName).append("=")
+                        .append(java.net.URLEncoder.encode(value, "UTF-8"));
+            } catch (java.io.UnsupportedEncodingException e) {
+                url.append("&").append(paramName).append("=").append(value);
+            }
+        }
+    }
+
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Admin Dashboard Servlet - Updated for new DAO";
+    }
 }

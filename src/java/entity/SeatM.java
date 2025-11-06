@@ -9,11 +9,11 @@ public class SeatM {
     private String status;
     private ScreeningRoom screeningRoom;
 
-    // Constants for validation
+    // Sửa lại constants để bao gồm Disabled
     public static final String[] VALID_SEAT_TYPES = {"Standard", "VIP", "Couple", "Disabled"};
     public static final String[] VALID_STATUSES = {"Available", "Booked", "Maintenance", "Unavailable"};
 
-    // Constructors
+    // Constructors (giữ nguyên)
     public SeatM() {
     }
 
@@ -35,7 +35,7 @@ public class SeatM {
         this.status = status;
     }
 
-    // Getters and Setters
+    // Getters and Setters (giữ nguyên)
     public int getSeatID() {
         return seatID;
     }
@@ -57,7 +57,6 @@ public class SeatM {
     }
 
     public void setSeatRow(String seatRow) {
-        // Tạm thời bỏ validation để fix lỗi
         if (seatRow != null) {
             this.seatRow = seatRow.toUpperCase().trim();
         } else {
@@ -70,7 +69,6 @@ public class SeatM {
     }
 
     public void setSeatNumber(String seatNumber) {
-        // Tạm thời bỏ validation để fix lỗi
         if (seatNumber != null) {
             this.seatNumber = seatNumber.trim();
         } else {
@@ -89,6 +87,7 @@ public class SeatM {
         } else {
             // Default to Standard nếu không hợp lệ
             this.seatType = "Standard";
+            System.out.println("Invalid seat type: " + seatType + ", defaulting to Standard");
         }
     }
 
@@ -103,6 +102,7 @@ public class SeatM {
         } else {
             // Default to Available nếu không hợp lệ
             this.status = "Available";
+            System.out.println("Invalid status: " + status + ", defaulting to Available");
         }
     }
 
@@ -161,7 +161,7 @@ public class SeatM {
         return "Couple".equalsIgnoreCase(seatType);
     }
 
-    public boolean isDisabledAccessible() {
+    public boolean isDisabled() {
         return "Disabled".equalsIgnoreCase(seatType);
     }
 
@@ -199,8 +199,8 @@ public class SeatM {
     @Override
     public int hashCode() {
         int result = roomID;
-        result = 31 * result + seatRow.hashCode();
-        result = 31 * result + seatNumber.hashCode();
+        result = 31 * result + (seatRow != null ? seatRow.hashCode() : 0);
+        result = 31 * result + (seatNumber != null ? seatNumber.hashCode() : 0);
         return result;
     }
 }
