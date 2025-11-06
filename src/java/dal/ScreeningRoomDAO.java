@@ -17,8 +17,9 @@ public class ScreeningRoomDAO {
             String status, String search, int offset, int limit) {
         List<ScreeningRoom> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-        SELECT sr.RoomID, sr.CinemaID, sr.RoomName, sr.SeatCapacity, sr.RoomType, 
-               sr.IsActive,
+        SELECT sr.RoomID, sr.CinemaID, sr.RoomName, 
+               (SELECT COUNT(*) FROM Seats WHERE RoomID = sr.RoomID) AS SeatCapacity, 
+               sr.RoomType, sr.IsActive,
                c.CinemaName, c.Location, c.Address
         FROM ScreeningRooms sr
         JOIN Cinemas c ON sr.CinemaID = c.CinemaID
@@ -166,8 +167,9 @@ public class ScreeningRoomDAO {
     // Lấy room by ID với đầy đủ thông tin
     public ScreeningRoom getRoomById(int roomId) {
         String sql = """
-        SELECT sr.RoomID, sr.CinemaID, sr.RoomName, sr.SeatCapacity, sr.RoomType, 
-               sr.IsActive,
+        SELECT sr.RoomID, sr.CinemaID, sr.RoomName, 
+               (SELECT COUNT(*) FROM Seats WHERE RoomID = sr.RoomID) AS SeatCapacity, 
+               sr.RoomType, sr.IsActive,
                c.CinemaName, c.Location, c.Address, c.IsActive as CinemaActive
         FROM ScreeningRooms sr
         JOIN Cinemas c ON sr.CinemaID = c.CinemaID
@@ -192,17 +194,16 @@ public class ScreeningRoomDAO {
     // Tạo mới room
     public int createRoom(ScreeningRoom room) {
         String sql = """
-        INSERT INTO ScreeningRooms (CinemaID, RoomName, SeatCapacity, RoomType, IsActive)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO ScreeningRooms (CinemaID, RoomName, RoomType, IsActive)
+        VALUES (?, ?, ?, ?)
     """;
 
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, room.getCinemaID());
             ps.setString(2, room.getRoomName());
-            ps.setInt(3, room.getSeatCapacity());
-            ps.setString(4, room.getRoomType());
-            ps.setBoolean(5, room.isActive());
+            ps.setString(3, room.getRoomType());
+            ps.setBoolean(4, room.isActive());
 
             int affectedRows = ps.executeUpdate();
 
@@ -224,17 +225,16 @@ public class ScreeningRoomDAO {
     public boolean updateRoom(ScreeningRoom room) {
         String sql = """
             UPDATE ScreeningRooms 
-            SET RoomName = ?, SeatCapacity = ?, RoomType = ?, IsActive = ?
+            SET RoomName = ?, RoomType = ?, IsActive = ?
             WHERE RoomID = ?
         """;
 
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, room.getRoomName());
-            ps.setInt(2, room.getSeatCapacity());
-            ps.setString(3, room.getRoomType());
-            ps.setBoolean(4, room.isActive());
-            ps.setInt(5, room.getRoomID());
+            ps.setString(2, room.getRoomType());
+            ps.setBoolean(3, room.isActive());
+            ps.setInt(4, room.getRoomID());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -263,8 +263,9 @@ public class ScreeningRoomDAO {
     public List<ScreeningRoom> getRoomsByCinemaId(int cinemaId) {
         List<ScreeningRoom> list = new ArrayList<>();
         String sql = """
-        SELECT sr.RoomID, sr.CinemaID, sr.RoomName, sr.SeatCapacity, sr.RoomType, 
-               sr.IsActive,
+        SELECT sr.RoomID, sr.CinemaID, sr.RoomName, 
+               (SELECT COUNT(*) FROM Seats WHERE RoomID = sr.RoomID) AS SeatCapacity, 
+               sr.RoomType, sr.IsActive,
                c.CinemaName, c.Location, c.Address
         FROM ScreeningRooms sr
         JOIN Cinemas c ON sr.CinemaID = c.CinemaID
@@ -391,7 +392,12 @@ public class ScreeningRoomDAO {
 
     // Lấy total seats capacity by cinema
     public int getTotalSeatCapacityByCinema(int cinemaId) {
-        String sql = "SELECT SUM(SeatCapacity) as total FROM ScreeningRooms WHERE CinemaID = ? AND IsActive = 1";
+        String sql = """
+            SELECT COUNT(*) as total 
+            FROM Seats s
+            INNER JOIN ScreeningRooms sr ON s.RoomID = sr.RoomID
+            WHERE sr.CinemaID = ? AND sr.IsActive = 1
+        """;
 
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -411,7 +417,14 @@ public class ScreeningRoomDAO {
     // Get screening rooms by cinema ID
     public List<ScreeningRoom> getScreeningRoomsByCinemaId(int cinemaId) {
         List<ScreeningRoom> rooms = new ArrayList<>();
-        String sql = "SELECT RoomID, CinemaID, RoomName, SeatCapacity, RoomType, IsActive FROM ScreeningRooms WHERE CinemaID = ? ORDER BY RoomName";
+        String sql = """
+            SELECT RoomID, CinemaID, RoomName, 
+                   (SELECT COUNT(*) FROM Seats WHERE RoomID = sr.RoomID) AS SeatCapacity, 
+                   RoomType, IsActive 
+            FROM ScreeningRooms sr
+            WHERE CinemaID = ? 
+            ORDER BY RoomName
+        """;
 
         try (Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -438,7 +451,8 @@ public class ScreeningRoomDAO {
     public List<ScreeningRoom> getAllRooms() {
         List<ScreeningRoom> list = new ArrayList<>();
         String sql = """
-            SELECT r.RoomID, r.CinemaID, r.RoomName, r.SeatCapacity
+            SELECT r.RoomID, r.CinemaID, r.RoomName, 
+                   (SELECT COUNT(*) FROM Seats WHERE RoomID = r.RoomID) AS SeatCapacity
             FROM ScreeningRooms r
             JOIN Cinemas c ON r.CinemaID = c.CinemaID
             WHERE r.IsActive = 1

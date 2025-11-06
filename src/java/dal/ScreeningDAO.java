@@ -192,7 +192,8 @@ public class ScreeningDAO extends DBContext {
                    + "s.ScreeningDate, s.Showtime, s.BaseTicketPrice, "
                    + "m.Title AS MovieTitle, m.Status AS MovieStatus, "
                    + "c.CinemaName, sr.RoomName, sr.RoomType, "
-                   + "sr.SeatCapacity - ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
+                   + "ISNULL((SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID), 0) "
+                   + "- ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
                    + "FROM Tickets t WHERE t.ScreeningID = s.ScreeningID), 0) "
                    + "- ISNULL((SELECT COUNT(DISTINCT sr2.SeatID) "
                    + "FROM SeatReservations sr2 "
@@ -251,7 +252,8 @@ public class ScreeningDAO extends DBContext {
                    + "s.ScreeningDate, s.Showtime, s.BaseTicketPrice, "
                    + "m.Title AS MovieTitle, m.Status AS MovieStatus, "
                    + "c.CinemaName, sr.RoomName, sr.RoomType, "
-                   + "sr.SeatCapacity - ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
+                   + "ISNULL((SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID), 0) "
+                   + "- ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
                    + "FROM Tickets t WHERE t.ScreeningID = s.ScreeningID), 0) "
                    + "- ISNULL((SELECT COUNT(DISTINCT sr2.SeatID) "
                    + "FROM SeatReservations sr2 "
@@ -264,6 +266,8 @@ public class ScreeningDAO extends DBContext {
                    + "AND s.MovieID = ? "
                    + "AND s.ScreeningDate = ? "
                    + "AND m.Status = 'Active' "
+                   + "AND sr.IsActive = 1 "
+                   + "AND c.IsActive = 1 "
                    + "ORDER BY s.Showtime ASC";
         
         try (Connection conn = getConnection();
@@ -278,6 +282,7 @@ public class ScreeningDAO extends DBContext {
             while (rs.next()) {
                 Date screeningDate = rs.getDate("ScreeningDate");
                 String showtime = rs.getString("Showtime");
+                
                 LocalDateTime[] times = parseShowtime(
                     screeningDate.toLocalDate(), 
                     showtime
@@ -435,7 +440,7 @@ public class ScreeningDAO extends DBContext {
             m.Title AS MovieTitle, 
             c.CinemaName, 
             r.RoomName, 
-            r.SeatCapacity
+            (SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID) AS SeatCapacity
         FROM Screenings s
         JOIN Movies m ON s.MovieID = m.MovieID
         JOIN ScreeningRooms r ON s.RoomID = r.RoomID
@@ -547,7 +552,7 @@ public class ScreeningDAO extends DBContext {
         return false;
     }
      public Integer getSeatCapacityByRoomID(int roomID) {
-        String sql = "SELECT SeatCapacity FROM ScreeningRooms WHERE RoomID = ?";
+        String sql = "SELECT COUNT(*) AS SeatCapacity FROM Seats WHERE RoomID = ?";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
 
             ps.setInt(1, roomID);

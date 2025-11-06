@@ -313,7 +313,7 @@
         
         .showtime-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 12px;
         }
         
@@ -339,12 +339,15 @@
         }
         
         .showtime-btn .time {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #fff;
             display: block;
-            line-height: 1.2;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .showtime-btn .room {
@@ -1259,7 +1262,10 @@
                             // Create time element
                             const timeDiv = document.createElement('div');
                             timeDiv.className = 'time';
-                            timeDiv.textContent = screening.startTime;
+                            const timeText = screening.endTime ? 
+                                screening.startTime + ' - ' + screening.endTime : 
+                                screening.startTime;
+                            timeDiv.textContent = timeText;
                             
                             // Create room element
                             const roomDiv = document.createElement('div');

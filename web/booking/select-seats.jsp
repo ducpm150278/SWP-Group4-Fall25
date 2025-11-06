@@ -713,6 +713,17 @@
                     <div class="info-label">Phòng</div>
                     <div class="info-value"><%= bookingSession.getRoomName() %></div>
                 </div>
+                <% if (screening != null && screening.getStartTime() != null) { 
+                    java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+                    String startTime = screening.getStartTime().format(timeFormatter);
+                    String endTime = screening.getEndTime() != null ? screening.getEndTime().format(timeFormatter) : "";
+                    String timeDisplay = endTime.isEmpty() ? startTime : startTime + " - " + endTime;
+                %>
+                <div class="info-item">
+                    <div class="info-label">Giờ chiếu</div>
+                    <div class="info-value"><%= timeDisplay %></div>
+                </div>
+                <% } %>
                 <div class="info-item">
                     <div class="info-label">Giá vé</div>
                     <div class="info-value"><%= String.format("%,.0f VNĐ", bookingSession.getTicketPrice()) %></div>

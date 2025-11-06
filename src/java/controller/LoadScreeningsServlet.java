@@ -77,11 +77,22 @@ public class LoadScreeningsServlet extends HttpServlet {
             
             for (int i = 0; i < screenings.size(); i++) {
                 Screening screening = screenings.get(i);
+                
+                // Skip screenings with null startTime (parsing failed)
+                if (screening.getStartTime() == null) {
+                    continue;
+                }
+                
                 if (i > 0) json.append(",");
                 
                 json.append("{");
                 json.append("\"screeningID\":").append(screening.getScreeningID()).append(",");
                 json.append("\"startTime\":\"").append(screening.getStartTime().format(timeFormatter)).append("\",");
+                if (screening.getEndTime() != null) {
+                    json.append("\"endTime\":\"").append(screening.getEndTime().format(timeFormatter)).append("\",");
+                } else {
+                    json.append("\"endTime\":null,");
+                }
                 json.append("\"ticketPrice\":").append(screening.getTicketPrice()).append(",");
                 json.append("\"availableSeats\":").append(screening.getAvailableSeats()).append(",");
                 json.append("\"roomName\":\"").append(escapeJson(screening.getRoomName())).append("\"");
