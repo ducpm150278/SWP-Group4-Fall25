@@ -2,6 +2,27 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <div id="cinema-management-content">
+        <!-- Toast Notification -->
+    <c:if test="${not empty toastType and not empty toastMessage}">
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div class="toast align-items-center text-white bg-${toastType} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi
+                           <c:choose>
+                               <c:when test="${toastType == 'success'}">bi-check-circle-fill</c:when>
+                               <c:when test="${toastType == 'error'}">bi-exclamation-circle-fill</c:when>
+                               <c:when test="${toastType == 'warning'}">bi-exclamation-triangle-fill</c:when>
+                               <c:otherwise>bi-info-circle-fill</c:otherwise>
+                           </c:choose>
+                           me-2"></i>
+                        ${toastMessage}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </c:if>
     <!-- Search Bar + Actions (LUÔN HIỆN) -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <!-- Search Bar -->
@@ -35,16 +56,9 @@
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=all&status=${requestScope.statusFilter}&search=${requestScope.search}">All Locations</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Hà Nội&status=${requestScope.statusFilter}&search=${requestScope.search}">Hà Nội</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=TP.HCM&status=${requestScope.statusFilter}&search=${requestScope.search}">TP.HCM</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Đà Nẵng&status=${requestScope.statusFilter}&search=${requestScope.search}">Đà Nẵng</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Hải Phòng&status=${requestScope.statusFilter}&search=${requestScope.search}">Hải Phòng</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Cần Thơ&status=${requestScope.statusFilter}&search=${requestScope.search}">Cần Thơ</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Nha Trang&status=${requestScope.statusFilter}&search=${requestScope.search}">Nha Trang</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Vũng Tàu&status=${requestScope.statusFilter}&search=${requestScope.search}">Vũng Tàu</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Đà Lạt&status=${requestScope.statusFilter}&search=${requestScope.search}">Đà Lạt</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Huế&status=${requestScope.statusFilter}&search=${requestScope.search}">Huế</a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=Quy Nhơn&status=${requestScope.statusFilter}&search=${requestScope.search}">Quy Nhơn</a></li>
+                    <c:forEach var="location" items="${requestScope.allLocations}">
+                        <li><a class="dropdown-item" href="dashboard?section=cinema-management&location=${location}&status=${requestScope.statusFilter}&search=${requestScope.search}">${location}</a></li>
+                    </c:forEach>
                 </ul>
             </div>
 
@@ -85,12 +99,6 @@
                         </a></li>
                     <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=name_desc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
                             <i class="bi bi-sort-alpha-down-alt"></i> Sort by Name Z-A
-                        </a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=rooms_asc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
-                            <i class="bi bi-sort-numeric-down"></i> Sort by Rooms (Low to High)
-                        </a></li>
-                    <li><a class="dropdown-item" href="dashboard?section=cinema-management&sort=rooms_desc&status=${requestScope.statusFilter}&location=${requestScope.locationFilter}&search=${requestScope.search}">
-                            <i class="bi bi-sort-numeric-down-alt"></i> Sort by Rooms (High to Low)
                         </a></li>
                 </ul>
             </div>
@@ -315,16 +323,9 @@
                             <label class="form-label">Location <span class="text-danger">*</span></label>
                             <select class="form-select" name="location" required>
                                 <option value="">Select Location</option>
-                                <option value="Hà Nội">Hà Nội</option>
-                                <option value="TP.HCM">TP.HCM</option>
-                                <option value="Đà Nẵng">Đà Nẵng</option>
-                                <option value="Hải Phòng">Hải Phòng</option>
-                                <option value="Cần Thơ">Cần Thơ</option>
-                                <option value="Nha Trang">Nha Trang</option>
-                                <option value="Vũng Tàu">Vũng Tàu</option>
-                                <option value="Đà Lạt">Đà Lạt</option>
-                                <option value="Huế">Huế</option>
-                                <option value="Quy Nhơn">Quy Nhơn</option>
+                                <c:forEach var="location" items="${requestScope.allLocations}">
+                                    <option value="${location}">${location}</option>
+                                </c:forEach>
                             </select>
                             <div class="invalid-feedback">Please select location.</div>
                         </div>
@@ -410,16 +411,9 @@
                                     <c:choose>
                                         <c:when test="${param.mode == 'edit'}">
                                             <select class="form-select" name="location" ${param.mode != 'edit' ? 'disabled' : ''} required>
-                                                <option value="Hà Nội" ${requestScope.viewCinema.location == 'Hà Nội' ? 'selected' : ''}>Hà Nội</option>
-                                                <option value="TP.HCM" ${requestScope.viewCinema.location == 'TP.HCM' ? 'selected' : ''}>TP.HCM</option>
-                                                <option value="Đà Nẵng" ${requestScope.viewCinema.location == 'Đà Nẵng' ? 'selected' : ''}>Đà Nẵng</option>
-                                                <option value="Hải Phòng" ${requestScope.viewCinema.location == 'Hải Phòng' ? 'selected' : ''}>Hải Phòng</option>
-                                                <option value="Cần Thơ" ${requestScope.viewCinema.location == 'Cần Thơ' ? 'selected' : ''}>Cần Thơ</option>
-                                                <option value="Nha Trang" ${requestScope.viewCinema.location == 'Nha Trang' ? 'selected' : ''}>Nha Trang</option>
-                                                <option value="Vũng Tàu" ${requestScope.viewCinema.location == 'Vũng Tàu' ? 'selected' : ''}>Vũng Tàu</option>
-                                                <option value="Đà Lạt" ${requestScope.viewCinema.location == 'Đà Lạt' ? 'selected' : ''}>Đà Lạt</option>
-                                                <option value="Huế" ${requestScope.viewCinema.location == 'Huế' ? 'selected' : ''}>Huế</option>
-                                                <option value="Quy Nhơn" ${requestScope.viewCinema.location == 'Quy Nhơn' ? 'selected' : ''}>Quy Nhơn</option>
+                                                <c:forEach var="location" items="${requestScope.allLocations}">
+                                                    <option value="${location}" ${requestScope.viewCinema.location == location ? 'selected' : ''}>${location}</option>
+                                                </c:forEach>
                                             </select>
                                         </c:when>
                                         <c:otherwise>
@@ -525,164 +519,191 @@
         </div>
     </div>
 
-    <!-- Toasts -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-        <!-- Add Toast -->
-        <div id="successAddToast" class="toast align-items-center text-bg-success border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">✅ New cinema has been added successfully!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <div id="errorAddToast" class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to add cinema! ${sessionScope.showError}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <div id="errorNameAddToast" class="toast align-items-center text-bg-danger border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to add cinema! Cinema name already exists!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        
-        <!-- Update Toast -->
-        <div id="successUpdateToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">✅ Cinema updated successfully!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        <div id="errorUpdateToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to update cinema! ${sessionScope.showError}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        
-        <!-- Delete Toast -->
-        <div id="successDeleteToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">🗑️ Cinema has been deleted successfully!</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        <div id="errorDeleteToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">❌ Failed to delete cinema! ${sessionScope.showError}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1060"></div>
 
     <!-- JavaScript functions -->
     <script>
-        // Show toast
+        // ===== MAIN INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', function () {
+            initializeAddCinemaForm();
+            initializeViewCinemaModal();
+            showToasts();
+        });
+
+        // ===== TOAST SYSTEM =====
+        function showToasts() {
+            <c:if test="${not empty sessionScope.toastType}">
+                <c:choose>
+                    <c:when test="${sessionScope.toastType == 'success'}">
+                        showToast('✅ ${sessionScope.toastMessage}', 'success');
+                    </c:when>
+                    <c:when test="${sessionScope.toastType == 'error'}">
+                        showToast('❌ ${sessionScope.toastMessage}', 'error');
+                    </c:when>
+                    <c:when test="${sessionScope.toastType == 'warning'}">
+                        showToast('⚠️ ${sessionScope.toastMessage}', 'warning');
+                    </c:when>
+                </c:choose>
+                <c:remove var="toastType" scope="session"/>
+                <c:remove var="toastMessage" scope="session"/>
+            </c:if>
+            
+            <%-- Giữ lại phần cũ để tương thích ngược --%>
             <c:if test="${not empty sessionScope.showToast}">
                 <c:choose>
                     <c:when test="${sessionScope.showToast == 'add_success'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successAddToast'));
-                        successToast.show();
+                        showToast('✅ Cinema created successfully!', 'success');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_error'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorAddToast'));
-                        errorToast.show();
+                        showToast('❌ Failed to create cinema!', 'error');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_error_name'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorNameAddToast'));
-                        errorToast.show();
+                        showToast('❌ Cinema name already exists!', 'error');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'update_success'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successUpdateToast'));
-                        successToast.show();
+                        showToast('✅ Cinema updated successfully!', 'success');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'update_error'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorUpdateToast'));
-                        errorToast.show();
+                        showToast('❌ Failed to update cinema!', 'error');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'delete_success'}">
-                        var successToast = new bootstrap.Toast(document.getElementById('successDeleteToast'));
-                        successToast.show();
+                        showToast('🗑️ Cinema deleted successfully!', 'success');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'delete_error'}">
-                        var errorToast = new bootstrap.Toast(document.getElementById('errorDeleteToast'));
-                        errorToast.show();
+                        showToast('❌ Failed to delete cinema!', 'error');
                     </c:when>
                 </c:choose>
                 <c:remove var="showToast" scope="session"/>
                 <c:remove var="showError" scope="session"/>
             </c:if>
+        }
 
-            // Hiển thị modal view khi có dữ liệu viewCinema
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const bgClass = {
+                'success': 'text-bg-success',
+                'error': 'text-bg-danger',
+                'warning': 'text-bg-warning',
+                'info': 'text-bg-info'
+            }[type] || 'text-bg-info';
+
+            const toastHTML = `
+                <div id="${toastId}" class="toast ${bgClass} border-0 mb-2" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toast = new bootstrap.Toast(document.getElementById(toastId), {
+                autohide: true,
+                delay: 5000
+            });
+            toast.show();
+            
+            // Remove from DOM after hide
+            document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+                this.remove();
+            });
+        }
+
+        // ===== ADD CINEMA FORM =====
+        function initializeAddCinemaForm() {
+            const form = document.getElementById('addCinemaForm');
+            if (!form) return;
+
+            // Real-time validation
+            const fields = form.querySelectorAll('input[required], select[required], textarea[required]');
+            fields.forEach(field => {
+                field.addEventListener('input', function() {
+                    this.classList.remove('is-invalid', 'is-valid');
+                    if (this.checkValidity()) {
+                        this.classList.add('is-valid');
+                    }
+                });
+                
+                field.addEventListener('blur', function() {
+                    if (!this.checkValidity()) {
+                        this.classList.add('is-invalid');
+                    }
+                });
+            });
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (!validateForm(this)) {
+                    e.preventDefault();
+                    showToast('❌ Please fix the validation errors!', 'error');
+                }
+            });
+
+            // Reset form when modal closes
+            const modal = document.getElementById('addCinemaModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    form.reset();
+                    form.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+                        el.classList.remove('is-valid', 'is-invalid');
+                    });
+                });
+            }
+        }
+
+        function validateForm(form) {
+            let isValid = true;
+            const fields = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            fields.forEach(field => {
+                field.classList.remove('is-invalid', 'is-valid');
+                if (!field.checkValidity()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.add('is-valid');
+                }
+            });
+            
+            return isValid;
+        }
+
+        // ===== VIEW CINEMA MODAL =====
+        function initializeViewCinemaModal() {
+            // Auto-show modal if viewCinema exists
             <c:if test="${requestScope.viewCinema != null}">
-                var viewModal = new bootstrap.Modal(document.getElementById('viewCinemaModal'));
-                viewModal.show();
+                const modal = new bootstrap.Modal(document.getElementById('viewCinemaModal'));
+                modal.show();
             </c:if>
-        });
 
-        // Hàm hiện modal delete với thông tin của cinema - ĐÃ SỬA
+            // Handle modal close redirect
+            const viewModal = document.getElementById('viewCinemaModal');
+            if (viewModal) {
+                viewModal.addEventListener('hidden.bs.modal', function() {
+                    window.location.href = 'dashboard?section=cinema-management&page=${currentPage}';
+                });
+            }
+        }
+
+        // ===== DELETE MODAL =====
         function showDeleteModal(cinemaId, cinemaName, location, address, totalRooms) {
-            // Set cinema details in the modal
             document.getElementById('deleteCinemaName').textContent = cinemaName;
             document.getElementById('deleteCinemaLocation').textContent = location;
             document.getElementById('deleteCinemaAddress').textContent = address;
             document.getElementById('deleteCinemaRooms').textContent = totalRooms;
             document.getElementById('deleteCinemaIdInput').value = cinemaId;
 
-            // Show the modal
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            deleteModal.show();
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
         }
 
-        // Form validation
-        document.getElementById("addCinemaForm").addEventListener('submit', function (e) {
-            const cinemaName = document.querySelector('input[name="cinemaName"]');
-            const location = document.querySelector('select[name="location"]');
-            const address = document.querySelector('textarea[name="address"]');
-            
-            let isValid = true;
-            
-            // Clear previous validation
-            cinemaName.classList.remove('is-invalid');
-            location.classList.remove('is-invalid');
-            address.classList.remove('is-invalid');
-            
-            // Validate cinema name
-            if (!cinemaName.value.trim()) {
-                cinemaName.classList.add('is-invalid');
-                isValid = false;
-            }
-            
-            // Validate location
-            if (!location.value) {
-                location.classList.add('is-invalid');
-                isValid = false;
-            }
-            
-            // Validate address
-            if (!address.value.trim()) {
-                address.classList.add('is-invalid');
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                e.preventDefault();
-            }
-        });
-
-        // Real-time validation
-        document.querySelectorAll('input[name="cinemaName"], select[name="location"], textarea[name="address"]').forEach(input => {
-            input.addEventListener('input', function () {
-                this.classList.remove('is-invalid');
-            });
-        });
-
-        // Xử lý khi modal view bị ẩn
-        document.getElementById('viewCinemaModal').addEventListener('hidden.bs.modal', function () {
-            window.location.href = 'dashboard?section=cinema-management&page=${requestScope.currentPage}';
-        });
+        // ===== UTILITY FUNCTIONS =====
+        function enableEditMode() {
+            console.log('Edit mode enabled');
+        }
     </script>
 
     <style>
