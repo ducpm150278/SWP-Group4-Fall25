@@ -2,6 +2,28 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <div id="screening-room-management-content">
+    <!-- Toast Notification -->
+    <c:if test="${not empty toastType and not empty toastMessage}">
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div class="toast align-items-center text-white bg-${toastType} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi
+                           <c:choose>
+                               <c:when test="${toastType == 'success'}">bi-check-circle-fill</c:when>
+                               <c:when test="${toastType == 'error'}">bi-exclamation-circle-fill</c:when>
+                               <c:when test="${toastType == 'warning'}">bi-exclamation-triangle-fill</c:when>
+                               <c:otherwise>bi-info-circle-fill</c:otherwise>
+                           </c:choose>
+                           me-2"></i>
+                        ${toastMessage}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </c:if>
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -32,7 +54,39 @@
                 </ol>
             </nav>
         </div>
-        <a href="dashboard?section=screening-room-management" class="btn btn-outline-secondary">
+        <!-- Sửa nút Back to List để giữ lại filters -->
+        <%
+            // Lấy các tham số filter từ request
+            String locationFilter = request.getParameter("locationFilter");
+            String cinemaFilter = request.getParameter("cinemaFilter");
+            String roomType = request.getParameter("roomType");
+            String status = request.getParameter("status");
+            String search = request.getParameter("search");
+            String page1 = request.getParameter("page");
+    
+            // Tạo URL với các tham số filter
+            StringBuilder backUrl = new StringBuilder("dashboard?section=screening-room-management");
+            if (locationFilter != null && !locationFilter.equals("none")) {
+                backUrl.append("&locationFilter=").append(locationFilter);
+            }
+            if (cinemaFilter != null && !cinemaFilter.equals("none")) {
+                backUrl.append("&cinemaFilter=").append(cinemaFilter);
+            }
+            if (roomType != null && !roomType.equals("all")&&!roomType.equals("all")) {
+                backUrl.append("&roomType=").append(roomType);
+            }
+            if (status != null && !status.equals("all")) {
+                backUrl.append("&status=").append(status);
+            }
+            if (search != null && !search.trim().isEmpty()) {
+                backUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
+            }
+            if (page1 != null && !page1.equals("1")) {
+                backUrl.append("&page=").append(page);
+            }
+        %>
+
+        <a href="<%= backUrl.toString() %>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to List
         </a>
     </div>
@@ -53,12 +107,14 @@
                         <c:if test="${param.action != 'create'}">
                             <input type="hidden" name="roomId" value="${viewRoom.roomID}">
                         </c:if>
+                        <c:if test="${param.action == 'create'}">
+                            <input type="hidden" name="cinemaId" value="${param.cinemaId}">
+                        </c:if>
 
                         <div class="mb-3">
                             <label class="form-label">Cinema</label>
                             <c:choose>
                                 <c:when test="${param.action == 'create'}">
-                                    <input type="hidden" name="cinemaId" value="${param.cinemaId}">
                                     <input type="text" class="form-control" value="${cinema.cinemaName} - ${cinema.location}" readonly>
                                 </c:when>
                                 <c:otherwise>
@@ -176,18 +232,16 @@
                     </h5>
                     <div>
                         <c:if test="${param.action == 'edit' && (empty seats || seats.size() == 0)}">
-                            <a href="dashboard?section=screening-room-management&action=generateSeats&roomId=${viewRoom.roomID}" 
-                               class="btn btn-primary btn-sm" 
-                               onclick="return confirm('Generate default seat layout? This will create seats based on room type.')">
+                            <button type="button" class="btn btn-primary btn-sm" 
+                                    onclick="showGenerateSeatsModal(${viewRoom.roomID}, 'generate')">
                                 <i class="bi bi-magic"></i> Generate Seats
-                            </a>
+                            </button>
                         </c:if>
                         <c:if test="${param.action == 'edit' && not empty seats && seats.size() > 0}">
-                            <a href="dashboard?section=screening-room-management&action=generateSeats&roomId=${viewRoom.roomID}" 
-                               class="btn btn-outline-warning btn-sm" 
-                               onclick="return confirm('WARNING: This will replace all existing seats and delete any booking history. Continue?')">
+                            <button type="button" class="btn btn-outline-warning btn-sm" 
+                                    onclick="showGenerateSeatsModal(${viewRoom.roomID}, 'regenerate')">
                                 <i class="bi bi-arrow-repeat"></i> Regenerate Seats
-                            </a>
+                            </button>
                         </c:if>
                     </div>
                 </div>
@@ -213,62 +267,69 @@
 
                                 <c:choose>
                                     <c:when test="${not empty seats && seats.size() > 0}">
-                                        <!-- Seat Legend -->
+                                        <!-- Seat Legend với icon -->
                                         <div class="seat-legend mb-3">
                                             <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #6c757d;"></div>
-                                                <span>Standard</span>
+                                                <div class="seat standard" style="width: 20px; height: 20px;"></div>
+                                                <span>💺 Standard</span>
                                             </div>
                                             <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #ffc107;"></div>
-                                                <span>VIP</span>
+                                                <div class="seat vip" style="width: 20px; height: 20px;"></div>
+                                                <span>⭐ VIP</span>
                                             </div>
                                             <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #e83e8c;"></div>
-                                                <span>Couple</span>
+                                                <div class="seat couple" style="width: 40px; height: 20px;"></div>
+                                                <span>💑 Couple</span>
                                             </div>
                                             <div class="legend-item">
-                                                <div class="legend-color" style="background-color: #17a2b8;"></div>
-                                                <span>Disabled</span>
+                                                <div class="seat disabled" style="width: 20px; height: 20px;"></div>
+                                                <span>♿ Disabled</span>
                                             </div>
                                         </div>
 
-                                        <!-- Thay thế phần seats-container hiện tại -->
+                                        <!-- UPDATED seats-container với icon và cấu trúc HTML cho ghế -->
                                         <div class="seats-container">
-                                            <c:forEach var="seat" items="${seats}">
-                                                <c:choose>
-                                                    <c:when test="${param.action == 'edit'}">
-                                                        <!-- Trong chế độ edit, ghế có thể click -->
-                                                        <a href="dashboard?section=screening-room-management&action=editSeat&seatId=${seat.seatID}&roomId=${viewRoom.roomID}&mode=edit" 
-                                                           class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()} seat-clickable"
-                                                           data-bs-toggle="tooltip" 
-                                                           title="Click to edit - Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
-                                                            ${seat.seatRow}${seat.seatNumber}
-                                                        </a>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <!-- Trong chế độ view, ghế chỉ hiển thị -->
-                                                        <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()}"
-                                                             data-bs-toggle="tooltip" 
-                                                             title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
-                                                            ${seat.seatRow}${seat.seatNumber}
-                                                        </div>
-                                                    </c:otherwise>
-                                                </c:choose>
+                                            <c:forEach var="row" items="${['A','B','C','D','E','F','G','H','I','J','K','L','M','N']}">
+                                                <c:set var="rowSeats" value="${seats.stream().filter(s -> s.seatRow == row).toList()}"/>
+                                                <c:if test="${not empty rowSeats}">
+                                                    <div class="seat-row" data-row="${row}">
+                                                        <c:forEach var="seat" items="${rowSeats}">
+                                                            <c:choose>
+                                                                <c:when test="${param.action == 'edit'}">
+                                                                    <a href="dashboard?section=screening-room-management&action=editSeat&seatId=${seat.seatID}&roomId=${viewRoom.roomID}" 
+                                                                       class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()} seat-clickable"
+                                                                       data-bs-toggle="tooltip" 
+                                                                       title="Click to edit - Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
+                                                                        <span class="seat-text">${seat.seatRow}${seat.seatNumber}</span>
+                                                                    </a>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()}"
+                                                                         data-bs-toggle="tooltip" 
+                                                                         title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
+                                                                        <span class="seat-text">${seat.seatRow}${seat.seatNumber}</span>
+                                                                    </div>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </c:forEach>
+                                                    </div>
+                                                </c:if>
                                             </c:forEach>
                                         </div>
 
-                                        <!-- Seat Statistics -->
+                                        <!-- Seat Statistics với đầy đủ thống kê -->
                                         <div class="seat-statistics mt-4 p-3 border rounded bg-light">
                                             <h6 class="mb-3">
                                                 <i class="bi bi-bar-chart"></i> Seat Statistics
                                             </h6>
                                             <div class="row text-center">
-                                                <div class="col-3">
+                                                <!-- Total -->
+                                                <div class="col-3 col-sm-2">
                                                     <div class="text-primary fw-bold fs-5">${seats.size()}</div>
                                                     <small class="text-muted">Total</small>
                                                 </div>
-                                                <div class="col-3">
+                                                <!-- Available -->
+                                                <div class="col-3 col-sm-2">
                                                     <c:set var="availableCount" value="0"/>
                                                     <c:forEach var="seat" items="${seats}">
                                                         <c:if test="${seat.status == 'Available'}">
@@ -278,7 +339,21 @@
                                                     <div class="text-success fw-bold fs-5">${availableCount}</div>
                                                     <small class="text-muted">Available</small>
                                                 </div>
-                                                <div class="col-3">
+                                                <!-- Standard Seats -->
+                                                <div class="col-3 col-sm-2">
+                                                    <c:set var="standardCount" value="0"/>
+                                                    <c:forEach var="seat" items="${seats}">
+                                                        <c:if test="${seat.seatType == 'Standard'}">
+                                                            <c:set var="standardCount" value="${standardCount + 1}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <div class="text-secondary fw-bold fs-5">${standardCount}</div>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-person"></i> Standard
+                                                    </small>
+                                                </div>
+                                                <!-- VIP Seats -->
+                                                <div class="col-3 col-sm-2">
                                                     <c:set var="vipCount" value="0"/>
                                                     <c:forEach var="seat" items="${seats}">
                                                         <c:if test="${seat.seatType == 'VIP'}">
@@ -286,49 +361,91 @@
                                                         </c:if>
                                                     </c:forEach>
                                                     <div class="text-warning fw-bold fs-5">${vipCount}</div>
-                                                    <small class="text-muted">VIP</small>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-star"></i> VIP
+                                                    </small>
                                                 </div>
-                                                <div class="col-3">
+                                                <!-- Couple Seats -->
+                                                <div class="col-3 col-sm-2">
+                                                    <c:set var="coupleCount" value="0"/>
+                                                    <c:forEach var="seat" items="${seats}">
+                                                        <c:if test="${seat.seatType == 'Couple'}">
+                                                            <c:set var="coupleCount" value="${coupleCount + 1}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <div class="text-pink fw-bold fs-5">${coupleCount}</div>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-heart"></i> Couple
+                                                    </small>
+                                                </div>
+                                                <!-- Disabled Seats -->
+                                                <div class="col-3 col-sm-2">
+                                                    <c:set var="disabledCount" value="0"/>
+                                                    <c:forEach var="seat" items="${seats}">
+                                                        <c:if test="${seat.seatType == 'Disabled'}">
+                                                            <c:set var="disabledCount" value="${disabledCount + 1}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <div class="text-info fw-bold fs-5">${disabledCount}</div>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-wheelchair"></i> Disabled
+                                                    </small>
+                                                </div>
+                                            </div>
+
+                                            <!-- Additional Status Statistics -->
+                                            <div class="row text-center mt-3 pt-3 border-top">
+                                                <!-- Maintenance -->
+                                                <div class="col-4">
                                                     <c:set var="maintenanceCount" value="0"/>
                                                     <c:forEach var="seat" items="${seats}">
                                                         <c:if test="${seat.status == 'Maintenance'}">
                                                             <c:set var="maintenanceCount" value="${maintenanceCount + 1}"/>
                                                         </c:if>
                                                     </c:forEach>
-                                                    <div class="text-danger fw-bold fs-5">${maintenanceCount}</div>
-                                                    <small class="text-muted">Maintenance</small>
+                                                    <div class="text-danger fw-bold fs-6">${maintenanceCount}</div>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-tools"></i> Maintenance
+                                                    </small>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Manage Seats Section -->
-                                        <c:if test="${param.action == 'edit'}">
-                                            <div class="manage-seats mt-4 p-3 border rounded bg-light">
-                                                <h6 class="mb-3">
-                                                    <i class="bi bi-gear"></i> Manage Seats
-                                                </h6>
-                                                <div class="d-grid gap-2">
-                                                    <a href="dashboard?section=seat-management&roomId=${viewRoom.roomID}" 
-                                                       class="btn btn-outline-primary btn-sm">
-                                                        <i class="bi bi-pencil-square"></i> Edit Seats Layout
-                                                    </a>
-                                                    <small class="text-muted text-center">
-                                                        Advanced seat configuration available in Seat Management
+                                                <!-- Unavailable -->
+                                                <div class="col-4">
+                                                    <c:set var="unavailableCount" value="0"/>
+                                                    <c:forEach var="seat" items="${seats}">
+                                                        <c:if test="${seat.status == 'Unavailable'}">
+                                                            <c:set var="unavailableCount" value="${unavailableCount + 1}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <div class="text-muted fw-bold fs-6">${unavailableCount}</div>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-slash-circle"></i> Unavailable
+                                                    </small>
+                                                </div>
+                                                <!-- Booked -->
+                                                <div class="col-4">
+                                                    <c:set var="bookedCount" value="0"/>
+                                                    <c:forEach var="seat" items="${seats}">
+                                                        <c:if test="${seat.status == 'Booked'}">
+                                                            <c:set var="bookedCount" value="${bookedCount + 1}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <div class="text-warning fw-bold fs-6">${bookedCount}</div>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-ticket-perforated"></i> Booked
                                                     </small>
                                                 </div>
                                             </div>
-                                        </c:if>
+                                        </div>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="text-center py-4">
                                             <i class="bi bi-inbox display-4 text-muted"></i>
                                             <p class="mt-3 text-muted">No seats configured for this room</p>
                                             <c:if test="${param.action == 'edit'}">
-                                                <a href="dashboard?section=screening-room-management&action=generateSeats&roomId=${viewRoom.roomID}" 
-                                                   class="btn btn-primary" 
-                                                   onclick="return confirm('Generate default seat layout? This will create seats based on room type.')">
+                                                <button type="button" class="btn btn-primary" 
+                                                        onclick="showGenerateSeatsModal(${viewRoom.roomID}, 'generate')">
                                                     <i class="bi bi-magic"></i> Generate Default Seats
-                                                </a>
+                                                </button>
                                             </c:if>
                                         </div>
                                     </c:otherwise>
@@ -379,6 +496,29 @@
     </div>
 </div>
 
+<!-- Generate Seats Confirm Modal -->
+<div class="modal fade" id="generateSeatsModal" tabindex="-1" aria-labelledby="generateSeatsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateSeatsModalLabel">Generate Seats</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="generateSeatsContent">
+                    <!-- Content will be dynamically filled by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmGenerateSeats">
+                    <i class="bi bi-check-lg"></i> <span id="confirmButtonText">Confirm</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     .screen {
         background: linear-gradient(180deg, #333 0%, #555 100%);
@@ -397,16 +537,24 @@
         right: 0;
         text-align: center;
     }
+
     .seats-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
-        gap: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         padding: 15px;
-        justify-items: center;
+        align-items: center;
     }
+
+    .seat-row {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Base seat style */
     .seat {
-        width: 35px;
-        height: 35px;
         border-radius: 5px;
         display: flex;
         align-items: center;
@@ -417,7 +565,36 @@
         transition: all 0.3s ease;
         border: 1px solid #dee2e6;
         color: white;
+        position: relative;
+        overflow: hidden;
     }
+
+    /* Standard seat size */
+    .seat.standard {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* VIP seat size */
+    .seat.vip {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* Disabled seat size */
+    .seat.disabled {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* COUPLE seat - DOUBLE WIDTH */
+    .seat.couple {
+        width: 70px; /* Double width */
+        height: 35px;
+        background: linear-gradient(135deg, #e83e8c, #d91a72);
+        position: relative;
+    }
+
     .seat-clickable {
         cursor: pointer;
         text-decoration: none;
@@ -432,32 +609,19 @@
         position: relative;
     }
 
-    /* Đảm bảo màu chữ hiển thị đúng trên link */
-    .seat-clickable.standard {
-        color: white !important;
-    }
-    .seat-clickable.vip {
-        color: black !important;
-    }
-    .seat-clickable.couple {
-        color: white !important;
-    }
-    .seat-clickable.disabled {
-        color: white !important;
-    }
     /* Seat type colors */
     .seat.standard {
-        background-color: #6c757d;
+        background: linear-gradient(135deg, #6c757d, #5a6268);
     }
     .seat.vip {
-        background-color: #ffc107;
+        background: linear-gradient(135deg, #ffc107, #e0a800);
         color: black;
     }
     .seat.couple {
-        background-color: #e83e8c;
+        background: linear-gradient(135deg, #e83e8c, #d91a72);
     }
     .seat.disabled {
-        background-color: #17a2b8;
+        background: linear-gradient(135deg, #17a2b8, #138496);
     }
 
     /* Seat status styles */
@@ -465,10 +629,45 @@
         opacity: 1;
     }
     .seat.maintenance {
-        background-color: #fd7e14 !important;
+        background: linear-gradient(135deg, #fd7e14, #e55a00) !important;
     }
     .seat.unavailable {
         opacity: 0.5;
+    }
+
+    /* Icons for seats */
+    .seat.standard::before {
+        content: "💺";
+        font-size: 12px;
+        margin-right: 2px;
+    }
+
+    .seat.vip::before {
+        content: "⭐";
+        font-size: 12px;
+        margin-right: 2px;
+    }
+
+    .seat.couple::before {
+        content: "💑";
+        font-size: 14px;
+        margin-right: 4px;
+    }
+
+    .seat.disabled::before {
+        content: "♿";
+        font-size: 12px;
+        margin-right: 2px;
+    }
+
+    /* Hide text for very small seats, show only icon */
+    .seat .seat-text {
+        font-size: 9px;
+    }
+
+    /* For couple seats, we can show both icon and text nicely */
+    .seat.couple .seat-text {
+        font-size: 10px;
     }
 
     /* Seat legend */
@@ -493,26 +692,111 @@
         height: 15px;
         border-radius: 3px;
     }
+
+    /* Gap indicator between seat groups */
+    .seat-gap {
+        width: 20px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* NEW: Special styling for couple seats to make them stand out */
+    .seat.couple {
+        border: 2px solid #c2185b;
+        box-shadow: 0 2px 4px rgba(232, 62, 140, 0.3);
+    }
+
+    .seat.couple::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        pointer-events: none;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .seat.standard, .seat.vip, .seat.disabled {
+            width: 30px;
+            height: 30px;
+            font-size: 9px;
+        }
+        .seat.couple {
+            width: 60px;
+            height: 30px;
+        }
+        .seats-container {
+            gap: 6px;
+            padding: 10px;
+        }
+        .seat-row {
+            gap: 4px;
+        }
+        .seat::before {
+            font-size: 10px;
+            margin-right: 1px;
+        }
+        .seat.couple::before {
+            font-size: 12px;
+            margin-right: 2px;
+        }
+    }
+    /* Additional colors for statistics */
+    .text-pink {
+        color: #e83e8c !important;
+    }
+
+    .bg-pink {
+        background-color: #e83e8c !important;
+    }
+
+    /* Progress bar styles for visual statistics */
+    .seat-type-progress {
+        height: 8px;
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+
+    .progress-standard {
+        background-color: #6c757d;
+    }
+
+    .progress-vip {
+        background-color: #ffc107;
+    }
+
+    .progress-couple {
+        background-color: #e83e8c;
+    }
+
+    .progress-disabled {
+        background-color: #17a2b8;
+    }
 </style>
 
 <script>
+    // Debug info
+    console.log('Room details page loaded');
+    console.log('viewRoom roomID:', ${viewRoom.roomID});
+    console.log('viewRoom roomName:', '${viewRoom.roomName}');
+    console.log('viewRoom roomType:', '${viewRoom.roomType}');
+    console.log('action:', '${param.action}');
+    console.log('seats count:', ${empty seats ? 0 : seats.size()});
+
     // Delete modal function
     function showDeleteModal(roomId, roomName) {
-        // Find the room details from the table
-        const roomRow = document.querySelector(`tr:has(button[onclick="showDeleteModal(${roomId}, '${roomName}')"])`);
-        if (roomRow) {
-            const cinemaName = roomRow.cells[2].textContent;
-            const seatCapacity = roomRow.cells[4].textContent;
+        console.log('showDeleteModal called with:', roomId, roomName);
 
-            document.getElementById('deleteRoomName').textContent = roomName;
-            document.getElementById('deleteCinemaName').textContent = cinemaName;
-            document.getElementById('deleteSeatCapacity').textContent = seatCapacity;
-        } else {
-            // If not in table (from edit page), use current room data
-            document.getElementById('deleteRoomName').textContent = roomName;
-            document.getElementById('deleteCinemaName').textContent = '${viewRoom.cinema.cinemaName}';
-            document.getElementById('deleteSeatCapacity').textContent = '${viewRoom.seatCapacity}';
-        }
+        // If not in table (from edit page), use current room data
+        document.getElementById('deleteRoomName').textContent = roomName;
+        document.getElementById('deleteCinemaName').textContent = '${viewRoom.cinema.cinemaName}';
+        document.getElementById('deleteSeatCapacity').textContent = '${viewRoom.seatCapacity}';
 
         document.getElementById('deleteRoomId').value = roomId;
 
@@ -520,10 +804,114 @@
         deleteModal.show();
     }
 
-    // Initialize tooltips
+    // Generate seats modal function - WORKING VERSION
+    function showGenerateSeatsModal(roomId, actionType) {
+        console.log('showGenerateSeatsModal called with:', roomId, actionType);
+
+        const modal = document.getElementById('generateSeatsModal');
+        const modalTitle = document.getElementById('generateSeatsModalLabel');
+        const modalContent = document.getElementById('generateSeatsContent');
+        const confirmButton = document.getElementById('confirmGenerateSeats');
+        const confirmButtonText = document.getElementById('confirmButtonText');
+
+        // Get room info from JSP variables
+        const roomName = '${viewRoom.roomName}';
+        const roomType = '${viewRoom.roomType}';
+        const seatCapacity = '${viewRoom.seatCapacity}';
+        const currentSeatsCount = '${empty seats ? 0 : seats.size()}';
+
+        let title = '';
+        let message = '';
+        let confirmText = '';
+
+        if (actionType === 'generate') {
+            title = 'Generate Seats';
+            message = `
+                <p>Are you sure you want to generate default seat layout for this room?</p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 
+                    This will create seats based on the room type (<strong>${roomType}</strong>).
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Room:</strong> ${roomName}</p>
+                        <p class="mb-1"><strong>Type:</strong> ${roomType}</p>
+                        <p class="mb-0"><strong>Capacity:</strong> ${seatCapacity} seats</p>
+                    </div>
+                </div>
+            `;
+            confirmText = 'Generate Seats';
+        } else {
+            title = 'Regenerate Seats';
+            message = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Warning: This action cannot be undone!</strong>
+                </div>
+                <p>Are you sure you want to regenerate all seats for this room?</p>
+                <div class="alert alert-danger">
+                    <h6><i class="bi bi-x-octagon-fill"></i> Critical Consequences:</h6>
+                    <ul class="mb-0">
+                        <li>All existing seats will be deleted</li>
+                        <li>Any booking history for these seats will be lost</li>
+                        <li>New seats will be generated based on current room type</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Room:</strong> ${roomName}</p>
+                        <p class="mb-1"><strong>Current Seats:</strong> ${currentSeatsCount}</p>
+                        <p class="mb-0"><strong>New Layout:</strong> Based on <strong>${roomType}</strong> type</p>
+                    </div>
+                </div>
+            `;
+            confirmText = 'Regenerate Seats';
+        }
+
+        modalTitle.textContent = title;
+        modalContent.innerHTML = message;
+        confirmButtonText.textContent = confirmText;
+
+        // Remove any existing event listeners
+        const newConfirmButton = confirmButton.cloneNode(true);
+        confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+
+        // Add new event listener
+        newConfirmButton.addEventListener('click', function () {
+            console.log('Modal confirm clicked, redirecting for room:', roomId);
+            window.location.href = 'dashboard?section=screening-room-management&action=generateSeats&roomId=' + roomId;
+        });
+
+        // Initialize and show modal
+        const generateModal = new bootstrap.Modal(modal);
+        generateModal.show();
+
+        console.log('Modal shown successfully');
+    }
+
+    // Backup function using confirm dialog
+    function generateSeatsSimple(roomId, isRegenerate) {
+        console.log('generateSeatsSimple called with:', roomId, isRegenerate);
+
+        let message = 'Generate default seat layout for this room?';
+
+        if (isRegenerate) {
+            message = 'WARNING: This will delete all existing seats and create new ones. Continue?';
+        }
+
+        if (confirm(message)) {
+            console.log('Redirecting to generate seats for room:', roomId);
+            window.location.href = 'dashboard?section=screening-room-management&action=generateSeats&roomId=' + roomId;
+        }
+    }
+
+    // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        console.log('DOM loaded - initializing components');
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
@@ -548,6 +936,21 @@
                     return;
                 }
             });
+        }
+
+        // Auto-hide toast after 5 seconds
+        const toastEl = document.querySelector('.toast');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl, {delay: 5000});
+            toast.show();
+        }
+
+        // Test modal elements
+        const modal = document.getElementById('generateSeatsModal');
+        if (modal) {
+            console.log('✅ Generate seats modal element found');
+        } else {
+            console.error('❌ Generate seats modal element NOT found');
         }
     });
 </script>

@@ -2,6 +2,28 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <div id="screening-room-management-content">
+    <!-- Toast Notification -->
+    <c:if test="${not empty toastType and not empty toastMessage}">
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div class="toast align-items-center text-white bg-${toastType} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi
+                           <c:choose>
+                               <c:when test="${toastType == 'success'}">bi-check-circle-fill</c:when>
+                               <c:when test="${toastType == 'error'}">bi-exclamation-circle-fill</c:when>
+                               <c:when test="${toastType == 'warning'}">bi-exclamation-triangle-fill</c:when>
+                               <c:otherwise>bi-info-circle-fill</c:otherwise>
+                           </c:choose>
+                           me-2"></i>
+                        ${toastMessage}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </c:if>
+
     <!-- Filter Section -->
     <div class="row mb-4">
         <div class="col-md-4">
@@ -151,7 +173,7 @@
                     </a>
                 </span>
             </c:if>
-            <c:if test="${not empty param.locationFilter}">
+            <c:if test="${not empty param.locationFilter && param.locationFilter != 'none'}">
                 <span class="badge bg-primary me-2">
                     Location: ${param.locationFilter}
                     <a href="dashboard?section=screening-room-management&cinemaFilter=${param.cinemaFilter}&roomType=${param.roomType}&status=${param.status}&search=${param.search}" class="text-white ms-1">
@@ -159,7 +181,7 @@
                     </a>
                 </span>
             </c:if>
-            <c:if test="${not empty param.cinemaFilter}">
+            <c:if test="${not empty param.cinemaFilter && param.cinemaFilter != 'none'}">
                 <c:forEach var="cinema" items="${cinemasByLocation}">
                     <c:if test="${cinema.cinemaID == param.cinemaFilter}">
                         <span class="badge bg-secondary me-2">
@@ -211,6 +233,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- Cập nhật tất cả các link action để giữ filters -->
                         <c:forEach var="room" items="${listRooms}" varStatus="loop">
                             <tr>
                                 <td>${(currentPage - 1) * recordsPerPage + loop.index + 1}</td>
@@ -242,9 +265,11 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="dashboard?section=screening-room-management&action=view&id=${room.roomID}" 
+                                        <!-- View link với filters -->
+                                        <a href="dashboard?section=screening-room-management&action=view&id=${room.roomID}&locationFilter=${param.locationFilter}&cinemaFilter=${param.cinemaFilter}&roomType=${param.roomType}&status=${param.status}&search=${param.search}&page=${currentPage}" 
                                            class="btn btn-info">View</a>
-                                        <a href="dashboard?section=screening-room-management&action=edit&id=${room.roomID}" 
+                                        <!-- Edit link với filters -->
+                                        <a href="dashboard?section=screening-room-management&action=edit&id=${room.roomID}&locationFilter=${param.locationFilter}&cinemaFilter=${param.cinemaFilter}&roomType=${param.roomType}&status=${param.status}&search=${param.search}&page=${currentPage}" 
                                            class="btn btn-warning">Edit</a>
                                         <button class="btn btn-danger" 
                                                 onclick="showDeleteModal(${room.roomID}, '${room.roomName}')">
@@ -258,7 +283,7 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            <!-- Pagination với filters -->
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
                     <c:if test="${currentPage > 1}">

@@ -103,5 +103,11 @@ public class User {
 
     public int getLoyaltyPoints() { return loyaltyPoints; }
     public void setLoyaltyPoints(int loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; }
+
+    @Override
+    public String toString() {
+        return "User{" + "userID=" + userID + ", fullName=" + fullName + ", email=" + email + ", phoneNumber=" + phoneNumber + ", password=" + password + ", gender=" + gender + ", dateOfBirth=" + dateOfBirth + ", address=" + address + ", accountStatus=" + accountStatus + ", role=" + role + '}';
+    }
+    
     
 }

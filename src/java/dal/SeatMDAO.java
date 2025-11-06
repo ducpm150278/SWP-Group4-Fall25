@@ -3,7 +3,10 @@ package dal;
 import entity.SeatM;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SeatMDAO {
 
@@ -305,6 +308,175 @@ public class SeatMDAO {
         } catch (SQLException e) {
             System.out.println("Error in bulkUpdateSeats: " + e.getMessage());
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 14. Lấy trạng thái ghế theo screening (cho booking)
+    public Map<Integer, String> getSeatStatusForScreening(int screeningId, int roomId) {
+        Map<Integer, String> seatStatusMap = new HashMap<>();
+        String sql = """
+            SELECT s.SeatID, 
+                   CASE 
+                     WHEN t.TicketID IS NOT NULL THEN 'Booked'
+                     WHEN sr.ReservationID IS NOT NULL AND sr.ExpiresAt > GETDATE() THEN 'Reserved'
+                     ELSE s.Status
+                   END AS CurrentStatus
+            FROM Seats s
+            LEFT JOIN Tickets t ON s.SeatID = t.SeatID AND t.ScreeningID = ?
+            LEFT JOIN SeatReservations sr ON s.SeatID = sr.SeatID AND sr.ScreeningID = ?
+            WHERE s.RoomID = ?
+            ORDER BY s.SeatRow, s.SeatNumber
+        """;
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, screeningId);
+            ps.setInt(2, screeningId);
+            ps.setInt(3, roomId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int seatId = rs.getInt("SeatID");
+                String status = rs.getString("CurrentStatus");
+                seatStatusMap.put(seatId, status);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getSeatStatusForScreening: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return seatStatusMap;
+    }
+
+    // 15. Kiểm tra ghế có available cho screening không
+    public boolean isSeatAvailableForScreening(int seatId, int screeningId) {
+        String sql = """
+            SELECT CASE 
+                     WHEN t.TicketID IS NOT NULL THEN 0
+                     WHEN sr.ReservationID IS NOT NULL AND sr.ExpiresAt > GETDATE() THEN 0
+                     WHEN s.Status != 'Available' THEN 0
+                     ELSE 1
+                   END AS IsAvailable
+            FROM Seats s
+            LEFT JOIN Tickets t ON s.SeatID = t.SeatID AND t.ScreeningID = ?
+            LEFT JOIN SeatReservations sr ON s.SeatID = sr.SeatID AND sr.ScreeningID = ?
+            WHERE s.SeatID = ?
+        """;
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, screeningId);
+            ps.setInt(2, screeningId);
+            ps.setInt(3, seatId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getBoolean("IsAvailable");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in isSeatAvailableForScreening: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 16. Lấy ghế theo screening và room
+    public List<SeatM> getSeatsForScreening(int screeningId, int roomId) {
+        List<SeatM> seats = new ArrayList<>();
+        String sql = """
+            SELECT s.SeatID, s.RoomID, s.SeatRow, s.SeatNumber, s.SeatType, 
+                   CASE 
+                     WHEN t.TicketID IS NOT NULL THEN 'Booked'
+                     WHEN sr.ReservationID IS NOT NULL AND sr.ExpiresAt > GETDATE() THEN 'Reserved'
+                     ELSE s.Status
+                   END AS CurrentStatus
+            FROM Seats s
+            LEFT JOIN Tickets t ON s.SeatID = t.SeatID AND t.ScreeningID = ?
+            LEFT JOIN SeatReservations sr ON s.SeatID = sr.SeatID AND sr.ScreeningID = ?
+            WHERE s.RoomID = ?
+            ORDER BY 
+                CASE WHEN s.SeatRow LIKE '[A-Z]' THEN 0 ELSE 1 END,
+                s.SeatRow, 
+                CAST(s.SeatNumber AS INT)
+        """;
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, screeningId);
+            ps.setInt(2, screeningId);
+            ps.setInt(3, roomId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                SeatM seat = new SeatM();
+                seat.setSeatID(rs.getInt("SeatID"));
+                seat.setRoomID(rs.getInt("RoomID"));
+                seat.setSeatRow(rs.getString("SeatRow"));
+                seat.setSeatNumber(rs.getString("SeatNumber"));
+                seat.setSeatType(rs.getString("SeatType"));
+                seat.setStatus(rs.getString("CurrentStatus")); // Status động theo screening
+
+                seats.add(seat);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error in getSeatsForScreening: " + e.getMessage());
+        }
+        return seats;
+    }
+
+    // 17. Cập nhật hàng loạt trạng thái ghế
+    public boolean bulkUpdateSeatStatus(List<Integer> seatIds, String status) {
+        if (seatIds == null || seatIds.isEmpty()) {
+            return true;
+        }
+
+        // Tạo placeholders cho IN clause
+        String placeholders = String.join(",", Collections.nCopies(seatIds.size(), "?"));
+        String sql = "UPDATE Seats SET Status = ? WHERE SeatID IN (" + placeholders + ")";
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false);
+            ps.setString(1, status);
+
+            for (int i = 0; i < seatIds.size(); i++) {
+                ps.setInt(i + 2, seatIds.get(i));
+            }
+
+            int result = ps.executeUpdate();
+            conn.commit();
+
+            return result > 0;
+        } catch (SQLException e) {
+            System.out.println("Error in bulkUpdateSeatStatus: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // 18. Cập nhật hàng loạt loại ghế
+    public boolean bulkUpdateSeatType(List<Integer> seatIds, String seatType) {
+        if (seatIds == null || seatIds.isEmpty()) {
+            return true;
+        }
+
+        String placeholders = String.join(",", Collections.nCopies(seatIds.size(), "?"));
+        String sql = "UPDATE Seats SET SeatType = ? WHERE SeatID IN (" + placeholders + ")";
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false);
+            ps.setString(1, seatType);
+
+            for (int i = 0; i < seatIds.size(); i++) {
+                ps.setInt(i + 2, seatIds.get(i));
+            }
+
+            int result = ps.executeUpdate();
+            conn.commit();
+
+            return result > 0;
+        } catch (SQLException e) {
+            System.out.println("Error in bulkUpdateSeatType: " + e.getMessage());
             return false;
         }
     }

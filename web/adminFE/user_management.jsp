@@ -301,7 +301,7 @@
                         <!-- Status Alert -->
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i> 
-                            <strong>Note:</strong> New accounts will be created with "Active" status.
+                            <strong>Note:</strong> New accounts will be created with "Temporary" status.
                         </div>
                     </div>
                     
@@ -442,33 +442,27 @@
         </div>
     </div>
 
-    <!-- Toasts Container -->-
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-        <!-- Success Toast Template -->
-        <div id="successToastTemplate" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="successToastMessage"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <!-- Toast Notification -->
+    <c:if test="${not empty toastType and not empty toastMessage}">
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060">
+            <div class="toast align-items-center text-white bg-${toastType} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi
+                           <c:choose>
+                               <c:when test="${toastType == 'success'}">bi-check-circle-fill</c:when>
+                               <c:when test="${toastType == 'error'}">bi-exclamation-circle-fill</c:when>
+                               <c:when test="${toastType == 'warning'}">bi-exclamation-triangle-fill</c:when>
+                               <c:otherwise>bi-info-circle-fill</c:otherwise>
+                           </c:choose>
+                           me-2"></i>
+                        ${toastMessage}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
             </div>
         </div>
-        
-        <!-- Error Toast Template -->
-        <div id="errorToastTemplate" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="errorToastMessage"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-        
-        <!-- Warning Toast Template -->
-        <div id="warningToastTemplate" class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="warningToastMessage"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
-
+    </c:if>
     <!-- JavaScript functions -->
     <script>
         // ===== MAIN INITIALIZATION =====
@@ -480,6 +474,23 @@
 
         // ===== TOAST SYSTEM =====
         function showToasts() {
+            <c:if test="${not empty sessionScope.toastType}">
+                <c:choose>
+                    <c:when test="${sessionScope.toastType == 'success'}">
+                        showToast('✅ ${sessionScope.toastMessage}', 'success');
+                    </c:when>
+                    <c:when test="${sessionScope.toastType == 'error'}">
+                        showToast('❌ ${sessionScope.toastMessage}', 'error');
+                    </c:when>
+                    <c:when test="${sessionScope.toastType == 'warning'}">
+                        showToast('⚠️ ${sessionScope.toastMessage}', 'warning');
+                    </c:when>
+                </c:choose>
+                <c:remove var="toastType" scope="session"/>
+                <c:remove var="toastMessage" scope="session"/>
+            </c:if>
+            
+            <%-- Giữ lại phần cũ để tương thích ngược --%>
             <c:if test="${not empty sessionScope.showToast}">
                 <c:choose>
                     <c:when test="${sessionScope.showToast == 'add_success'}">
