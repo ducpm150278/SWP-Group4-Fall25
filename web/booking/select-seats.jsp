@@ -308,7 +308,7 @@
             flex-shrink: 0;
         }
         
-        .seat:hover:not(.booked):not(.reserved):not(.maintenance):not(.selected) {
+        .seat:hover:not(.booked):not(.reserved):not(.maintenance):not(.unavailable):not(.selected) {
             background: #3a3d45;
             border-color: #4a4d55;
             color: #fff;
@@ -360,7 +360,7 @@
             background: #2f2d2a;
         }
         
-        .seat.vip:hover:not(.booked):not(.reserved):not(.maintenance):not(.selected) {
+        .seat.vip:hover:not(.booked):not(.reserved):not(.maintenance):not(.unavailable):not(.selected) {
             background: #3f3d3a;
             border-color: #8b7d5f;
         }
@@ -384,7 +384,7 @@
             background: #2d2a2d;
         }
         
-        .seat.couple:hover:not(.booked):not(.reserved):not(.maintenance):not(.selected) {
+        .seat.couple:hover:not(.booked):not(.reserved):not(.maintenance):not(.unavailable):not(.selected) {
             background: #3d3a3d;
             border-color: #5a4d55;
         }
@@ -408,6 +408,27 @@
             color: #555;
             cursor: not-allowed;
             opacity: 0.3;
+        }
+        
+        /* Unavailable seats */
+        .seat.unavailable {
+            background: #1a1d24;
+            border-color: #1a1d24;
+            color: #555;
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+        
+        .seat.vip.unavailable {
+            background: #1a1d24;
+            border-color: #1a1d24;
+            color: #555;
+        }
+        
+        .seat.couple.unavailable {
+            background: #1a1d24;
+            border-color: #1a1d24;
+            color: #555;
         }
         
         /* Legend */
@@ -804,9 +825,19 @@
                                                 boolean isSelected = bookingSession.getSelectedSeatIDs() != null && 
                                                                    bookingSession.getSelectedSeatIDs().contains(seat.getSeatID());
                                                 boolean isMaintenance = "Maintenance".equals(seat.getStatus());
+                                                boolean isUnavailable = "Unavailable".equals(seat.getStatus());
+                                                
+                                                // Check if seat has unavailable status (from servlet attribute)
+                                                @SuppressWarnings("unchecked")
+                                                List<Integer> unavailableStatusSeatIDs = (List<Integer>) request.getAttribute("unavailableStatusSeatIDs");
+                                                if (unavailableStatusSeatIDs != null && unavailableStatusSeatIDs.contains(seat.getSeatID())) {
+                                                    isUnavailable = true;
+                                                }
                                                 
                                                 if (isMaintenance) {
                                                     seatClass += " maintenance";
+                                                } else if (isUnavailable) {
+                                                    seatClass += " unavailable";
                                                 } else if (isBooked) {
                                                     seatClass += " booked";
                                                 } else if (isReserved) {
@@ -825,7 +856,7 @@
                                                 <div class="<%= seatClass %>" 
                                                      data-seat-id="<%= seat.getSeatID() %>"
                                                      data-seat-label="<%= seat.getSeatRow().trim() %><%= seat.getSeatNumber() %>"
-                                                     data-available="<%= !isBooked && !isReserved && !isMaintenance %>"
+                                                     data-available="<%= !isBooked && !isReserved && !isMaintenance && !isUnavailable %>"
                                                      data-price-multiplier="<%= seat.getPriceMultiplier() %>"
                                                      data-seat-type="<%= seatType %>">
                                                     <%= seat.getSeatNumber() %>

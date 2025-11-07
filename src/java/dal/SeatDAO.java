@@ -46,10 +46,16 @@ public class SeatDAO extends DBContext {
     
     /**
      * Get booked seat IDs for a specific screening
+     * Only includes seats from bookings with status 'Confirmed' or 'Completed'
+     * Excludes cancelled bookings
      */
     public List<Integer> getBookedSeatsForScreening(int screeningID) {
         List<Integer> bookedSeatIDs = new ArrayList<>();
-        String sql = "SELECT DISTINCT SeatID FROM Tickets WHERE ScreeningID = ?";
+        String sql = "SELECT DISTINCT t.SeatID " +
+                     "FROM Tickets t " +
+                     "INNER JOIN Bookings b ON t.BookingID = b.BookingID " +
+                     "WHERE t.ScreeningID = ? " +
+                     "  AND b.Status IN ('Confirmed', 'Completed')";
         
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -213,8 +219,15 @@ public class SeatDAO extends DBContext {
     
     /**
      * Update seat status (for maintenance, etc.)
+     * Note: 'Booked' is no longer a valid stored status - booked status is managed via Tickets table
      */
     public boolean updateSeatStatus(int seatID, String status) {
+        // Validate status - 'Booked' is not allowed as stored status
+        if (status != null && "Booked".equalsIgnoreCase(status)) {
+            System.err.println("Error: Cannot set seat status to 'Booked'. Booked status is managed via Tickets table.");
+            return false;
+        }
+        
         String sql = "UPDATE Seats SET Status = ? WHERE SeatID = ?";
         
         try (Connection conn = getConnection();
@@ -276,13 +289,21 @@ public class SeatDAO extends DBContext {
         // Build parameter placeholders for IN clause
         String placeholders = String.join(",", seatIDs.stream().map(id -> "?").toArray(String[]::new));
         
-        // Check both booked seats (from Tickets) and reserved seats (from SeatReservations)
+        // Check booked seats (from Tickets with Confirmed/Completed bookings only), 
+        // reserved seats (from SeatReservations), and seats with Unavailable/Maintenance status
         String sql = "SELECT COUNT(DISTINCT SeatID) as UnavailableCount FROM ( " +
-                     "  SELECT SeatID FROM Tickets WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
+                     "  SELECT t.SeatID FROM Tickets t " +
+                     "  INNER JOIN Bookings b ON t.BookingID = b.BookingID " +
+                     "  WHERE t.ScreeningID = ? AND t.SeatID IN (" + placeholders + ") " +
+                     "    AND b.Status IN ('Confirmed', 'Completed') " +
                      "  UNION " +
                      "  SELECT SeatID FROM SeatReservations " +
                      "  WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
                      "    AND SessionID != ? AND ExpiresAt > GETDATE() " +
+                     "  UNION " +
+                     "  SELECT SeatID FROM Seats " +
+                     "  WHERE SeatID IN (" + placeholders + ") " +
+                     "    AND Status IN ('Unavailable', 'Maintenance') " +
                      ") AS UnavailableSeats";
         
         try (Connection conn = getConnection();
@@ -308,6 +329,11 @@ public class SeatDAO extends DBContext {
             
             // Set excludeSessionID
             ps.setString(paramIndex++, excludeSessionID != null ? excludeSessionID : "");
+            
+            // Set seatIDs for Seats status check (Unavailable/Maintenance)
+            for (Integer seatID : seatIDs) {
+                ps.setInt(paramIndex++, seatID);
+            }
             
             ResultSet rs = ps.executeQuery();
             
@@ -339,13 +365,21 @@ public class SeatDAO extends DBContext {
         // Build parameter placeholders for IN clause
         String placeholders = String.join(",", seatIDs.stream().map(id -> "?").toArray(String[]::new));
         
-        // Get unavailable seat IDs
+        // Get unavailable seat IDs (booked from Confirmed/Completed bookings only, 
+        // reserved, or with Unavailable/Maintenance status)
         String sql = "SELECT DISTINCT SeatID FROM ( " +
-                     "  SELECT SeatID FROM Tickets WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
+                     "  SELECT t.SeatID FROM Tickets t " +
+                     "  INNER JOIN Bookings b ON t.BookingID = b.BookingID " +
+                     "  WHERE t.ScreeningID = ? AND t.SeatID IN (" + placeholders + ") " +
+                     "    AND b.Status IN ('Confirmed', 'Completed') " +
                      "  UNION " +
                      "  SELECT SeatID FROM SeatReservations " +
                      "  WHERE ScreeningID = ? AND SeatID IN (" + placeholders + ") " +
                      "    AND SessionID != ? AND ExpiresAt > GETDATE() " +
+                     "  UNION " +
+                     "  SELECT SeatID FROM Seats " +
+                     "  WHERE SeatID IN (" + placeholders + ") " +
+                     "    AND Status IN ('Unavailable', 'Maintenance') " +
                      ") AS UnavailableSeats";
         
         try (Connection conn = getConnection();
@@ -371,6 +405,11 @@ public class SeatDAO extends DBContext {
             
             // Set excludeSessionID
             ps.setString(paramIndex++, excludeSessionID != null ? excludeSessionID : "");
+            
+            // Set seatIDs for Seats status check (Unavailable/Maintenance)
+            for (Integer seatID : seatIDs) {
+                ps.setInt(paramIndex++, seatID);
+            }
             
             ResultSet rs = ps.executeQuery();
             
