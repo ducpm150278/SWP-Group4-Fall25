@@ -194,8 +194,15 @@ public class BookingPaymentServlet extends HttpServlet {
         }
         
         // Check if discount has reached max usage
-        if (discount.getUsageCount() >= discount.getMaxUsage()) {
-            request.setAttribute("error", "Mã giảm giá đã hết lượt sử dụng!");
+        // Use actual usage count from Bookings table to ensure accuracy
+        int actualUsageCount = discountDAO.getActualUsageCount(discount.getDiscountID());
+        System.out.println("Discount validation - Code: " + discount.getCode() + 
+                         ", MaxUsage: " + discount.getMaxUsage() + 
+                         ", Stored UsageCount: " + discount.getUsageCount() + 
+                         ", Actual UsageCount: " + actualUsageCount);
+        
+        if (actualUsageCount >= discount.getMaxUsage()) {
+            request.setAttribute("error", "Mã giảm giá đã hết lượt sử dụng! (Đã dùng " + actualUsageCount + "/" + discount.getMaxUsage() + " lượt)");
             doGet(request, response);
             return;
         }
@@ -203,6 +210,13 @@ public class BookingPaymentServlet extends HttpServlet {
         // Calculate discount amount based on type
         double subtotal = bookingSession.getTicketSubtotal() + bookingSession.getFoodSubtotal();
         double discountAmount = discount.calculateDiscountAmount(subtotal);
+        
+        // Debug logging for discount calculation
+        System.out.println("Discount calculation - Code: " + discount.getCode() + 
+                         ", Type: " + discount.getDiscountType() + 
+                         ", DiscountValue: " + discount.getDiscountValue() + 
+                         ", Subtotal: " + subtotal + 
+                         ", Calculated Discount Amount: " + discountAmount);
         
         // Apply discount
         bookingSession.setDiscountID(discount.getDiscountID());

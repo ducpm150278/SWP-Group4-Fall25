@@ -66,6 +66,13 @@ public class BookingSeatSelectionServlet extends HttpServlet {
         // Get all seats for the room
         List<Seat> allSeats = seatDAO.getSeatsByRoomID(screening.getRoomID());
         
+        // Filter out Unavailable and Maintenance seats (they should not be selectable)
+        // Note: We still show them in the UI but mark them as unavailable
+        List<Integer> unavailableStatusSeatIDs = allSeats.stream()
+            .filter(seat -> "Unavailable".equals(seat.getStatus()) || "Maintenance".equals(seat.getStatus()))
+            .map(Seat::getSeatID)
+            .collect(Collectors.toList());
+        
         // Get booked seats
         List<Integer> bookedSeatIDs = seatDAO.getBookedSeatsForScreening(bookingSession.getScreeningID());
         
@@ -82,6 +89,7 @@ public class BookingSeatSelectionServlet extends HttpServlet {
         request.setAttribute("allSeats", allSeats);
         request.setAttribute("bookedSeatIDs", bookedSeatIDs);
         request.setAttribute("reservedSeatIDs", reservedSeatIDs);
+        request.setAttribute("unavailableStatusSeatIDs", unavailableStatusSeatIDs); // Seats with Unavailable/Maintenance status
         request.setAttribute("bookingSession", bookingSession);
         
         // Forward to seat selection page

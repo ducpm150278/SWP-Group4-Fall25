@@ -182,12 +182,34 @@ public class DiscountDAO extends DBContext {
                 d.setDiscountID(rs.getInt("DiscountID"));
                 d.setCode(rs.getString("Code"));
                 d.setDiscountType(rs.getString("DiscountType"));
-                d.setDiscountValue(rs.getDouble("DiscountValue"));
+                
+                // Handle both DiscountPercentage and DiscountValue
+                // This is critical for correct discount calculation
+                String discountType = rs.getString("DiscountType");
+                if ("Percentage".equals(discountType)) {
+                    // For Percentage type, get value from DiscountPercentage column
+                    double percentage = rs.getObject("DiscountPercentage") != null ? 
+                                       rs.getDouble("DiscountPercentage") : 0.0;
+                    d.setDiscountValue(percentage);
+                    d.setDiscountPercentage(percentage);
+                } else {
+                    // For FixedAmount type, get value from DiscountValue column
+                    double value = rs.getObject("DiscountValue") != null ? 
+                                  rs.getDouble("DiscountValue") : 0.0;
+                    d.setDiscountValue(value);
+                }
+                
                 d.setStartDate(rs.getTimestamp("StartDate").toLocalDateTime());
                 d.setEndDate(rs.getTimestamp("EndDate").toLocalDateTime());
                 d.setStatus(rs.getString("Status"));
                 d.setMaxUsage(rs.getInt("MaxUsage"));
                 d.setUsageCount(rs.getInt("UsageCount"));
+                d.setCreatedBy(rs.getInt("CreatedBy"));
+                
+                System.out.println("Discount loaded - Code: " + d.getCode() + 
+                                 ", Type: " + d.getDiscountType() + 
+                                 ", Value: " + d.getDiscountValue());
+                
                 return d;
             }
         } catch (SQLException e) {
@@ -280,6 +302,34 @@ WHERE DiscountID=?""";
             e.printStackTrace();
             return false;
         }
+    }
+    
+    /**
+     * Get actual usage count from Bookings table (real-time count)
+     * This ensures we check against actual usage, not potentially stale UsageCount
+     */
+    public int getActualUsageCount(int discountID) {
+        String sql = "SELECT COUNT(*) as ActualCount " +
+                     "FROM Bookings " +
+                     "WHERE DiscountID = ? " +
+                     "AND Status IN ('Confirmed', 'Completed')";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, discountID);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt("ActualCount");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error getting actual usage count: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return 0;
     }
     
     //tìm kiếm
