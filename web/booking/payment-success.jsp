@@ -232,7 +232,7 @@
         </div>
         
         <div class="action-buttons">
-            <a href="${pageContext.request.contextPath}/profile" class="btn-custom btn-primary-custom">
+            <a href="${pageContext.request.contextPath}/booking-history" class="btn-custom btn-primary-custom">
                 <i class="fas fa-ticket-alt"></i> Xem Vé Của Tôi
             </a>
             <a href="${pageContext.request.contextPath}/index.jsp" class="btn-custom btn-secondary-custom">
