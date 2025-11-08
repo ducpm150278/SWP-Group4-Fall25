@@ -62,7 +62,7 @@
         <%
     // Debug
     System.out.println("Current URI: " + uri);
-%>
+        %>
 
     </head>
     <body>
@@ -113,7 +113,12 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
                                 Quản lý đồ ăn
                             </a>
-                           
+
+                            <a class="nav-link ${activePage == 'list-refunds' ? 'active' : ''}" href="${pageContext.request.contextPath}/list-refunds">
+                                <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                                Quản lý huỷ vé
+                            </a>
+
                             <!-- Tài khoản -->
                             <div class="sb-sidenav-menu-heading">Tài khoản</div>
                             <a class="nav-link text-danger" href="logout">
