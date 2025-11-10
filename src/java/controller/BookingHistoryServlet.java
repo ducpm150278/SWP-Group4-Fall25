@@ -112,18 +112,20 @@ public class BookingHistoryServlet extends HttpServlet {
             
             // Check if can be cancelled
             if (!booking.canBeCancelled()) {
-                request.setAttribute("error", "Không thể hủy đơn đặt vé này. Chỉ có thể hủy các đơn chưa chiếu phim.");
+                request.setAttribute("error", "Không thể yêu cầu hủy đơn đặt vé này. Chỉ có thể hủy các đơn chưa chiếu phim.");
                 doGet(request, response);
                 return;
             }
             
             // Cancel the booking
-            boolean cancelled = bookingDAO.cancelBooking(bookingID);
+            //            boolean cancelled = bookingDAO.cancelBooking(bookingID);
             
-            if (cancelled) {
-                request.setAttribute("message", "Đã hủy đơn đặt vé thành công!");
+            // đổi logic thay vì hủy ngay,thì yêu cầu hoàn tiền
+            boolean requested = bookingDAO.requestRefund(bookingID);
+            if (requested) {
+                request.setAttribute("message", "Đã gửi yêu cầu hủy vé thành công! Vui lòng chờ nhân viên xử lý.");
             } else {
-                request.setAttribute("error", "Có lỗi xảy ra khi hủy đơn đặt vé.");
+                request.setAttribute("error", "Có lỗi xảy ra khi gửi yêu cầu hủy vé.");
             }
         }
         

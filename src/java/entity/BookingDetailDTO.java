@@ -45,6 +45,11 @@ public class BookingDetailDTO {
     //For review
     private int movieID;
     
+    //For refunds-list
+    private String customerName;
+    private String customerEmail;
+    private String customerPhone;
+    
     public BookingDetailDTO() {
         this.seatLabels = new ArrayList<>();
         this.foodItems = new ArrayList<>();
@@ -325,5 +330,33 @@ public class BookingDetailDTO {
     public void setMovieID(int movieID) {
         this.movieID = movieID;
     }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+    
+    
 }
+
+    
 
