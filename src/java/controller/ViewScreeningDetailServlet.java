@@ -74,41 +74,25 @@ public class ViewScreeningDetailServlet extends HttpServlet {
             ScreeningDAO dao = new ScreeningDAO();
 
             Screening detail = dao.getScreeningDetails(screeningID);
-            System.out.println(detail.getBaseTicketPrice());
+
             if (detail == null) {
                 response.sendRedirect("listScreening");
                 return;
             }
-            int capacity = dao.getSeatCapacityByRoomID(detail.getRoomID());
-            int availableSeats = capacity;
-            int soldSeats = 0;
-            int cols = 10; // số ghế mỗi hàng
-            int rows = (int) Math.ceil((double) capacity / cols);
-            String rowLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-            List<String> seatLabels = new ArrayList<>();
-            for (int i = 0; i < rows; i++) {
-                for (int j = 1; j <= cols; j++) {
-                    int seatIndex = i * cols + j;
-                    if (seatIndex > capacity) {
-                        break;
-                    }
-                    String label = rowLabels.charAt(i) + String.valueOf(j);
-                    seatLabels.add(label);
-                }
-            }
-
+            // Định dạng lại ngày chiếu
             String formattedDate = detail.getFormattedScreeningDate();
 
+            // Gửi dữ liệu sang JSP
             request.setAttribute("detail", detail);
-            request.setAttribute("seatLabels", seatLabels);
-            request.setAttribute("rows", rows);
-            request.setAttribute("cols", cols);
-            request.setAttribute("availableSeats", availableSeats);
-            request.setAttribute("soldSeats", soldSeats);
             request.setAttribute("formattedDate", formattedDate);
+
+            // Chuyển tiếp sang trang viewScreening.jsp
             request.getRequestDispatcher("viewScreening.jsp").forward(request, response);
 
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid screening ID: " + e.getMessage());
+            response.sendRedirect("listScreening");
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect("listScreening");

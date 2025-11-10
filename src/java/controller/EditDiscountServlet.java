@@ -115,6 +115,14 @@ public class EditDiscountServlet extends HttpServlet {
             double discountPercentage = Double.parseDouble(request.getParameter("discountPercentage"));
 
             boolean hasError = false;
+             // ✅ Kiểm tra mã khuyến mãi (code)
+        if (code == null || code.trim().isEmpty()) {
+            request.setAttribute("errorCode", "Mã CTKM không được để trống!");
+            hasError = true;
+        } else if (code.length() > 50) {
+            request.setAttribute("errorCode", "Mã CTKM không được vượt quá 50 ký tự!");
+            hasError = true;
+        }
 
             // ✅ Kiểm tra ngày
             if (endDate.isBefore(startDate)) {

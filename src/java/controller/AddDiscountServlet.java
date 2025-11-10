@@ -85,6 +85,11 @@ public class AddDiscountServlet extends HttpServlet {
             Map<String, String> errors = new HashMap<>();
 
             // ==== Kiểm tra hợp lệ ====
+            if (code == null || code.trim().isEmpty()) {
+                errors.put("codeError", "❌ Mã CTKM không được để trống!");
+            } else if (code.length() > 50) {
+                errors.put("codeError", "❌ Mã CTKM không được vượt quá 50 ký tự!");
+            }
             if (endDate.isBefore(startDate)) {
                 errors.put("dateError", "❌ Ngày kết thúc phải sau ngày bắt đầu!");
             }

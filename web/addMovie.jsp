@@ -33,35 +33,50 @@
                             <form action="add" method="post" class="needs-validation" novalidate>
                                 <div class="mb-3">
                                     <label class="form-label">Tiêu đề</label>
-                                    <input type="text" name="title" class="form-control" 
-                                           value="${title}" required>
+                                    <input type="text" name="title" class="form-control" value="${title}" required>
+                                    <c:if test="${not empty errors.errorTitle}">
+                                        <div class="text-danger mt-1">${errors.errorTitle}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Thể loại</label>
-                                    <input type="text" name="genre" class="form-control" 
-                                           value="${genre}" required>
+                                    <input type="text" name="genre" class="form-control" value="${genre}" required>
+                                    <c:if test="${not empty errors.errorGenre}">
+                                        <div class="text-danger mt-1">${errors.errorGenre}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Tóm tắt</label>
                                     <textarea name="summary" class="form-control" rows="4">${summary}</textarea>
+                                    <c:if test="${not empty errors.errorSummary}">
+                                        <div class="text-danger mt-1">${errors.errorSummary}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Trailer URL</label>
-                                    <input type="url" name="trailerURL" class="form-control" 
-                                           value="${trailerURL}">
+                                    <input type="url" name="trailerURL" class="form-control" value="${trailerURL}">
+                                    <c:if test="${not empty errors.errorTrailer}">
+                                        <div class="text-danger mt-1">${errors.errorTrailer}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Dàn diễn viên</label>
                                         <input type="text" name="cast" class="form-control" value="${cast}">
+                                        <c:if test="${not empty errors.errorCast}">
+                                            <div class="text-danger mt-1">${errors.errorCast}</div>
+                                        </c:if>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Đạo diễn</label>
                                         <input type="text" name="director" class="form-control" value="${director}">
+                                        <c:if test="${not empty errors.errorDirector}">
+                                            <div class="text-danger mt-1">${errors.errorDirector}</div>
+                                        </c:if>
                                     </div>
                                 </div>
 
@@ -115,8 +130,10 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Poster URL</label>
-                                    <input type="url" name="posterURL" class="form-control" 
-                                           value="${posterURL}">
+                                    <input type="url" name="posterURL" class="form-control" value="${posterURL}">
+                                    <c:if test="${not empty errors.errorPoster}">
+                                        <div class="text-danger mt-1">${errors.errorPoster}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="d-flex justify-content-between">

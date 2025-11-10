@@ -162,6 +162,7 @@ public class DiscountDAO extends DBContext {
                 d.setStatus(rs.getString("Status"));
                 d.setMaxUsage(rs.getInt("MaxUsage"));
                 d.setUsageCount(rs.getInt("UsageCount"));
+                d.setDiscountPercentage(rs.getDouble("DiscountPercentage"));
                 return d;
             }
         } catch (SQLException e) {

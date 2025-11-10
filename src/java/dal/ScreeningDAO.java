@@ -606,6 +606,29 @@ public class ScreeningDAO extends DBContext {
         }
         return sc;
     }
+      public boolean existsScreening(int movieID, int roomID, LocalDate date, String timeSlot) {
+    String sql = """
+        SELECT COUNT(*) FROM Screenings
+        WHERE MovieID = ? AND RoomID = ? AND ScreeningDate = ? AND Showtime = ?
+    """;
+
+    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+        ps.setInt(1, movieID);
+        ps.setInt(2, roomID);
+        ps.setDate(3, Date.valueOf(date));
+        ps.setString(4, timeSlot);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+}
+
 
 
 }

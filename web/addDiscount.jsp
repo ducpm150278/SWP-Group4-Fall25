@@ -27,7 +27,11 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Mã CTKM (Code)</label>
                                         <input type="text" name="code" value="${code}" class="form-control" required>
+                                        <c:if test="${not empty errors.codeError}">
+                                            <div class="text-danger small mt-1">${errors.codeError}</div>
+                                        </c:if>
                                     </div>
+
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Trạng thái</label>
                                         <select name="status" class="form-select" required>
@@ -41,16 +45,17 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Ngày bắt đầu</label>
-                                        <input type="date" name="startDate" value="${startDate}" class="form-control" required>
+                                        <input type="date" id="startDate" name="startDate" value="${startDate}" class="form-control" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Ngày kết thúc</label>
-                                        <input type="date" name="endDate" value="${endDate}" class="form-control" required>
+                                        <input type="date" id="endDate" name="endDate" value="${endDate}" class="form-control" required>
                                         <c:if test="${not empty errors.dateError}">
                                             <div class="text-danger small mt-1">${errors.dateError}</div>
                                         </c:if>
                                     </div>
                                 </div>
+
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -88,6 +93,12 @@
                 </div>
             </div>
         </div>
+        <script>
+            // Giới hạn ngày bắt đầu và kết thúc chỉ được chọn từ hôm nay trở đi
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("startDate").setAttribute("min", today);
+            document.getElementById("endDate").setAttribute("min", today);
+        </script>
 
     </body>
 </html>

@@ -24,31 +24,49 @@
                                 <div class="mb-3">
                                     <label class="form-label">Tiêu đề</label>
                                     <input type="text" name="title" class="form-control" value="${movie.title}" required>
+                                    <c:if test="${not empty errors.errorTitle}">
+                                        <div class="text-danger mt-1">${errors.errorTitle}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Thể loại</label>
                                     <input type="text" name="genre" class="form-control" value="${movie.genre}" required>
+                                    <c:if test="${not empty errors.errorGenre}">
+                                        <div class="text-danger mt-1">${errors.errorGenre}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Tóm tắt</label>
                                     <textarea name="summary" class="form-control" rows="4">${movie.summary}</textarea>
+                                    <c:if test="${not empty errors.errorSummary}">
+                                        <div class="text-danger mt-1">${errors.errorSummary}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Trailer URL</label>
                                     <input type="text" name="trailerURL" class="form-control" value="${movie.trailerURL}">
+                                    <c:if test="${not empty errors.errorTrailer}">
+                                        <div class="text-danger mt-1">${errors.errorTrailer}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Dàn diễn viên</label>
                                     <input type="text" name="cast" class="form-control" value="${movie.cast}">
+                                    <c:if test="${not empty errors.errorCast}">
+                                        <div class="text-danger mt-1">${errors.errorCast}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Đạo diễn</label>
                                     <input type="text" name="director" class="form-control" value="${movie.director}">
+                                    <c:if test="${not empty errors.errorDirector}">
+                                        <div class="text-danger mt-1">${errors.errorDirector}</div>
+                                    </c:if>
                                 </div>
 
                                 <div class="mb-3">
@@ -76,6 +94,9 @@
                                 <div class="mb-3">
                                     <label class="form-label">Poster URL</label>
                                     <input type="text" name="posterURL" class="form-control" value="${movie.posterURL}">
+                                    <c:if test="${not empty errors.errorPoster}">
+                                        <div class="text-danger mt-1">${errors.errorPoster}</div>
+                                    </c:if>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Ngôn ngữ</label>

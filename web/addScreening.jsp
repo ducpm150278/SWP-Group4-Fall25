@@ -20,7 +20,13 @@
                         <h4 class="mb-0">Thêm lịch chiếu mới</h4>
                     </div>
                     <div class="card-body">
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger">
+                                ${error}
+                            </div>
+                        </c:if>
                         <!-- form -->
+
                         <form action="${pageContext.request.contextPath}/addScreening" method="post" class="row g-3">
 
                             <!-- Cột 1: Tên phim, Rạp chiếu, Tên phòng -->
@@ -198,7 +204,7 @@
                 }
             });
         </script>
-        
+
         <script>
             // Giới hạn ngày chiếu chỉ từ hôm nay trở đi
             const today = new Date().toISOString().split("T")[0];

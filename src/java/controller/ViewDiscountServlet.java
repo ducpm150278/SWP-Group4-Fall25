@@ -72,6 +72,7 @@ public class ViewDiscountServlet extends HttpServlet {
             int discountID = Integer.parseInt(idStr);
             DiscountDAO dao = new DiscountDAO();
             Discount d = dao.getDiscountById(discountID);
+            System.out.println(d.getDiscountPercentage());
 
             if (d == null) {
                 response.sendRedirect("listDiscount");

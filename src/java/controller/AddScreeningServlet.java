@@ -125,13 +125,20 @@ public class AddScreeningServlet extends HttpServlet {
 //            
             // Giá vé (có thể rỗng, mặc định 0)
             double baseTicketPrice = 0.0;
-            String t = request.getParameter("ticketPrice");
+            String t = request.getParameter("baseTicketPrice");
             if (t != null && !t.isBlank()) {
                 baseTicketPrice = Double.parseDouble(t);
             }
 
             // ✅ Tự động lấy sức chứa của phòng (không nhập tay)
             ScreeningDAO dao = new ScreeningDAO();
+            // ✅ KIỂM TRA TRÙNG LỊCH
+            boolean isDuplicate = dao.existsScreening(movieID, roomID, date, timeSlot);
+            if (isDuplicate) {
+                request.setAttribute("error", "❌ Lịch chiếu này đã tồn tại (phim, phòng, ngày, giờ chiếu trùng)!");
+                doGet(request, response);
+                return;
+            }
             int availableSeats = dao.getSeatCapacityByRoomID(roomID);
 
             // Gán dữ liệu vào model

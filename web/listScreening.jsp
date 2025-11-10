@@ -200,13 +200,13 @@
                                         </c:forEach>
                                     </tbody>
                                 </table>
-                                <!-- Phân trang -->
+                                 <!-- Phân trang -->
                                 <div class="d-flex justify-content-center mt-3">
                                     <ul class="pagination">
                                         <c:if test="${currentPage > 1}">
                                             <li class="page-item">
                                                 <a class="page-link"
-                                                   href="listScreening?page=${currentPage - 1}&keyword=${keyword}&from=${from}&to=${to}&status=${status}">
+                                                   href="listScreening?page=${currentPage - 1}&keyword=${keyword}&from=${from}&to=${to}&status=${status}&showtime=${showtime}">
                                                     « Trước
                                                 </a>
                                             </li>
@@ -215,7 +215,7 @@
                                         <c:forEach begin="1" end="${totalPages}" var="i">
                                             <li class="page-item ${i == currentPage ? 'active' : ''}">
                                                 <a class="page-link"
-                                                   href="listScreening?page=${i}&keyword=${keyword}&from=${from}&to=${to}&status=${status}">
+                                                   href="listScreening?page=${i}&keyword=${keyword}&from=${from}&to=${to}&status=${status}&showtime=${showtime}">
                                                     ${i}
                                                 </a>
                                             </li>
@@ -224,7 +224,7 @@
                                         <c:if test="${currentPage < totalPages}">
                                             <li class="page-item">
                                                 <a class="page-link"
-                                                   href="listScreening?page=${currentPage + 1}&keyword=${keyword}&from=${from}&to=${to}&status=${status}">
+                                                   href="listScreening?page=${currentPage + 1}&keyword=${keyword}&from=${from}&to=${to}&status=${status}&showtime=${showtime}">
                                                     Sau »
                                                 </a>
                                             </li>

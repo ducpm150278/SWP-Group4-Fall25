@@ -14,7 +14,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -76,83 +78,124 @@ public class AddMovieServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            // Lấy dữ liệu từ form
-            String title = request.getParameter("title");
-            String genre = request.getParameter("genre");
-            String summary = request.getParameter("summary");
-            String trailerURL = request.getParameter("trailerURL");
-            String cast = request.getParameter("cast");
-            String director = request.getParameter("director");
-            String durationStr = request.getParameter("duration");
-            String releasedDateStr = request.getParameter("releasedDate");
-            String endDateStr = request.getParameter("endDate");
-            String posterURL = request.getParameter("posterURL");
-            String status = request.getParameter("status");
-            String languageID = request.getParameter("languageName");
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        // Lấy dữ liệu từ form
+        String title = request.getParameter("title");
+        String genre = request.getParameter("genre");
+        String summary = request.getParameter("summary");
+        String trailerURL = request.getParameter("trailerURL");
+        String cast = request.getParameter("cast");
+        String director = request.getParameter("director");
+        String durationStr = request.getParameter("duration");
+        String releasedDateStr = request.getParameter("releasedDate");
+        String endDateStr = request.getParameter("endDate");
+        String posterURL = request.getParameter("posterURL");
+        String status = request.getParameter("status");
+        String languageID = request.getParameter("languageName");
 
-            // Giữ lại dữ liệu người dùng nhập
-            request.setAttribute("title", title);
-            request.setAttribute("genre", genre);
-            request.setAttribute("summary", summary);
-            request.setAttribute("trailerURL", trailerURL);
-            request.setAttribute("cast", cast);
-            request.setAttribute("director", director);
-            request.setAttribute("duration", durationStr);
-            request.setAttribute("releasedDate", releasedDateStr);
-            request.setAttribute("endDate", endDateStr);
-            request.setAttribute("posterURL", posterURL);
-            request.setAttribute("status", status);
-            request.setAttribute("selectedLanguage", languageID);
+        // Giữ lại dữ liệu người dùng nhập (để không bị mất form khi lỗi)
+        request.setAttribute("title", title);
+        request.setAttribute("genre", genre);
+        request.setAttribute("summary", summary);
+        request.setAttribute("trailerURL", trailerURL);
+        request.setAttribute("cast", cast);
+        request.setAttribute("director", director);
+        request.setAttribute("duration", durationStr);
+        request.setAttribute("releasedDate", releasedDateStr);
+        request.setAttribute("endDate", endDateStr);
+        request.setAttribute("posterURL", posterURL);
+        request.setAttribute("status", status);
+        request.setAttribute("selectedLanguage", languageID);
 
-            // Kiểm tra duration
-            int duration = Integer.parseInt(durationStr);
-            if (duration <= 0) {
-                request.setAttribute("errorDuration", "Thời lượng phim phải lớn hơn 0!");
-                MovieDAO mvd = new MovieDAO();
-                List<Language> listLanguage = mvd.getAllLanguages();
-                request.setAttribute("listLanguage", listLanguage);
-                request.getRequestDispatcher("addMovie.jsp").forward(request, response);
-                return;
-            }
+        Map<String, String> errors = new HashMap<>();
 
-            // Parse ngày
-            LocalDate releasedDate = LocalDate.parse(releasedDateStr);
-            LocalDate endDate = LocalDate.parse(endDateStr);
+        // ✅ Kiểm tra rỗng và độ dài chuỗi
+        if (title == null || title.trim().isEmpty()) {
+            errors.put("errorTitle", "Tiêu đề không được để trống!");
+        } else if (title.length() > 100) {
+            errors.put("errorTitle", "Tiêu đề không được vượt quá 100 ký tự!");
+        }
 
-            // ngày kết thúc phải sau ngày bắt đầu
-            if (!endDate.isAfter(releasedDate)) {
-                request.setAttribute("errorDate", "Ngày kết thúc phải sau ngày công chiếu!");
-                MovieDAO mvd = new MovieDAO();
-                List<Language> listLanguage = mvd.getAllLanguages();
-                request.setAttribute("listLanguage", listLanguage);
-                request.getRequestDispatcher("addMovie.jsp").forward(request, response);
-                return;
-            }
+        if (genre == null || genre.trim().isEmpty()) {
+            errors.put("errorGenre", "Thể loại không được để trống!");
+        } else if (genre.length() > 100) {
+            errors.put("errorGenre", "Thể loại không được vượt quá 100 ký tự!");
+        }
 
-            int languageId = Integer.parseInt(languageID);
+        if (director == null || director.trim().isEmpty()) {
+            errors.put("errorDirector", "Đạo diễn không được để trống!");
+        } else if (director.length() > 100) {
+            errors.put("errorDirector", "Tên đạo diễn không được vượt quá 100 ký tự!");
+        }
 
-            // Thêm phim
-            MovieDAO dao = new MovieDAO();
+        if (cast == null || cast.trim().isEmpty()) {
+            errors.put("errorCast", "Dàn diễn viên không được để trống!");
+        } else if (cast.length() > 255) {
+            errors.put("errorCast", "Dàn diễn viên không được vượt quá 255 ký tự!");
+        }
 
-            dao.addMovie(title, genre, summary, trailerURL, cast, director, duration, releasedDate, endDate, posterURL, languageId, status);
+        if (posterURL == null || posterURL.trim().isEmpty()) {
+            errors.put("errorPoster", "Poster URL không được để trống!");
+        } else if (posterURL.length() > 255) {
+            errors.put("errorPoster", "Poster URL không được vượt quá 255 ký tự!");
+        }
 
+        if (trailerURL == null || trailerURL.trim().isEmpty()) {
+            errors.put("errorTrailer", "Trailer URL không được để trống!");
+        } else if (trailerURL.length() > 200) {
+            errors.put("errorTrailer", "Trailer URL không được vượt quá 200 ký tự!");
+        }
 
+        if (summary == null || summary.trim().isEmpty()) {
+            errors.put("errorSummary", "Tóm tắt phim không được để trống!");
+        } else if (summary.length() > 500) {
+            errors.put("errorSummary", "Tóm tắt phim không được vượt quá 500 ký tự!");
+        }
 
-            // Thành công → redirect về danh sách
-            response.sendRedirect("list?addSuccess=1");
+        // ✅ Kiểm tra thời lượng
+        int duration = Integer.parseInt(durationStr);
+        if (duration <= 0) {
+            errors.put("errorDuration", "Thời lượng phim phải lớn hơn 0!");
+        }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Có lỗi khi thêm phim!");
+        // ✅ Kiểm tra ngày
+        LocalDate releasedDate = LocalDate.parse(releasedDateStr);
+        LocalDate endDate = LocalDate.parse(endDateStr);
+        if (!endDate.isAfter(releasedDate)) {
+            errors.put("errorDate", "Ngày kết thúc phải sau ngày công chiếu!");
+        }
+
+        // Nếu có lỗi thì quay lại form
+        if (!errors.isEmpty()) {
+            request.setAttribute("errors", errors);
             MovieDAO mvd = new MovieDAO();
             List<Language> listLanguage = mvd.getAllLanguages();
             request.setAttribute("listLanguage", listLanguage);
             request.getRequestDispatcher("addMovie.jsp").forward(request, response);
+            return;
         }
+
+        // ✅ Lưu vào DB
+        int languageId = Integer.parseInt(languageID);
+        MovieDAO dao = new MovieDAO();
+        dao.addMovie(title, genre, summary, trailerURL, cast, director,
+                duration, releasedDate, endDate, posterURL, languageId, status);
+
+        // Thành công → redirect về danh sách
+        response.sendRedirect("list?addSuccess=1");
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        request.setAttribute("error", "Có lỗi khi thêm phim!");
+        MovieDAO mvd = new MovieDAO();
+        List<Language> listLanguage = mvd.getAllLanguages();
+        request.setAttribute("listLanguage", listLanguage);
+        request.getRequestDispatcher("addMovie.jsp").forward(request, response);
     }
+}
+
     /**
      * Returns a short description of the servlet.
      *
