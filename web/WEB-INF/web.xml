@@ -14,6 +14,10 @@
         <servlet-name>ListRefundsServlet</servlet-name>
         <servlet-class>controller.ListRefundsServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TicketCheckInServlet</servlet-name>
+        <servlet-class>controller.TicketCheckInServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ListRefundsServlet</servlet-name>
         <url-pattern>/list-refunds</url-pattern>
@@ -200,6 +204,10 @@
     <servlet-mapping>
         <servlet-name>ViewBookingServlet</servlet-name>
         <url-pattern>/view-booking</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TicketCheckInServlet</servlet-name>
+        <url-pattern>/staff-check-in</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

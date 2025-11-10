@@ -24,7 +24,6 @@ public class ListRefundsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Lấy danh sách các yêu cầu
         List<BookingDetailDTO> refundRequests = bookingDAO.getRefundRequests();
         
         request.setAttribute("refundRequests", refundRequests);
@@ -47,6 +46,6 @@ public class ListRefundsServlet extends HttpServlet {
             request.setAttribute("error", "Đã từ chối hoàn tiền cho đơn " + bookingID);
         }
         
-        doGet(request, response); // Tải lại trang
+        doGet(request, response); 
     }
 }

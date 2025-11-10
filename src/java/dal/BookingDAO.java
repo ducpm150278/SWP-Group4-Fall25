@@ -766,7 +766,7 @@ public class BookingDAO extends DBContext {
                 + "FROM Bookings b "
                 + "JOIN Users u ON b.UserID = u.UserID "
                 + "WHERE b.Status = 'RefundRequested' "
-                + "ORDER BY b.BookingDate ASC"; // Ưu tiên xử lý đơn cũ
+                + "ORDER BY b.BookingDate ASC"; 
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
@@ -777,7 +777,7 @@ public class BookingDAO extends DBContext {
                 detail.setBookingCode(rs.getString("BookingCode"));
                 detail.setBookingDate(rs.getTimestamp("BookingDate").toLocalDateTime());
                 detail.setStatus(rs.getString("Status"));
-                detail.setCustomerName(rs.getString("FullName")); // (Bạn cần thêm setCustomerName vào DTO)
+                detail.setCustomerName(rs.getString("FullName")); 
                 bookingDetails.add(detail);
             }
         } catch (SQLException e) {
@@ -812,67 +812,131 @@ public class BookingDAO extends DBContext {
         }
     }
 
-    public BookingDetailDTO getBookingDetailByID_Staff(int bookingID) {
-        BookingDetailDTO detail = null;
 
-        String sql = "SELECT "
-                + "b.BookingID, b.BookingCode, b.BookingDate, b.Status, b.FinalAmount, b.PaymentMethod, "
-                + "u.FullName AS CustomerName, u.Email AS CustomerEmail, u.PhoneNumber AS CustomerPhone, "
-                + "m.Title AS MovieTitle, "
-                + "c.CinemaName, "
-                + "r.RoomName, "
-                + "s.ScreeningDate, s.Showtime, "
-                + "STRING_AGG(CONCAT(st.SeatRow, st.SeatNumber), ', ') AS SeatLabels "
-                + "FROM Bookings b "
-                + "JOIN Users u ON b.UserID = u.UserID "
-                + "JOIN Screenings s ON b.ScreeningID = s.ScreeningID "
-                + "JOIN Movies m ON s.MovieID = m.MovieID "
-                + "JOIN ScreeningRooms r ON s.RoomID = r.RoomID "
-                + "JOIN Cinemas c ON r.CinemaID = c.CinemaID "
-                + "LEFT JOIN Tickets t ON b.BookingID = t.BookingID " + 
-                "LEFT JOIN Seats st ON t.SeatID = st.SeatID " + 
-                "WHERE b.BookingID = ? "
-                + "GROUP BY b.BookingID, b.BookingCode, b.BookingDate, b.Status, b.FinalAmount, b.PaymentMethod, " +
-                "u.FullName, u.Email, u.PhoneNumber, m.Title, c.CinemaName, r.RoomName, s.ScreeningDate, s.Showtime";
+public BookingDetailDTO getBookingDetailByID_Staff(int bookingID) {
+    BookingDetailDTO detail = null;
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    String sql = "SELECT "
+            + "b.BookingID, b.BookingCode, b.BookingDate, b.Status, b.FinalAmount, b.PaymentMethod, b.PaymentStatus, "
+            + "u.FullName AS CustomerName, u.Email AS CustomerEmail, u.PhoneNumber AS CustomerPhone, "
+            + "m.MovieID, m.Title AS MovieTitle, "
+            + "c.CinemaName, "
+            + "r.RoomName, "
+            + "s.ScreeningDate, s.Showtime, "
+            + "STRING_AGG(CONCAT(st.SeatRow, st.SeatNumber), ', ') AS SeatLabels "
+            + "FROM Bookings b "
+            + "JOIN Users u ON b.UserID = u.UserID "
+            + "JOIN Screenings s ON b.ScreeningID = s.ScreeningID "
+            + "JOIN Movies m ON s.MovieID = m.MovieID "
+            + "JOIN ScreeningRooms r ON s.RoomID = r.RoomID "
+            + "JOIN Cinemas c ON r.CinemaID = c.CinemaID "
+            + "LEFT JOIN Tickets t ON b.BookingID = t.BookingID "
+            + "LEFT JOIN Seats st ON t.SeatID = st.SeatID "
+            + "WHERE b.BookingID = ? "
+            + "GROUP BY b.BookingID, b.BookingCode, b.BookingDate, b.Status, b.FinalAmount, b.PaymentMethod, b.PaymentStatus, "
+            + "u.FullName, u.Email, u.PhoneNumber, m.MovieID, m.Title, c.CinemaName, r.RoomName, s.ScreeningDate, s.Showtime";
 
-            ps.setInt(1, bookingID);
-            ResultSet rs = ps.executeQuery();
+    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            if (rs.next()) {
-                detail = new BookingDetailDTO();
-                detail.setBookingID(rs.getInt("BookingID"));
-                detail.setBookingCode(rs.getString("BookingCode"));
-                detail.setBookingDate(rs.getTimestamp("BookingDate").toLocalDateTime());
-                detail.setFinalAmount(rs.getDouble("FinalAmount"));
-                detail.setCustomerName(rs.getString("CustomerName"));
-                detail.setCustomerEmail(rs.getString("CustomerEmail"));
-                detail.setCustomerPhone(rs.getString("CustomerPhone"));
-                detail.setMovieTitle(rs.getString("MovieTitle"));
-                detail.setCinemaName(rs.getString("CinemaName"));
-                detail.setRoomName(rs.getString("RoomName"));
+        ps.setInt(1, bookingID);
+        ResultSet rs = ps.executeQuery();
 
-                String seatLabelsStr = rs.getString("SeatLabels");
-                if (seatLabelsStr != null) {
-                    detail.setSeatLabels(java.util.Arrays.asList(seatLabelsStr.split(", ")));
-                } else {
-                    detail.setSeatLabels(new java.util.ArrayList<>());
-                }
+        if (rs.next()) {
+            detail = new BookingDetailDTO();
+            detail.setBookingID(rs.getInt("BookingID"));
+            detail.setBookingCode(rs.getString("BookingCode"));
+            detail.setBookingDate(rs.getTimestamp("BookingDate").toLocalDateTime());
+            detail.setFinalAmount(rs.getDouble("FinalAmount"));
+            detail.setStatus(rs.getString("Status"));
+            detail.setPaymentMethod(rs.getString("PaymentMethod"));
+            detail.setPaymentStatus(rs.getString("PaymentStatus"));
+            detail.setCustomerName(rs.getString("CustomerName"));
+            detail.setCustomerEmail(rs.getString("CustomerEmail"));
+            detail.setCustomerPhone(rs.getString("CustomerPhone"));
+            detail.setMovieTitle(rs.getString("MovieTitle"));
+            
+            detail.setMovieID(rs.getInt("MovieID"));
+            
+            detail.setCinemaName(rs.getString("CinemaName"));
+            detail.setRoomName(rs.getString("RoomName"));
 
-                java.sql.Date screeningDate = rs.getDate("ScreeningDate");
-                String showtime = rs.getString("Showtime");
-                if (screeningDate != null && showtime != null) {
-                    LocalDateTime[] times = parseShowtime(screeningDate.toLocalDate(), showtime);
-                    detail.setScreeningTime(times[0]);
-                }
+            String seatLabelsStr = rs.getString("SeatLabels");
+            if (seatLabelsStr != null) {
+                detail.setSeatLabels(java.util.Arrays.asList(seatLabelsStr.split(", ")));
+            } else {
+                detail.setSeatLabels(new java.util.ArrayList<>());
             }
+            detail.setTicketCount(detail.getSeatLabels().size());
 
-        } catch (SQLException e) {
-            System.err.println("Error getBookingDetailByID_Staff: " + e.getMessage());
-            e.printStackTrace();
+            java.sql.Date screeningDate = rs.getDate("ScreeningDate");
+            String showtime = rs.getString("Showtime");
+            if (screeningDate != null && showtime != null) {
+                LocalDateTime[] times = parseShowtime(screeningDate.toLocalDate(), showtime);
+                detail.setScreeningTime(times[0]);
+            }
         }
 
-        return detail;
+    } catch (SQLException e) {
+        System.err.println("Error getBookingDetailByID_Staff: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    return detail;
+}
+    
+    public List<BookingDetailDTO> findBookingsForCheckIn(String searchTerm) {
+        List<BookingDetailDTO> results = new ArrayList<>();
+        String sql = "SELECT " +
+                 "b.BookingID " + 
+                 "FROM Bookings b " +
+                 "JOIN Users u ON b.UserID = u.UserID " +
+                 "WHERE (b.BookingCode = ? OR u.PhoneNumber = ? OR u.Email = ?) " +
+                 "AND b.Status IN ('Pending', 'Confirmed') " + 
+                 "ORDER BY b.BookingDate ASC"; 
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, searchTerm);
+            ps.setString(2, searchTerm);
+            ps.setString(3, searchTerm);
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                int bookingID = rs.getInt("BookingID");
+                BookingDetailDTO detail = this.getBookingDetailByID_Staff(bookingID);
+                if (detail != null) {
+                    results.add(detail);
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error findBookingsForCheckIn: " + e.getMessage());
+        }
+        
+        return results;
+    }
+
+    public boolean confirmAndCompleteBooking(int bookingID, String paymentMethod) {
+        String sql = "UPDATE Bookings " +
+                     "SET Status = 'Completed', " +
+                     "    PaymentStatus = 'Completed', " +
+                     "    PaymentMethod = ?, " +
+                     "    PaymentDate = GETDATE() " +
+                     "WHERE BookingID = ? AND Status = 'Pending'"; 
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, paymentMethod);
+            ps.setInt(2, bookingID);
+            
+            return ps.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("Error confirmAndCompleteBooking: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }

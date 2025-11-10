@@ -114,6 +114,13 @@
                                 Quản lý đồ ăn
                             </a>
 
+                            <li class="nav-item">
+                                <a class="nav-link ${activePage == 'staff-check-in' ? 'active' : ''}" href="${pageContext.request.contextPath}/staff-check-in">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-qrcode"></i></div>
+                                    Quản lý vé
+                                </a>
+                            </li>    
+
                             <a class="nav-link ${activePage == 'list-refunds' ? 'active' : ''}" href="${pageContext.request.contextPath}/list-refunds">
                                 <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
                                 Quản lý huỷ vé

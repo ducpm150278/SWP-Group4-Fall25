@@ -44,6 +44,8 @@ public class BookingDetailDTO {
     
     //For review
     private int movieID;
+    
+    //For refunds-list
     private String customerName;
     private String customerEmail;
     private String customerPhone;
