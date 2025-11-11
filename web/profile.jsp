@@ -152,9 +152,26 @@
                         </div>
                     </form>
                 </div>
+            </div>                   
+                                   
+        <div class="card-cinema" style="margin-top: 30px;">
+            <div class="card-header-cinema">
+                <h1><i class="fas fa-headset"></i> Trung Tâm Hỗ Trợ</h1>
+                <p>Gặp sự cố? Gửi yêu cầu cho chúng tôi.</p>
+            </div>
+            <div style="padding: 30px; text-align: center;">
+                <p style="color: var(--text-secondary); margin-bottom: 25px;">
+                    Bạn có thể xem lại lịch sử các yêu cầu hỗ trợ của mình, 
+                    hoặc tạo một yêu cầu hỗ trợ mới nếu bạn gặp vấn đề
+                    về thanh toán, đặt vé, hoặc lỗi kỹ thuật.
+                </p>
+                <a href="${pageContext.request.contextPath}/support" class="btn-primary-cinema btn-cinema" style="font-size: 1rem; padding: 12px 25px;">
+                    <i class="fas fa-ticket-alt"></i> Tới Trung Tâm Hỗ Trợ
+                </a>
             </div>
         </div>
-
+        </div>
+                                   
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

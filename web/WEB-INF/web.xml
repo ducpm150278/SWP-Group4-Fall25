@@ -18,6 +18,18 @@
         <servlet-name>TicketCheckInServlet</servlet-name>
         <servlet-class>controller.TicketCheckInServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SupportServlet</servlet-name>
+        <servlet-class>controller.SupportServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StaffSupportServlet</servlet-name>
+        <servlet-class>controller.StaffSupportServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StaffSupportDetailServlet</servlet-name>
+        <servlet-class>controller.StaffSupportDetailServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ListRefundsServlet</servlet-name>
         <url-pattern>/list-refunds</url-pattern>
@@ -208,6 +220,18 @@
     <servlet-mapping>
         <servlet-name>TicketCheckInServlet</servlet-name>
         <url-pattern>/staff-check-in</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SupportServlet</servlet-name>
+        <url-pattern>/support</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffSupportServlet</servlet-name>
+        <url-pattern>/staff-support</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffSupportDetailServlet</servlet-name>
+        <url-pattern>/staff-support-detail</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

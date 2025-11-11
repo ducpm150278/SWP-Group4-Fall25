@@ -121,11 +121,20 @@
                                 </a>
                             </li>    
 
-                            <a class="nav-link ${activePage == 'list-refunds' ? 'active' : ''}" href="${pageContext.request.contextPath}/list-refunds">
-                                <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                                Quản lý huỷ vé
-                            </a>
+                            <li class="nav-item">
+                                <a class="nav-link ${activePage == 'list-refunds' ? 'active' : ''}" href="${pageContext.request.contextPath}/list-refunds">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                                    Quản lý huỷ vé
+                                </a>
+                            </li>
 
+                            <li class="nav-item"> 
+                                <a class="nav-link ${activePage == 'support-tickets' ? 'active' : ''}" href="${pageContext.request.contextPath}/staff-support">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-headset"></i></div>
+                                    Hỗ trợ khách hàng
+                                </a>
+                            </li>
+                            
                             <!-- Tài khoản -->
                             <div class="sb-sidenav-menu-heading">Tài khoản</div>
                             <a class="nav-link text-danger" href="logout">
