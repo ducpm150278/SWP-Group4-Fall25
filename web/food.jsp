@@ -5,6 +5,34 @@
 <%
     // This would typically come from your servlet
     List<Food> foodList = (List<Food>) request.getAttribute("foodList");
+    
+    // Pagination parameters
+    int currentPage = 1;
+    int pageSize = 10;
+    int totalItems = foodList != null ? foodList.size() : 0;
+    int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+    
+    // Get current page from request parameter
+    String pageParam = request.getParameter("page");
+    if (pageParam != null && !pageParam.isEmpty()) {
+        try {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+        } catch (NumberFormatException e) {
+            currentPage = 1;
+        }
+    }
+    
+    // Calculate start and end index for current page
+    int startIndex = (currentPage - 1) * pageSize;
+    int endIndex = Math.min(startIndex + pageSize, totalItems);
+    
+    // Get sublist for current page
+    List<Food> currentPageFoodList = null;
+    if (foodList != null && !foodList.isEmpty()) {
+        currentPageFoodList = foodList.subList(startIndex, endIndex);
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -286,6 +314,14 @@
                 background-color: #2980b9;
             }
 
+            .action-btn.view {
+                background-color: #3498db;
+            }
+
+            .action-btn.view:hover {
+                background-color: #2980b9;
+            }
+
             .action-btn.edit {
                 background-color: #f39c12;
             }
@@ -305,6 +341,180 @@
             .price {
                 font-weight: 600;
                 color: #2c3e50;
+            }
+
+            .food-image {
+                width: 50px;
+                height: 50px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+            }
+
+            .food-image-placeholder {
+                width: 50px;
+                height: 50px;
+                background-color: #f8f9fa;
+                border: 1px dashed #ddd;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6c757d;
+                font-size: 0.7rem;
+                text-align: center;
+            }
+
+            /* Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 5% auto;
+                padding: 25px;
+                border: 1px solid #888;
+                width: 50%;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .view-modal-content {
+                max-width: 600px;
+            }
+
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover {
+                color: black;
+            }
+
+            .modal input, .modal select, .modal textarea {
+                width: 100%;
+                padding: 10px;
+                margin: 8px 0;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+
+            .modal label {
+                font-weight: 500;
+                color: #2c3e50;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            /* View Modal Specific Styles */
+            .view-field {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .view-label {
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 5px;
+            }
+
+            .view-value {
+                color: #555;
+            }
+
+            .modal-actions {
+                display: flex;
+                gap: 10px;
+                margin-top: 20px;
+                justify-content: flex-end;
+            }
+
+            /* Pagination Styles - Updated to match image */
+            .pagination-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+                padding: 20px;
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .pagination-info {
+                color: #6c757d;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            .pagination {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .page-btn {
+                padding: 8px 16px;
+                border: 1px solid #dee2e6;
+                background-color: white;
+                color: #3498db;
+                cursor: pointer;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                transition: all 0.3s;
+                min-width: 40px;
+                text-align: center;
+            }
+
+            .page-btn:hover {
+                background-color: #e9ecef;
+                border-color: #3498db;
+            }
+
+            .page-btn.active {
+                background-color: #3498db;
+                color: white;
+                border-color: #3498db;
+            }
+
+            .page-btn.disabled {
+                color: #6c757d;
+                cursor: not-allowed;
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+
+            .page-btn.disabled:hover {
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+
+            .page-dots {
+                padding: 8px 5px;
+                color: #6c757d;
+                font-weight: 500;
             }
 
             /* Responsive Design */
@@ -359,62 +569,28 @@
                 .filter-container select {
                     width: 100%;
                 }
-            }
 
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 1000;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.5);
-            }
+                .modal-content {
+                    width: 90%;
+                    margin: 10% auto;
+                }
 
-            .modal-content {
-                background-color: #fefefe;
-                margin: 5% auto;
-                padding: 25px;
-                border: 1px solid #888;
-                width: 50%;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                max-height: 80vh;
-                overflow-y: auto;
-            }
+                .food-image, .food-image-placeholder {
+                    width: 40px;
+                    height: 40px;
+                }
 
-            .close {
-                color: #aaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-                cursor: pointer;
-            }
+                .pagination-container {
+                    flex-direction: column;
+                    gap: 15px;
+                    align-items: stretch;
+                    text-align: center;
+                }
 
-            .close:hover {
-                color: black;
-            }
-
-            .modal input, .modal select, .modal textarea {
-                width: 100%;
-                padding: 10px;
-                margin: 8px 0;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                font-size: 14px;
-                box-sizing: border-box;
-            }
-
-            .modal label {
-                font-weight: 500;
-                color: #2c3e50;
-                display: block;
-                margin-bottom: 5px;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
+                .pagination {
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
             }
         </style>
     </head>
@@ -469,7 +645,6 @@
                             <option value="category:Snack">Category: Snack</option>
                             <option value="category:Drink">Category: Drink</option>
                             <option value="category:Dessert">Category: Dessert</option>
-                            <option value="category:Combo">Category: Combo</option>
                             <option value="status:available">Status: Available</option>
                             <option value="status:unavailable">Status: Unavailable</option>
                         </select>
@@ -486,6 +661,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Image</th>
                             <th>Food Name</th>
                             <th>Description</th>
                             <th>Type</th>
@@ -495,12 +671,22 @@
                         </tr>
                     </thead>
                     <tbody id="foodTableBody">
-                        <% if (foodList != null && !foodList.isEmpty()) { 
-                            for (Food food : foodList) { 
+                        <% if (currentPageFoodList != null && !currentPageFoodList.isEmpty()) { 
+                            for (Food food : currentPageFoodList) { 
                                 String foodTypeClass = food.getFoodType() != null ? food.getFoodType().toLowerCase() : "snack";
+                                String imageUrl = food.getImageURL() != null && !food.getImageURL().isEmpty() ? food.getImageURL() : null;
                         %>
-                        <tr>
+                        <tr data-food-id="<%= food.getFoodID() != null ? food.getFoodID() : 0 %>">
                             <td><%= food.getFoodID() != null ? food.getFoodID() : "N/A" %></td>
+                            <td>
+                                <% if (imageUrl != null) { %>
+                                <img src="<%= imageUrl %>" alt="<%= food.getFoodName() %>" class="food-image" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="food-image-placeholder" style="display: none;">No Image</div>
+                                <% } else { %>
+                                <div class="food-image-placeholder">No Image</div>
+                                <% } %>
+                            </td>
                             <td><%= food.getFoodName() != null ? food.getFoodName() : "N/A" %></td>
                             <td><%= food.getDescription() != null ? food.getDescription() : "N/A" %></td>
                             <td>
@@ -515,8 +701,8 @@
                                 </span>
                             </td>
                             <td>
-                                <button class="action-btn edit" onclick="editFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
-                                    Edit
+                                <button class="action-btn view" onclick="viewFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
+                                    View
                                 </button>
                                 <button class="action-btn delete" onclick="deleteFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
                                     Delete
@@ -524,11 +710,15 @@
                             </td>
                         </tr>
                         <% } 
-    } else { %>
+                    } else { %>
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px;">
+                            <td colspan="8" style="text-align: center; padding: 40px;">
                                 <div style="color: #7f8c8d; font-size: 1.1rem;">
+                                    <% if (foodList != null && !foodList.isEmpty()) { %>
+                                    No food items found on this page.
+                                    <% } else { %>
                                     No food items found.
+                                    <% } %>
                                 </div>
                             </td>
                         </tr>
@@ -536,7 +726,61 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Controls - Separate container like in the image -->
+            <% if (totalPages > 0) { %>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> entries
+                </div>
+                <div class="pagination">
+                    <%-- Previous button --%>
+                    <% if (currentPage > 1) { %>
+                    <button class="page-btn" onclick="goToPage(<%= currentPage - 1 %>)">
+                        ‹
+                    </button>
+                    <% } else { %>
+                    <button class="page-btn disabled">‹</button>
+                    <% } %>
+
+                    <%-- Page numbers --%>
+                    <% 
+                        int startPage = Math.max(1, currentPage - 1);
+                        int endPage = Math.min(totalPages, currentPage + 1);
+                    
+                        // Always show first page
+                        if (startPage > 1) { 
+                    %>
+                    <button class="page-btn <%= 1 == currentPage ? "active" : "" %>" onclick="goToPage(1)">1</button>
+                    <% if (startPage > 2) { %>
+                    <span class="page-dots">...</span>
+                    <% } %>
+                    <% } %>
+
+                    <% for (int i = startPage; i <= endPage; i++) { %>
+                    <button class="page-btn <%= i == currentPage ? "active" : "" %>" onclick="goToPage(<%= i %>)"><%= i %></button>
+                    <% } %>
+
+                    <%-- Always show last page if needed --%>
+                    <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                    <span class="page-dots">...</span>
+                    <% } %>
+                    <button class="page-btn <%= totalPages == currentPage ? "active" : "" %>" onclick="goToPage(<%= totalPages %>)"><%= totalPages %></button>
+                    <% } %>
+
+                    <%-- Next button --%>
+                    <% if (currentPage < totalPages) { %>
+                    <button class="page-btn" onclick="goToPage(<%= currentPage + 1 %>)">›</button>
+                    <% } else { %>
+                    <button class="page-btn disabled">›</button>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
         </div>
+
+        <!-- Modal Add Food -->
         <div id="addFoodModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeAddFoodModal()">&times;</span>
@@ -565,7 +809,6 @@
                             <option value="Snack">Snack</option>
                             <option value="Drink">Drink</option>
                             <option value="Dessert">Dessert</option>
-                            <option value="Combo">Combo</option>
                         </select>
                     </div>
 
@@ -589,6 +832,51 @@
                 </form>
             </div>
         </div>
+
+        <!-- Modal View Food -->
+        <div id="viewFoodModal" class="modal">
+            <div class="modal-content view-modal-content">
+                <span class="close" onclick="closeViewFoodModal()">&times;</span>
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">Food Details</h3>
+
+                <div class="view-field">
+                    <div class="view-label">Food ID</div>
+                    <div class="view-value" id="viewFoodId">N/A</div>
+                </div>
+
+                <div class="view-field">
+                    <div class="view-label">Food Name</div>
+                    <div class="view-value" id="viewFoodName">N/A</div>
+                </div>
+
+                <div class="view-field">
+                    <div class="view-label">Description</div>
+                    <div class="view-value" id="viewDescription">N/A</div>
+                </div>
+
+                <div class="view-field">
+                    <div class="view-label">Price</div>
+                    <div class="view-value" id="viewPrice">N/A</div>
+                </div>
+
+                <div class="view-field">
+                    <div class="view-label">Food Type</div>
+                    <div class="view-value" id="viewFoodType">N/A</div>
+                </div>
+
+                <div class="view-field">
+                    <div class="view-label">Status</div>
+                    <div class="view-value" id="viewStatus">N/A</div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary" id="editFoodBtn">Edit</button>
+                    <button type="button" class="btn" onclick="closeViewFoodModal()" 
+                            style="background-color: #95a5a6; color: white;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <script>
             // Check for success/error messages from URL parameters
             window.addEventListener('DOMContentLoaded', function () {
@@ -598,14 +886,38 @@
 
                 if (success) {
                     alert('Operation successful: ' + success);
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    // Remove success parameter from URL
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
                 }
 
                 if (error) {
                     alert('Operation failed: ' + error);
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    // Remove error parameter from URL
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
                 }
+
+                // Setup event listener for edit button
+                document.getElementById('editFoodBtn').addEventListener('click', function () {
+                    if (currentFoodId !== 0) {
+                        // Redirect to edit page through servlet
+                        window.location.href = 'food-management?action=edit&id=' + currentFoodId;
+                    } else {
+                        alert('No food item selected');
+                    }
+                });
             });
+
+            // Global variable to store current food ID
+            let currentFoodId = 0;
+
+            // Pagination function
+            function goToPage(page) {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('page', page);
+                window.location.href = window.location.pathname + '?' + urlParams.toString();
+            }
 
             // Modal functions
             function openAddFoodModal() {
@@ -616,11 +928,67 @@
                 document.getElementById('addFoodModal').style.display = 'none';
             }
 
+            // View Food Modal functions
+            function viewFood(foodId) {
+                if (foodId === 0) {
+                    alert('Invalid food ID');
+                    return;
+                }
+
+                currentFoodId = foodId;
+
+                const allRows = document.querySelectorAll('#foodTableBody tr');
+                let targetRow = null;
+
+                for (let row of allRows) {
+                    const rowFoodId = row.getAttribute('data-food-id');
+                    if (rowFoodId && parseInt(rowFoodId) === foodId) {
+                        targetRow = row;
+                        break;
+                    }
+                }
+
+                if (!targetRow) {
+                    alert('Food item not found in table. FoodId: ' + foodId);
+                    return;
+                }
+
+                const cells = targetRow.cells;
+                const foodData = {
+                    id: cells[0].textContent,
+                    name: cells[2].textContent,
+                    description: cells[3].textContent,
+                    type: cells[4].querySelector('.food-type').textContent,
+                    price: cells[5].textContent,
+                    status: cells[6].querySelector('.status').textContent
+                };
+
+                document.getElementById('viewFoodId').textContent = foodData.id;
+                document.getElementById('viewFoodName').textContent = foodData.name;
+                document.getElementById('viewDescription').textContent = foodData.description;
+                document.getElementById('viewPrice').textContent = foodData.price;
+                document.getElementById('viewFoodType').textContent = foodData.type;
+                document.getElementById('viewStatus').textContent = foodData.status;
+
+                document.getElementById('viewFoodModal').style.display = 'block';
+            }
+
+            function closeViewFoodModal() {
+                document.getElementById('viewFoodModal').style.display = 'none';
+                currentFoodId = 0;
+            }
+
             // Close modal when clicking outside
             window.onclick = function (event) {
-                const modal = document.getElementById('addFoodModal');
-                if (event.target === modal) {
+                const addModal = document.getElementById('addFoodModal');
+                const viewModal = document.getElementById('viewFoodModal');
+
+                if (event.target === addModal) {
                     closeAddFoodModal();
+                }
+
+                if (event.target === viewModal) {
+                    closeViewFoodModal();
                 }
             }
 
@@ -645,21 +1013,19 @@
                 const rows = document.querySelectorAll('#foodTableBody tr');
 
                 rows.forEach(row => {
-                    if (row.cells.length < 6)
+                    if (row.cells.length < 7)
                         return;
 
-                    const foodName = row.cells[1].textContent.toLowerCase();
-                    const description = row.cells[2].textContent.toLowerCase();
-                    const foodType = row.cells[3].textContent.toLowerCase();
-                    const status = row.cells[5].textContent.toLowerCase();
+                    const foodName = row.cells[2].textContent.toLowerCase();
+                    const description = row.cells[3].textContent.toLowerCase();
+                    const foodType = row.cells[4].textContent.toLowerCase();
+                    const status = row.cells[6].textContent.toLowerCase();
 
-                    // Check search term
                     const matchesSearch = searchTerm === '' ||
                             foodName.includes(searchTerm) ||
                             description.includes(searchTerm) ||
                             foodType.includes(searchTerm);
 
-                    // Check filter
                     let matchesFilter = true;
                     if (filterValue !== 'all') {
                         const [filterType, filterValueText] = filterValue.split(':');
@@ -671,22 +1037,8 @@
                         }
                     }
 
-                    // Show/hide row based on both conditions
-                    if (matchesSearch && matchesFilter) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
                 });
-            }
-
-            function editFood(foodId) {
-                if (foodId === 0) {
-                    alert('Invalid food ID');
-                    return;
-                }
-                // Sửa thành: gửi qua servlet
-                window.location.href = 'food-management?action=getById&id=' + foodId;
             }
 
             function deleteFood(foodId) {
@@ -704,15 +1056,15 @@
                     })
                             .then(response => {
                                 if (response.ok) {
+                                    alert('Food item deleted successfully!');
                                     location.reload();
                                 } else {
-                                    response.text().then(text => {
-                                        alert('Error deleting food item: ' + text);
+                                    return response.text().then(text => {
+                                        throw new Error(text || 'Unknown error occurred');
                                     });
                                 }
                             })
                             .catch(error => {
-                                console.error('Error:', error);
                                 alert('Error deleting food item: ' + error.message);
                             });
                 }

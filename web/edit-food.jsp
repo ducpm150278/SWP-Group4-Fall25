@@ -267,7 +267,6 @@
                     <option value="Snack" <%= "Snack".equals(food.getFoodType()) ? "selected" : "" %>>Snack</option>
                     <option value="Drink" <%= "Drink".equals(food.getFoodType()) ? "selected" : "" %>>Drink</option>
                     <option value="Dessert" <%= "Dessert".equals(food.getFoodType()) ? "selected" : "" %>>Dessert</option>
-                    <option value="Combo" <%= "Combo".equals(food.getFoodType()) ? "selected" : "" %>>Combo</option>
                 </select>
             </div>
 
