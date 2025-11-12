@@ -269,14 +269,19 @@ public class BookingPaymentServlet extends HttpServlet {
         
         // Calculate final amount
         bookingSession.calculateTotals();
+        // totalAmount = ticketSubtotal + foodSubtotal (before discount)
         double totalAmount = bookingSession.getTotalAmount();
+        // finalAmount = totalAmount - discountAmount (after discount) - this is what customer pays
+        double finalAmount = totalAmount - bookingSession.getDiscountAmount();
         
         System.out.println("=== Payment Submission ===");
         System.out.println("Session ID: " + request.getSession().getId());
         System.out.println("Selected Combos: " + bookingSession.getSelectedCombos());
         System.out.println("Selected Foods: " + bookingSession.getSelectedFoods());
         System.out.println("Food Subtotal: " + bookingSession.getFoodSubtotal());
-        System.out.println("Total Amount: " + totalAmount);
+        System.out.println("Total Amount (before discount): " + totalAmount);
+        System.out.println("Discount Amount: " + bookingSession.getDiscountAmount());
+        System.out.println("Final Amount (to pay): " + finalAmount);
         
         // Generate order ID
         String orderID = VNPayUtils.generateTxnRef();
@@ -293,9 +298,10 @@ public class BookingPaymentServlet extends HttpServlet {
         
         try {
             // Create VNPay payment URL with dynamic return URL
+            // Send finalAmount (after discount) to VNPay as this is what customer actually pays
             Map<String, String> vnpParams = VNPayUtils.createPaymentParams(
                 orderID,
-                (long) totalAmount,
+                (long) finalAmount,
                 orderInfo,
                 ipAddress,
                 request

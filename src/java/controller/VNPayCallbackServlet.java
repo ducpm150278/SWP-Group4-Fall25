@@ -190,8 +190,12 @@ public class VNPayCallbackServlet extends HttpServlet {
             // Step 1: Create main Booking record
             System.out.println("\n=== Step 1: Creating Booking Record ===");
             String bookingCode = bookingDAO.generateBookingCode();
-            double totalAmount = bookingSession.getTotalAmount();
+            // Ensure totals are calculated correctly
+            bookingSession.calculateTotals();
+            // totalAmount = ticketSubtotal + foodSubtotal (before discount)
+            double totalAmount = bookingSession.getTicketSubtotal() + bookingSession.getFoodSubtotal();
             double discountAmount = bookingSession.getDiscountAmount();
+            // finalAmount = totalAmount - discountAmount (after discount)
             double finalAmount = totalAmount - discountAmount;
             
             System.out.println("Booking Code: " + bookingCode);

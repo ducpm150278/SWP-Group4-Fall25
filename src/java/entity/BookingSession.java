@@ -214,11 +214,14 @@ public class BookingSession implements Serializable {
      * Calculate total amount based on existing subtotals
      * Note: ticketSubtotal should be set by BookingSeatSelectionServlet
      * to account for different seat types (VIP, Couple, etc.)
+     * totalAmount = ticketSubtotal + foodSubtotal (before discount)
+     * finalAmount = totalAmount - discountAmount (calculated separately)
      */
     public void calculateTotals() {
         // Do NOT recalculate ticketSubtotal - it's already set correctly
         // with seat type multipliers in BookingSeatSelectionServlet
-        this.totalAmount = this.ticketSubtotal + this.foodSubtotal - this.discountAmount;
+        // totalAmount should be BEFORE discount, discount is applied when calculating finalAmount
+        this.totalAmount = this.ticketSubtotal + this.foodSubtotal;
     }
     
     public boolean isExpired() {

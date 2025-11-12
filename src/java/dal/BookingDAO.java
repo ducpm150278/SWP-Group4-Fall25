@@ -421,6 +421,16 @@ public class BookingDAO extends DBContext {
                 }
                 detail.setFoodSubtotal(foodSubtotal);
 
+                // Recalculate totalAmount from actual ticket and food prices to ensure accuracy
+                // totalAmount should be ticketSubtotal + foodSubtotal (before discount)
+                double recalculatedTotalAmount = ticketSubtotal + foodSubtotal;
+                detail.setTotalAmount(recalculatedTotalAmount);
+                
+                // Recalculate finalAmount to ensure it's correct
+                // finalAmount = totalAmount - discountAmount
+                double recalculatedFinalAmount = recalculatedTotalAmount - detail.getDiscountAmount();
+                detail.setFinalAmount(recalculatedFinalAmount);
+
                 bookingDetails.add(detail);
             }
 
