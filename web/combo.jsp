@@ -707,6 +707,114 @@
                     align-self: flex-end;
                 }
             }
+
+            .combo-image {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+            }
+
+            .combo-image-placeholder {
+                width: 60px;
+                height: 60px;
+                background-color: #f5f5f5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                color: #999;
+                font-size: 0.8rem;
+                text-align: center;
+            }
+
+            /* Image URL Styles */
+            #viewImageUrl {
+                word-break: break-all;
+                background-color: #f8f9fa;
+                padding: 8px 12px;
+                border-radius: 4px;
+                border: 1px solid #e9ecef;
+                font-family: 'Courier New', monospace;
+                font-size: 0.85rem;
+                color: #2c3e50;
+                max-height: 80px;
+                overflow-y: auto;
+                transition: all 0.3s ease;
+            }
+
+            #viewImageUrl:hover {
+                background-color: #e9ecef;
+                border-color: #3498db;
+            }
+
+            /* Food List Styles */
+            .food-list {
+                margin-top: 10px;
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #e9ecef;
+                border-radius: 4px;
+                padding: 10px;
+                background-color: #f8f9fa;
+            }
+
+            /* Responsive Design for Modal */
+            @media (max-width: 1024px) {
+                .view-modal-columns {
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .view-column-left,
+                .view-column-right {
+                    flex: 1;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .view-modal-columns {
+                    gap: 15px;
+                }
+
+                #viewImageUrl {
+                    font-size: 0.8rem;
+                    max-height: 60px;
+                }
+            }
+
+            #copyNotification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 6px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                transition: all 0.3s ease;
+                transform: translateX(100%);
+            }
+
+            /* Image URL Hover Effects */
+            #viewImageUrl[style*="cursor: pointer"]:hover {
+                background-color: #3498db !important;
+                color: white !important;
+                border-color: #2980b9 !important;
+            }
+
+            /* Loading States */
+            .food-list .no-food {
+                text-align: center;
+                color: #6c757d;
+                font-style: italic;
+                padding: 30px;
+                background-color: #f8f9fa;
+                border-radius: 4px;
+            }
         </style>
     </head>
     <body>
@@ -775,6 +883,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Combo Image</th> 
                             <th>Combo Name</th>
                             <th>Description</th>
                             <th>Prices</th>
@@ -792,6 +901,17 @@
                         %>
                         <tr data-combo-id="<%= combo.getComboID() != null ? combo.getComboID() : 0 %>">
                             <td><%= combo.getComboID() != null ? combo.getComboID() : "N/A" %></td>
+                            <td>
+                                <% if (combo.getComboImage() != null && !combo.getComboImage().isEmpty()) { %>
+                                <img src="<%= combo.getComboImage() %>" 
+                                     alt="<%= combo.getComboName() != null ? combo.getComboName() : "Combo Image" %>" 
+                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                <% } else { %>
+                                <div style="width: 60px; height: 60px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #ddd; color: #999;">
+                                    No Image
+                                </div>
+                                <% } %>
+                            </td>
                             <td><%= combo.getComboName() != null ? combo.getComboName() : "N/A" %></td>
                             <td><%= combo.getDescription() != null ? combo.getDescription() : "N/A" %></td>
                             <td>
@@ -825,9 +945,9 @@
                             </td>
                         </tr>
                         <% } 
-                    } else { %>
+    } else { %>
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 40px;">
+                            <td colspan="7" style="text-align: center; padding: 40px;">
                                 <div style="color: #7f8c8d; font-size: 1.1rem;">
                                     <% if (comboList != null && !comboList.isEmpty()) { %>
                                     No combos found on this page.
@@ -938,6 +1058,15 @@
                             <div class="view-label">Status</div>
                             <div class="view-value" id="viewStatus">N/A</div>
                         </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Image URL</div>
+                            <div class="view-value">
+                                <div id="viewImageUrl" style="word-break: break-all; background-color: #f8f9fa; padding: 8px 12px; border-radius: 4px; border: 1px solid #e9ecef; font-family: monospace; font-size: 0.85rem;">
+                                    No image URL available
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Column 2: Food Items -->
@@ -1037,16 +1166,25 @@
 
                 const comboData = {
                     id: cells[0].textContent,
-                    name: cells[1].textContent,
-                    description: cells[2].textContent,
-                    prices: cells[3].innerHTML,
-                    status: cells[4].querySelector('.status').textContent
+                    name: cells[2].textContent,
+                    description: cells[3].textContent,
+                    prices: cells[4].innerHTML,
+                    status: cells[5].querySelector('.status').textContent
                 };
 
+                // Extract image information
+                const imageCell = cells[1];
+                let imageUrl = '';
+                const imgElement = imageCell.querySelector('img');
+                if (imgElement) {
+                    imageUrl = imgElement.src;
+                }
+
                 // Extract price information
-                const discountPriceElement = cells[3].querySelector('.discount-price');
-                const originalPriceElement = cells[3].querySelector('.original-price');
-                const priceElement = cells[3].querySelector('.price');
+                const discountPriceElement = cells[4].querySelector('.discount-price');
+                const originalPriceElement = cells[4].querySelector('.original-price');
+                const priceElement = cells[4].querySelector('.price');
+                const savingsElement = cells[4].querySelector('div[style*="color: #27ae60"]');
 
                 let totalPrice = 'N/A';
                 let discountPrice = 'N/A';
@@ -1054,8 +1192,8 @@
 
                 if (discountPriceElement && originalPriceElement) {
                     // Has discount
-                    totalPrice = originalPriceElement.textContent;
-                    discountPrice = discountPriceElement.textContent;
+                    totalPrice = originalPriceElement.textContent.trim();
+                    discountPrice = discountPriceElement.textContent.trim();
 
                     // Calculate savings
                     const totalPriceNum = parseFloat(totalPrice.replace(/[^0-9.]/g, ''));
@@ -1063,15 +1201,17 @@
                     if (!isNaN(totalPriceNum) && !isNaN(discountPriceNum)) {
                         const savingsNum = totalPriceNum - discountPriceNum;
                         savings = formatPriceDisplay(savingsNum);
+                    } else if (savingsElement) {
+                        savings = savingsElement.textContent.replace('Save', '').trim();
                     }
                 } else if (priceElement) {
                     // No discount
-                    totalPrice = priceElement.textContent;
+                    totalPrice = priceElement.textContent.trim();
                     discountPrice = 'No discount';
                     savings = 'No savings';
                 }
 
-                // Update modal content
+                // Update modal content - Basic Information
                 document.getElementById('viewComboId').textContent = comboData.id;
                 document.getElementById('viewComboName').textContent = comboData.name;
                 document.getElementById('viewDescription').textContent = comboData.description;
@@ -1080,6 +1220,27 @@
                 document.getElementById('viewSavings').textContent = savings;
                 document.getElementById('viewStatus').textContent = comboData.status;
 
+                // Update image URL
+                const imageUrlElement = document.getElementById('viewImageUrl');
+
+                if (imageUrl && imageUrl !== '') {
+                    imageUrlElement.textContent = imageUrl;
+                    imageUrlElement.style.color = '#2c3e50';
+                    imageUrlElement.style.cursor = 'pointer';
+
+                    // Thêm tooltip và click để copy URL
+                    imageUrlElement.title = 'Click to copy URL';
+                    imageUrlElement.onclick = function () {
+                        copyToClipboard(imageUrl);
+                    };
+                } else {
+                    imageUrlElement.textContent = 'No image URL available';
+                    imageUrlElement.style.color = '#999';
+                    imageUrlElement.style.cursor = 'default';
+                    imageUrlElement.onclick = null;
+                    imageUrlElement.title = '';
+                }
+
                 console.log('Modal content updated:', {
                     id: comboData.id,
                     name: comboData.name,
@@ -1087,15 +1248,22 @@
                     totalPrice: totalPrice,
                     discountPrice: discountPrice,
                     savings: savings,
-                    status: comboData.status
+                    status: comboData.status,
+                    imageUrl: imageUrl
                 });
+
+                // Reset food list trước khi load mới
+                const foodListContainer = document.getElementById('viewFoodList');
+                const totalItemsElement = document.getElementById('viewTotalFoodItems');
+                foodListContainer.innerHTML = '<div class="no-food">Loading food items...</div>';
+                totalItemsElement.textContent = 'Loading...';
 
                 // Load food items for this combo
                 loadComboFoodItems(comboId);
 
                 // Hiển thị modal
                 document.getElementById('viewComboModal').style.display = 'block';
-                console.log('Modal displayed');
+                console.log('Modal displayed for combo ID:', comboId);
             }
 
             function closeViewComboModal() {
@@ -1116,7 +1284,7 @@
                             if (!response.ok) {
                                 throw new Error('Network response was not ok: ' + response.statusText);
                             }
-                            return response.text(); // Dùng text() trước để debug
+                            return response.text();
                         })
                         .then(text => {
                             console.log('Raw response text:', text);
@@ -1186,7 +1354,7 @@
                         console.error('Error formatting price:', e);
                     }
 
-                    // Tạo HTML bằng string concatenation thay vì template string
+                    // Tạo HTML cho food item
                     foodListHTML +=
                             '<div class="food-item">' +
                             '<div class="food-info">' +
@@ -1214,7 +1382,7 @@
                 console.log('Food list container innerHTML:', foodListContainer.innerHTML);
             }
 
-// Helper function to escape HTML
+            // Helper function to escape HTML
             function escapeHtml(text) {
                 if (text === null || text === undefined) {
                     return '';
@@ -1240,6 +1408,36 @@
                     }
                 }
                 return 'N/A';
+            }
+
+            // Copy to clipboard function
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(function () {
+                    showNotification('URL copied to clipboard!', '#27ae60');
+                }, function (err) {
+                    console.error('Could not copy text: ', err);
+                    showNotification('Failed to copy URL', '#e74c3c');
+                });
+            }
+
+            // Show notification function
+            function showNotification(message, color) {
+                const notification = document.createElement('div');
+                notification.id = 'copyNotification';
+                notification.textContent = message;
+                notification.style.backgroundColor = color;
+                notification.style.transform = 'translateX(0)';
+
+                document.body.appendChild(notification);
+
+                setTimeout(function () {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(function () {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 2000);
             }
 
             // Close modal when clicking outside
@@ -1271,12 +1469,12 @@
                 const rows = document.querySelectorAll('#comboTableBody tr');
 
                 rows.forEach(row => {
-                    if (row.cells.length < 5)
+                    if (row.cells.length < 6)
                         return;
 
-                    const comboName = row.cells[1].textContent.toLowerCase();
-                    const description = row.cells[2].textContent.toLowerCase();
-                    const status = row.cells[4].textContent.toLowerCase();
+                    const comboName = row.cells[2].textContent.toLowerCase();
+                    const description = row.cells[3].textContent.toLowerCase();
+                    const status = row.cells[5].textContent.toLowerCase();
 
                     const matchesSearch = searchTerm === '' ||
                             comboName.includes(searchTerm) ||

@@ -20,8 +20,8 @@ public class DBContext {
     // Thay vào đó, tạo connection mới mỗi lần cần
     
     // Thông tin kết nối
-    private static final String USER = "sa";
-    private static final String PASS = "123";
+    private static final String USER = "minhd";
+    private static final String PASS = "12345";
     private static final String URL = "jdbc:sqlserver://localhost\\SQLEXPRESS:1433;databaseName=MovieTicketDB;"
             + "sendStringParametersAsUnicode=true;"
             + "characterEncoding=UTF-8;";
