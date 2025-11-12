@@ -10,6 +10,34 @@
 <%@ page import="java.math.BigDecimal" %>
 <%
     List<Combo> comboList = (List<Combo>) request.getAttribute("comboList");
+    
+    // Pagination parameters
+    int currentPage = 1;
+    int pageSize = 10;
+    int totalItems = comboList != null ? comboList.size() : 0;
+    int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+    
+    // Get current page from request parameter
+    String pageParam = request.getParameter("page");
+    if (pageParam != null && !pageParam.isEmpty()) {
+        try {
+            currentPage = Integer.parseInt(pageParam);
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+        } catch (NumberFormatException e) {
+            currentPage = 1;
+        }
+    }
+    
+    // Calculate start and end index for current page
+    int startIndex = (currentPage - 1) * pageSize;
+    int endIndex = Math.min(startIndex + pageSize, totalItems);
+    
+    // Get sublist for current page
+    List<Combo> currentPageComboList = null;
+    if (comboList != null && !comboList.isEmpty()) {
+        currentPageComboList = comboList.subList(startIndex, endIndex);
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -176,21 +204,35 @@
 
             /* Filter Container Styles */
             .filter-container {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .filter-group {
                 position: relative;
             }
 
-            .filter-container select {
+            .filter-group label {
+                display: block;
+                font-size: 0.8rem;
+                color: #7f8c8d;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .filter-group select {
                 padding: 12px 15px;
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 font-size: 0.9rem;
                 background-color: white;
                 cursor: pointer;
-                min-width: 200px;
+                min-width: 150px;
                 transition: border-color 0.3s;
             }
 
-            .filter-container select:focus {
+            .filter-group select:focus {
                 outline: none;
                 border-color: #3498db;
             }
@@ -280,6 +322,14 @@
                 background-color: #2980b9;
             }
 
+            .action-btn.view {
+                background-color: #3498db;
+            }
+
+            .action-btn.view:hover {
+                background-color: #2980b9;
+            }
+
             .action-btn.edit {
                 background-color: #f39c12;
             }
@@ -304,10 +354,266 @@
                 background-color: #c0392b;
             }
 
+            /* Pagination Styles */
+            .pagination-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+                padding: 20px;
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .pagination-info {
+                color: #6c757d;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            .pagination {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .page-btn {
+                padding: 8px 16px;
+                border: 1px solid #dee2e6;
+                background-color: white;
+                color: #3498db;
+                cursor: pointer;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                transition: all 0.3s;
+                min-width: 40px;
+                text-align: center;
+            }
+
+            .page-btn:hover {
+                background-color: #e9ecef;
+                border-color: #3498db;
+            }
+
+            .page-btn.active {
+                background-color: #3498db;
+                color: white;
+                border-color: #3498db;
+            }
+
+            .page-btn.disabled {
+                color: #6c757d;
+                cursor: not-allowed;
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+
+            .page-btn.disabled:hover {
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+
+            .page-dots {
+                padding: 8px 5px;
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            /* Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 5% auto;
+                padding: 25px;
+                border: 1px solid #888;
+                width: 70%;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .view-modal-content {
+                max-width: 900px;
+            }
+
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover {
+                color: black;
+            }
+
+            /* View Modal Specific Styles */
+            .view-modal-columns {
+                display: flex;
+                gap: 30px;
+                margin-top: 20px;
+            }
+
+            .view-column {
+                flex: 1;
+            }
+
+            .view-column-left {
+                flex: 1;
+            }
+
+            .view-column-right {
+                flex: 1;
+            }
+
+            .view-field {
+                margin-bottom: 15px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .view-label {
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 5px;
+                font-size: 0.9rem;
+            }
+
+            .view-value {
+                color: #555;
+                word-break: break-word;
+            }
+
+            .modal-actions {
+                display: flex;
+                gap: 10px;
+                margin-top: 20px;
+                justify-content: flex-end;
+            }
+
+            /* Food List Styles */
+            .food-list {
+                margin-top: 10px;
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #e9ecef;
+                border-radius: 4px;
+                padding: 10px;
+                background-color: #f8f9fa;
+            }
+
+            .food-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 12px;
+                margin-bottom: 8px;
+                background-color: white;
+                border-radius: 4px;
+                border: 1px solid #dee2e6;
+                transition: all 0.3s;
+            }
+
+            .food-item:hover {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .food-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .food-info {
+                flex: 1;
+            }
+
+            .food-name {
+                font-weight: 500;
+                color: #2c3e50;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .food-details {
+                font-size: 0.8rem;
+                color: #6c757d;
+                margin-top: 4px;
+            }
+
+            .food-quantity {
+                background-color: #3498db;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 500;
+                min-width: 40px;
+                text-align: center;
+            }
+
+            .no-food {
+                text-align: center;
+                color: #6c757d;
+                font-style: italic;
+                padding: 30px;
+            }
+
+            .food-type {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 0.7rem;
+                font-weight: 500;
+            }
+
+            .food-type.snack {
+                background-color: #fff3e0;
+                color: #ef6c00;
+            }
+
+            .food-type.drink {
+                background-color: #e3f2fd;
+                color: #1565c0;
+            }
+
+            .food-type.dessert {
+                background-color: #f3e5f5;
+                color: #7b1fa2;
+            }
+
+            .savings-badge {
+                background-color: #27ae60;
+                color: white;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 0.7rem;
+                font-weight: 500;
+                margin-left: 8px;
+            }
+
             /* Responsive Design */
             @media (max-width: 1024px) {
                 .sidebar {
                     width: 30%;
+                }
+
+                .view-modal-columns {
+                    flex-direction: column;
+                    gap: 20px;
                 }
             }
 
@@ -351,9 +657,15 @@
 
                 .filter-container {
                     width: 100%;
+                    flex-direction: column;
+                    align-items: flex-start;
                 }
 
-                .filter-container select {
+                .filter-group {
+                    width: 100%;
+                }
+
+                .filter-group select {
                     width: 100%;
                 }
 
@@ -362,71 +674,38 @@
                     width: 100%;
                     margin-right: 0;
                 }
-            }
 
-            .modal {
-                display: none;
-                position: fixed;
-                z-index: 1000;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.5);
-            }
+                .modal-content {
+                    width: 95%;
+                    margin: 5% auto;
+                }
 
-            .modal-content {
-                background-color: #fefefe;
-                margin: 5% auto;
-                padding: 25px;
-                border: 1px solid #888;
-                width: 50%;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                max-height: 80vh;
-                overflow-y: auto;
-            }
+                .pagination-container {
+                    flex-direction: column;
+                    gap: 15px;
+                    align-items: stretch;
+                    text-align: center;
+                }
 
-            .close {
-                color: #aaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-                cursor: pointer;
-            }
+                .pagination {
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
 
-            .close:hover {
-                color: black;
-            }
+                .view-modal-columns {
+                    flex-direction: column;
+                    gap: 15px;
+                }
 
-            .modal input, .modal select, .modal textarea {
-                width: 100%;
-                padding: 10px;
-                margin: 8px 0;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                font-size: 14px;
-                box-sizing: border-box;
-            }
+                .food-item {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 8px;
+                }
 
-            .modal label {
-                font-weight: 500;
-                color: #2c3e50;
-                display: block;
-                margin-bottom: 5px;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            .price-container {
-                display: flex;
-                gap: 15px;
-            }
-
-            .price-container .form-group {
-                flex: 1;
+                .food-quantity {
+                    align-self: flex-end;
+                }
             }
         </style>
     </head>
@@ -476,11 +755,13 @@
                     </div>
 
                     <div class="filter-container">
-                        <select id="filterSelect" onchange="filterCombo()">
-                            <option value="all">All Status</option>
-                            <option value="status:available">Status: Available</option>
-                            <option value="status:unavailable">Status: Unavailable</option>
-                        </select>
+                        <div class="filter-group">
+                            <select id="statusFilter" onchange="filterCombo()">
+                                <option value="all">All Status</option>
+                                <option value="available">Available</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button class="btn btn-primary" onclick="openAddComboModal()">
@@ -502,14 +783,14 @@
                         </tr>
                     </thead>
                     <tbody id="comboTableBody">
-                        <% if (comboList != null && !comboList.isEmpty()) { 
-                            for (Combo combo : comboList) { 
+                        <% if (currentPageComboList != null && !currentPageComboList.isEmpty()) { 
+                            for (Combo combo : currentPageComboList) { 
                                 BigDecimal savings = null;
                                 if (combo.getDiscountPrice() != null && combo.getTotalPrice() != null) {
                                     savings = combo.getTotalPrice().subtract(combo.getDiscountPrice());
                                 }
                         %>
-                        <tr>
+                        <tr data-combo-id="<%= combo.getComboID() != null ? combo.getComboID() : 0 %>">
                             <td><%= combo.getComboID() != null ? combo.getComboID() : "N/A" %></td>
                             <td><%= combo.getComboName() != null ? combo.getComboName() : "N/A" %></td>
                             <td><%= combo.getDescription() != null ? combo.getDescription() : "N/A" %></td>
@@ -517,6 +798,11 @@
                                 <% if (combo.getDiscountPrice() != null) { %>
                                 <div class="discount-price"><%= formatPrice(combo.getDiscountPrice()) %></div>
                                 <div class="original-price"><%= formatPrice(combo.getTotalPrice()) %></div>
+                                <% if (savings != null && savings.compareTo(BigDecimal.ZERO) > 0) { %>
+                                <div style="font-size: 0.8rem; color: #27ae60;">
+                                    Save <%= formatPrice(savings) %>
+                                </div>
+                                <% } %>
                                 <% } else { %>
                                 <div class="price"><%= formatPrice(combo.getTotalPrice()) %></div>
                                 <% } %>
@@ -527,8 +813,8 @@
                                 </span>
                             </td>
                             <td>
-                                <button class="action-btn edit" onclick="editCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
-                                    Edit
+                                <button class="action-btn view" onclick="viewCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
+                                    View
                                 </button>
                                 <button class="action-btn manage" onclick="manageComboFood(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
                                     Manage Food
@@ -543,13 +829,140 @@
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 40px;">
                                 <div style="color: #7f8c8d; font-size: 1.1rem;">
+                                    <% if (comboList != null && !comboList.isEmpty()) { %>
+                                    No combos found on this page.
+                                    <% } else { %>
                                     No combos found.
+                                    <% } %>
                                 </div>
                             </td>
                         </tr>
                         <% } %>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <% if (totalPages > 0) { %>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> entries
+                </div>
+                <div class="pagination">
+                    <%-- Previous button --%>
+                    <% if (currentPage > 1) { %>
+                    <button class="page-btn" onclick="goToPage(<%= currentPage - 1 %>)">
+                        ‹
+                    </button>
+                    <% } else { %>
+                    <button class="page-btn disabled">‹</button>
+                    <% } %>
+
+                    <%-- Page numbers --%>
+                    <% 
+                        int startPage = Math.max(1, currentPage - 1);
+                        int endPage = Math.min(totalPages, currentPage + 1);
+                    
+                        // Always show first page
+                        if (startPage > 1) { 
+                    %>
+                    <button class="page-btn <%= 1 == currentPage ? "active" : "" %>" onclick="goToPage(1)">1</button>
+                    <% if (startPage > 2) { %>
+                    <span class="page-dots">...</span>
+                    <% } %>
+                    <% } %>
+
+                    <% for (int i = startPage; i <= endPage; i++) { %>
+                    <button class="page-btn <%= i == currentPage ? "active" : "" %>" onclick="goToPage(<%= i %>)"><%= i %></button>
+                    <% } %>
+
+                    <%-- Always show last page if needed --%>
+                    <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                    <span class="page-dots">...</span>
+                    <% } %>
+                    <button class="page-btn <%= totalPages == currentPage ? "active" : "" %>" onclick="goToPage(<%= totalPages %>)"><%= totalPages %></button>
+                    <% } %>
+
+                    <%-- Next button --%>
+                    <% if (currentPage < totalPages) { %>
+                    <button class="page-btn" onclick="goToPage(<%= currentPage + 1 %>)">›</button>
+                    <% } else { %>
+                    <button class="page-btn disabled">›</button>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Modal View Combo -->
+        <div id="viewComboModal" class="modal">
+            <div class="modal-content view-modal-content">
+                <span class="close" onclick="closeViewComboModal()">&times;</span>
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">Combo Details</h3>
+
+                <div class="view-modal-columns">
+                    <!-- Column 1: Combo Information -->
+                    <div class="view-column view-column-left">
+                        <div class="view-field">
+                            <div class="view-label">Combo ID</div>
+                            <div class="view-value" id="viewComboId">N/A</div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Combo Name</div>
+                            <div class="view-value" id="viewComboName">N/A</div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Description</div>
+                            <div class="view-value" id="viewDescription">N/A</div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Total Price</div>
+                            <div class="view-value" id="viewTotalPrice">N/A</div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Discount Price</div>
+                            <div class="view-value" id="viewDiscountPrice">N/A</div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Savings</div>
+                            <div class="view-value" id="viewSavings">N/A</div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Status</div>
+                            <div class="view-value" id="viewStatus">N/A</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Food Items -->
+                    <div class="view-column view-column-right">
+                        <div class="view-field">
+                            <div class="view-label">Food Items in Combo</div>
+                            <div class="view-value">
+                                <div class="food-list" id="viewFoodList">
+                                    <div class="no-food">Loading food items...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Total Food Items</div>
+                            <div class="view-value" id="viewTotalFoodItems">0 items</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary" id="editComboBtn">Edit</button>
+                    <button type="button" class="btn" onclick="closeViewComboModal()" 
+                            style="background-color: #95a5a6; color: white;">Cancel</button>
+                </div>
             </div>
         </div>
 
@@ -569,23 +982,271 @@
                     alert('Operation failed: ' + error);
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
+
+                // Setup event listener for edit button
+                document.getElementById('editComboBtn').addEventListener('click', function () {
+                    if (currentComboId !== 0) {
+                        window.location.href = 'combo-management?action=getById&id=' + currentComboId;
+                    } else {
+                        alert('No combo selected');
+                    }
+                });
             });
 
+            // Global variable to store current combo ID
+            let currentComboId = 0;
+
+            // Pagination function
+            function goToPage(page) {
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('page', page);
+                window.location.href = window.location.pathname + '?' + urlParams.toString();
+            }
 
             // Modal functions
             function openAddComboModal() {
                 window.location.href = 'combo-management?action=showAddForm';
             }
 
-            function closeAddComboModal() {
-                document.getElementById('addComboModal').style.display = 'none';
+            // View Combo Modal functions
+            function viewCombo(comboId) {
+                if (comboId === 0) {
+                    alert('Invalid combo ID');
+                    return;
+                }
+
+                currentComboId = comboId;
+
+                const allRows = document.querySelectorAll('#comboTableBody tr');
+                let targetRow = null;
+
+                for (let row of allRows) {
+                    const rowComboId = row.getAttribute('data-combo-id');
+                    if (rowComboId && parseInt(rowComboId) === comboId) {
+                        targetRow = row;
+                        break;
+                    }
+                }
+
+                if (!targetRow) {
+                    alert('Combo not found in table. ComboId: ' + comboId);
+                    return;
+                }
+
+                const cells = targetRow.cells;
+
+                const comboData = {
+                    id: cells[0].textContent,
+                    name: cells[1].textContent,
+                    description: cells[2].textContent,
+                    prices: cells[3].innerHTML,
+                    status: cells[4].querySelector('.status').textContent
+                };
+
+                // Extract price information
+                const discountPriceElement = cells[3].querySelector('.discount-price');
+                const originalPriceElement = cells[3].querySelector('.original-price');
+                const priceElement = cells[3].querySelector('.price');
+
+                let totalPrice = 'N/A';
+                let discountPrice = 'N/A';
+                let savings = 'N/A';
+
+                if (discountPriceElement && originalPriceElement) {
+                    // Has discount
+                    totalPrice = originalPriceElement.textContent;
+                    discountPrice = discountPriceElement.textContent;
+
+                    // Calculate savings
+                    const totalPriceNum = parseFloat(totalPrice.replace(/[^0-9.]/g, ''));
+                    const discountPriceNum = parseFloat(discountPrice.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(totalPriceNum) && !isNaN(discountPriceNum)) {
+                        const savingsNum = totalPriceNum - discountPriceNum;
+                        savings = formatPriceDisplay(savingsNum);
+                    }
+                } else if (priceElement) {
+                    // No discount
+                    totalPrice = priceElement.textContent;
+                    discountPrice = 'No discount';
+                    savings = 'No savings';
+                }
+
+                // Update modal content
+                document.getElementById('viewComboId').textContent = comboData.id;
+                document.getElementById('viewComboName').textContent = comboData.name;
+                document.getElementById('viewDescription').textContent = comboData.description;
+                document.getElementById('viewTotalPrice').textContent = totalPrice;
+                document.getElementById('viewDiscountPrice').textContent = discountPrice;
+                document.getElementById('viewSavings').textContent = savings;
+                document.getElementById('viewStatus').textContent = comboData.status;
+
+                console.log('Modal content updated:', {
+                    id: comboData.id,
+                    name: comboData.name,
+                    description: comboData.description,
+                    totalPrice: totalPrice,
+                    discountPrice: discountPrice,
+                    savings: savings,
+                    status: comboData.status
+                });
+
+                // Load food items for this combo
+                loadComboFoodItems(comboId);
+
+                // Hiển thị modal
+                document.getElementById('viewComboModal').style.display = 'block';
+                console.log('Modal displayed');
+            }
+
+            function closeViewComboModal() {
+                document.getElementById('viewComboModal').style.display = 'none';
+                currentComboId = 0;
+            }
+
+            // Load Combo Food Items
+            function loadComboFoodItems(comboId) {
+                console.log('Loading food items for combo:', comboId);
+
+                const foodListContainer = document.getElementById('viewFoodList');
+                foodListContainer.innerHTML = '<div class="no-food">Loading food items...</div>';
+
+                fetch('combo-management?action=getComboFoods&comboId=' + comboId)
+                        .then(response => {
+                            console.log('Response status:', response.status);
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok: ' + response.statusText);
+                            }
+                            return response.text(); // Dùng text() trước để debug
+                        })
+                        .then(text => {
+                            console.log('Raw response text:', text);
+                            try {
+                                const foodItems = JSON.parse(text);
+                                console.log('Parsed food items:', foodItems);
+                                displayFoodItems(foodItems);
+                            } catch (e) {
+                                console.error('Error parsing JSON:', e);
+                                console.error('Raw text that failed to parse:', text);
+                                displayFoodItems([]);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading food items:', error);
+                            foodListContainer.innerHTML = '<div class="no-food">Error loading food items: ' + error.message + '</div>';
+                        });
+            }
+
+            // Display Food Items
+            function displayFoodItems(foodItems) {
+                const foodListContainer = document.getElementById('viewFoodList');
+                const totalItemsElement = document.getElementById('viewTotalFoodItems');
+
+                console.log('Displaying food items:', foodItems);
+
+                if (!foodItems || foodItems.length === 0) {
+                    foodListContainer.innerHTML = '<div class="no-food">No food items in this combo</div>';
+                    totalItemsElement.textContent = '0 items';
+                    return;
+                }
+
+                let foodListHTML = '';
+                let totalQuantity = 0;
+                let uniqueItems = foodItems.length;
+
+                foodItems.forEach((food, index) => {
+                    console.log(`Processing food item ${index}:`, food);
+
+                    // Đảm bảo các biến có giá trị
+                    const foodName = String(food.foodName || 'Unknown Food');
+                    const foodType = String(food.foodType || 'Unknown');
+                    const description = String(food.description || 'No description available');
+                    const quantity = Number(food.quantity) || 1;
+
+                    const foodTypeClass = foodType.toLowerCase().replace(/\s+/g, '-');
+                    totalQuantity += quantity;
+
+                    // Format price
+                    let priceDisplay = 'N/A';
+                    try {
+                        if (food.price !== null && food.price !== undefined) {
+                            let priceValue;
+                            if (typeof food.price === 'number') {
+                                priceValue = food.price;
+                            } else if (typeof food.price === 'string') {
+                                priceValue = parseFloat(food.price);
+                            } else {
+                                priceValue = parseFloat(food.price);
+                            }
+
+                            if (!isNaN(priceValue)) {
+                                priceDisplay = priceValue.toLocaleString('vi-VN') + ' VND';
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error formatting price:', e);
+                    }
+
+                    // Tạo HTML bằng string concatenation thay vì template string
+                    foodListHTML +=
+                            '<div class="food-item">' +
+                            '<div class="food-info">' +
+                            '<div class="food-name">' +
+                            escapeHtml(foodName) +
+                            '<span class="food-type ' + foodTypeClass + '">' +
+                            escapeHtml(foodType) +
+                            '</span>' +
+                            '</div>' +
+                            '<div class="food-details">' +
+                            escapeHtml(description) + ' | ' + escapeHtml(priceDisplay) +
+                            '</div>' +
+                            '</div>' +
+                            '<div class="food-quantity" title="Quantity">' +
+                            quantity +
+                            '</div>' +
+                            '</div>';
+                });
+
+                console.log('Final food list HTML:', foodListHTML);
+                foodListContainer.innerHTML = foodListHTML;
+                totalItemsElement.textContent = uniqueItems + ' items (' + totalQuantity + ' total pieces)';
+
+                // Kiểm tra xem HTML có được chèn đúng không
+                console.log('Food list container innerHTML:', foodListContainer.innerHTML);
+            }
+
+// Helper function to escape HTML
+            function escapeHtml(text) {
+                if (text === null || text === undefined) {
+                    return '';
+                }
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Helper function to format price
+            function formatPriceDisplay(price) {
+                if (typeof price === 'number') {
+                    return price.toLocaleString('vi-VN') + ' VND';
+                } else if (typeof price === 'string') {
+                    // If it's already formatted, return as is
+                    if (price.includes('VND')) {
+                        return price;
+                    }
+                    // Try to parse and format
+                    const num = parseFloat(price.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(num)) {
+                        return num.toLocaleString('vi-VN') + ' VND';
+                    }
+                }
+                return 'N/A';
             }
 
             // Close modal when clicking outside
             window.onclick = function (event) {
-                const modal = document.getElementById('addComboModal');
-                if (event.target === modal) {
-                    closeAddComboModal();
+                const viewModal = document.getElementById('viewComboModal');
+                if (event.target === viewModal) {
+                    closeViewComboModal();
                 }
             }
 
@@ -602,10 +1263,10 @@
             // Combined search and filter function
             function applyFilters() {
                 const searchInput = document.getElementById('searchInput');
-                const filterSelect = document.getElementById('filterSelect');
+                const statusFilter = document.getElementById('statusFilter');
 
                 const searchTerm = searchInput.value.toLowerCase();
-                const filterValue = filterSelect.value;
+                const statusValue = statusFilter.value;
 
                 const rows = document.querySelectorAll('#comboTableBody tr');
 
@@ -617,27 +1278,16 @@
                     const description = row.cells[2].textContent.toLowerCase();
                     const status = row.cells[4].textContent.toLowerCase();
 
-                    // Check search term
                     const matchesSearch = searchTerm === '' ||
                             comboName.includes(searchTerm) ||
                             description.includes(searchTerm);
 
-                    // Check filter
-                    let matchesFilter = true;
-                    if (filterValue !== 'all') {
-                        const [filterType, filterValueText] = filterValue.split(':');
-
-                        if (filterType === 'status') {
-                            matchesFilter = status.includes(filterValueText.toLowerCase());
-                        }
+                    let matchesStatus = true;
+                    if (statusValue !== 'all') {
+                        matchesStatus = status.includes(statusValue.toLowerCase());
                     }
 
-                    // Show/hide row based on both conditions
-                    if (matchesSearch && matchesFilter) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
                 });
             }
 
@@ -654,10 +1304,9 @@
                     alert('Invalid combo ID');
                     return;
                 }
-                console.log('Managing combo food for ID:', comboId); // Debug
+                console.log('Managing combo food for ID:', comboId);
                 window.location.href = 'combo-food-management?action=view&comboId=' + comboId;
             }
-
 
             function deleteCombo(comboId) {
                 if (comboId === 0) {

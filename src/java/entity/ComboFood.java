@@ -9,7 +9,7 @@ public class ComboFood {
     private Integer comboID;
     private Integer foodID;
     private Integer quantity;
-
+   
     public ComboFood() {}
 
     public ComboFood(Integer comboFoodID, Integer comboID, Integer foodID, Integer quantity) {

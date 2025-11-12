@@ -9,6 +9,7 @@
 package controller;
 
 import dal.ComboDAO;
+import dal.ComboFoodDAO;
 import dal.FoodDAO;
 import entity.Combo;
 import entity.Food;
@@ -19,6 +20,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 public class ComboManagementServlet extends HttpServlet {
 
@@ -41,6 +43,8 @@ public class ComboManagementServlet extends HttpServlet {
             getComboById(request, response);
         } else if ("showAddForm".equals(action)) {
             showAddComboForm(request, response);
+        } else if ("getComboFoods".equals(action)) {
+            getComboFoods(request, response); // THÊM DÒNG NÀY
         } else {
             getAllCombos(request, response);
         }
@@ -187,6 +191,134 @@ public class ComboManagementServlet extends HttpServlet {
         } catch (Exception e) {
             response.sendRedirect("combo-management?error=update");
         }
+    }
+
+    private void getComboFoods(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            String comboIdParam = request.getParameter("comboId");
+            System.out.println("Getting combo foods for comboId: " + comboIdParam);
+
+            if (comboIdParam == null || comboIdParam.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"error\": \"Combo ID is required\"}");
+                return;
+            }
+
+            int comboId = Integer.parseInt(comboIdParam);
+
+            ComboFoodDAO comboFoodDAO = new ComboFoodDAO();
+            List<Map<String, Object>> foodItems = comboFoodDAO.getComboFoodItemsWithQuantity(comboId);
+
+            // DEBUG: In ra toàn bộ dữ liệu
+            System.out.println("=== DEBUG FOOD ITEMS ===");
+            if (foodItems != null) {
+                for (Map<String, Object> item : foodItems) {
+                    System.out.println("Food Item: " + item);
+                    for (Map.Entry<String, Object> entry : item.entrySet()) {
+                        System.out.println("  " + entry.getKey() + ": " + entry.getValue() + " (type: " + (entry.getValue() != null ? entry.getValue().getClass().getSimpleName() : "null") + ")");
+                    }
+                }
+            } else {
+                System.out.println("foodItems is null");
+            }
+            System.out.println("=== END DEBUG ===");
+
+            // Convert to JSON manually
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            String jsonResponse = convertToJson(foodItems);
+
+            System.out.println("Sending JSON response: " + jsonResponse);
+            response.getWriter().write(jsonResponse);
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"error\": \"Invalid combo ID format\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\": \"Error loading food items: " + e.getMessage() + "\"}");
+        }
+    }
+
+// Helper method to convert List<Map> to JSON manually
+    private String convertToJson(List<Map<String, Object>> foodItems) {
+        if (foodItems == null || foodItems.isEmpty()) {
+            return "[]";
+        }
+
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("[");
+
+        for (int i = 0; i < foodItems.size(); i++) {
+            Map<String, Object> food = foodItems.get(i);
+            jsonBuilder.append("{");
+
+            boolean firstEntry = true;
+            for (Map.Entry<String, Object> entry : food.entrySet()) {
+                if (!firstEntry) {
+                    jsonBuilder.append(",");
+                }
+
+                jsonBuilder.append("\"").append(entry.getKey()).append("\":");
+
+                Object value = entry.getValue();
+                if (value instanceof String) {
+                    String stringValue = (String) value;
+                    // Kiểm tra nếu giá trị null trong database
+                    if ("null".equalsIgnoreCase(stringValue) || stringValue == null) {
+                        jsonBuilder.append("null");
+                    } else {
+                        String escapedValue = escapeJsonString(stringValue);
+                        jsonBuilder.append("\"").append(escapedValue).append("\"");
+                    }
+                } else if (value instanceof Number) {
+                    jsonBuilder.append(value);
+                } else if (value instanceof Boolean) {
+                    jsonBuilder.append(value);
+                } else if (value == null) {
+                    jsonBuilder.append("null");
+                } else {
+                    // For BigDecimal and other types
+                    String stringValue = value.toString();
+                    // Kiểm tra nếu là số
+                    if (stringValue.matches("-?\\d+(\\.\\d+)?")) {
+                        jsonBuilder.append(stringValue);
+                    } else {
+                        jsonBuilder.append("\"").append(escapeJsonString(stringValue)).append("\"");
+                    }
+                }
+
+                firstEntry = false;
+            }
+
+            jsonBuilder.append("}");
+
+            if (i < foodItems.size() - 1) {
+                jsonBuilder.append(",");
+            }
+        }
+
+        jsonBuilder.append("]");
+        return jsonBuilder.toString();
+    }
+
+// Helper method to escape JSON string
+    private String escapeJsonString(String input) {
+        if (input == null) {
+            return "";
+        }
+
+        return input.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     private void deleteCombo(HttpServletRequest request, HttpServletResponse response)
