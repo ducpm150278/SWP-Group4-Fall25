@@ -30,8 +30,6 @@ public class AdminDashboardServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String section = request.getParameter("section");
-        System.out.println("=== ADMIN DASHBOARD GET ===");
-        System.out.println("Section: " + section);
 
         try {
             if (section == null) {
@@ -66,8 +64,6 @@ public class AdminDashboardServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String section = request.getParameter("section");
-        System.out.println("=== ADMIN DASHBOARD POST ===");
-        System.out.println("Section: " + section);
 
         try {
             if (section == null) {
@@ -183,7 +179,7 @@ public class AdminDashboardServlet extends HttpServlet {
             }
 
         } catch (IOException e) {
-            sendToast(request, "error", "Error: " + e.getMessage());
+            sendToast(request, "danger", "Error: " + e.getMessage());
             response.sendRedirect("dashboard?section=user-management");
         }
     }
@@ -199,21 +195,21 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Validation
         if (fullname.isEmpty() || email.isEmpty() || phone.isEmpty() || role == null || role.isEmpty()) {
-            sendToast(request, "error", "All fields are required");
+            sendToast(request, "danger", "All fields are required");
             response.sendRedirect("dashboard?section=user-management");
             return;
         }
 
         // Check existing email
         if (ud.checkExistedEmail(email)) {
-            sendToast(request, "error", "Email already exists");
+            sendToast(request, "danger", "Email already exists");
             response.sendRedirect("dashboard?section=user-management");
             return;
         }
 
         // Check existing phone
         if (ud.checkExistedPhone(phone)) {
-            sendToast(request, "error", "Phone number already exists");
+            sendToast(request, "danger", "Phone number already exists");
             response.sendRedirect("dashboard?section=user-management");
             return;
         }
@@ -237,7 +233,7 @@ public class AdminDashboardServlet extends HttpServlet {
                 sendToast(request, "success", "User created but email not sent");
             }
         } else {
-            sendToast(request, "error", "Failed to create user");
+            sendToast(request, "danger", "Failed to create user");
         }
 
         response.sendRedirect("dashboard?section=user-management");
@@ -253,10 +249,10 @@ public class AdminDashboardServlet extends HttpServlet {
             if (isDeleted) {
                 sendToast(request, "success", "User deleted successfully");
             } else {
-                sendToast(request, "error", "Failed to delete user");
+                sendToast(request, "danger", "Failed to delete user");
             }
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid user ID");
+            sendToast(request, "danger", "Invalid user ID");
         }
 
         response.sendRedirect("dashboard?section=user-management");
@@ -272,7 +268,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
             User user = ud.getUserByID(userId);
             if (user == null) {
-                sendToast(request, "error", "User not found");
+                sendToast(request, "danger", "User not found");
                 response.sendRedirect("dashboard?section=user-management");
                 return;
             }
@@ -282,10 +278,10 @@ public class AdminDashboardServlet extends HttpServlet {
             if (isUpdated) {
                 sendToast(request, "success", "User updated successfully");
             } else {
-                sendToast(request, "error", "Failed to update user");
+                sendToast(request, "danger", "Failed to update user");
             }
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid user ID");
+            sendToast(request, "danger", "Invalid user ID");
         }
 
         response.sendRedirect("dashboard?section=user-management");
@@ -391,7 +387,7 @@ public class AdminDashboardServlet extends HttpServlet {
             }
 
         } catch (IOException e) {
-            sendToast(request, "error", "Error: " + e.getMessage());
+            sendToast(request, "danger", "Error: " + e.getMessage());
             response.sendRedirect("dashboard?section=cinema-management");
         }
     }
@@ -406,26 +402,26 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Validation
         if (cinemaName == null || cinemaName.trim().isEmpty()) {
-            sendToast(request, "error", "Cinema name is required");
+            sendToast(request, "danger", "Cinema name is required");
             response.sendRedirect("dashboard?section=cinema-management");
             return;
         }
 
         if (location == null || location.trim().isEmpty()) {
-            sendToast(request, "error", "Location is required");
+            sendToast(request, "danger", "Location is required");
             response.sendRedirect("dashboard?section=cinema-management");
             return;
         }
 
         if (address == null || address.trim().isEmpty()) {
-            sendToast(request, "error", "Address is required");
+            sendToast(request, "danger", "Address is required");
             response.sendRedirect("dashboard?section=cinema-management");
             return;
         }
 
         // Check duplicate cinema name
         if (cd.checkCinemaNameExists(cinemaName)) {
-            sendToast(request, "error", "Cinema name already exists");
+            sendToast(request, "danger", "Cinema name already exists");
             response.sendRedirect("dashboard?section=cinema-management");
             return;
         }
@@ -442,7 +438,7 @@ public class AdminDashboardServlet extends HttpServlet {
         if (isCreated) {
             sendToast(request, "success", "Cinema created successfully");
         } else {
-            sendToast(request, "error", "Failed to create cinema");
+            sendToast(request, "danger", "Failed to create cinema");
         }
 
         response.sendRedirect("dashboard?section=cinema-management");
@@ -458,10 +454,10 @@ public class AdminDashboardServlet extends HttpServlet {
             if (isDeleted) {
                 sendToast(request, "success", "Cinema deleted successfully");
             } else {
-                sendToast(request, "error", "Failed to delete cinema");
+                sendToast(request, "danger", "Failed to delete cinema");
             }
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid cinema ID");
+            sendToast(request, "danger", "Invalid cinema ID");
         }
 
         response.sendRedirect("dashboard?section=cinema-management");
@@ -479,21 +475,21 @@ public class AdminDashboardServlet extends HttpServlet {
 
             CinemaM cinema = cd.getCinemaById(cinemaId);
             if (cinema == null) {
-                sendToast(request, "error", "Cinema not found");
+                sendToast(request, "danger", "Cinema not found");
                 response.sendRedirect("dashboard?section=cinema-management");
                 return;
             }
 
             // Validation
             if (cinemaName == null || cinemaName.trim().isEmpty()) {
-                sendToast(request, "error", "Cinema name is required");
+                sendToast(request, "danger", "Cinema name is required");
                 response.sendRedirect("dashboard?section=cinema-management&action=view&cinemaId=" + cinemaId);
                 return;
             }
 
             // Check duplicate (excluding current cinema)
             if (cd.checkCinemaNameExists(cinemaName, cinemaId)) {
-                sendToast(request, "error", "Cinema name already exists");
+                sendToast(request, "danger", "Cinema name already exists");
                 response.sendRedirect("dashboard?section=cinema-management&action=view&cinemaId=" + cinemaId);
                 return;
             }
@@ -504,10 +500,10 @@ public class AdminDashboardServlet extends HttpServlet {
             if (isUpdated) {
                 sendToast(request, "success", "Cinema updated successfully");
             } else {
-                sendToast(request, "error", "Failed to update cinema");
+                sendToast(request, "danger", "Failed to update cinema");
             }
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid cinema ID");
+            sendToast(request, "danger", "Invalid cinema ID");
         }
 
         response.sendRedirect("dashboard?section=cinema-management");
@@ -541,7 +537,6 @@ public class AdminDashboardServlet extends HttpServlet {
                     }
                     case "generateSeats" ->
                         handleGenerateSeats(request, response, roomDAO, seatDAO);
-                    // Already redirects in method
                     case "editSeat" -> {
                         handleEditSeat(request, response, roomDAO, seatDAO);
                         request.getRequestDispatcher("admin_dashboard.jsp").forward(request, response);
@@ -559,7 +554,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         } catch (ServletException | IOException e) {
             System.out.println("Error in screening room management: " + e.getMessage());
-            sendToast(request, "error", "System error: " + e.getMessage());
+            sendToast(request, "danger", "System error: " + e.getMessage());
             response.sendRedirect("dashboard?section=screening-room-management");
         }
     }
@@ -589,6 +584,9 @@ public class AdminDashboardServlet extends HttpServlet {
             cinemaFilter = "none";
         }
 
+        // Check hasValidFilters - Filter LOCATION and CINEMA or not
+        boolean hasValidFilters = !"none".equals(locationFilter) && !"none".equals(cinemaFilter);
+
         // Parse cinema filter
         Integer cinemaId = null;
         if (!"none".equals(cinemaFilter)) {
@@ -608,29 +606,37 @@ public class AdminDashboardServlet extends HttpServlet {
             // Use default page
         }
 
-        // Get data - SỬA: Không cần kiểm tra hasValidFilters nữa
-        List<ScreeningRoom> rooms = roomDAO.getRoomsWithFilters(
-                "none".equals(locationFilter) ? null : locationFilter, 
-                cinemaId, 
-                "all".equals(roomTypeFilter) ? null : roomTypeFilter, 
-                "all".equals(statusFilter) ? null : statusFilter,
-                search, 
-                (page - 1) * recordsPerPage, 
-                recordsPerPage
-        );
-        
-        int totalRecords = roomDAO.countRoomsWithFilters(
-                "none".equals(locationFilter) ? null : locationFilter, 
-                cinemaId, 
-                "all".equals(roomTypeFilter) ? null : roomTypeFilter, 
-                "all".equals(statusFilter) ? null : statusFilter, 
-                search
-        );
-        
+        List<ScreeningRoom> rooms = new ArrayList<>();
+        int totalRecords = 0;
+        int noOfPages = 0;
+
+        // if filter get list
+        if (hasValidFilters) {
+            // Get data
+            rooms = roomDAO.getRoomsWithFilters(
+                    locationFilter,
+                    cinemaId,
+                    "all".equals(roomTypeFilter) ? null : roomTypeFilter,
+                    "all".equals(statusFilter) ? null : statusFilter,
+                    search,
+                    (page - 1) * recordsPerPage,
+                    recordsPerPage
+            );
+
+            totalRecords = roomDAO.countRoomsWithFilters(
+                    locationFilter,
+                    cinemaId,
+                    "all".equals(roomTypeFilter) ? null : roomTypeFilter,
+                    "all".equals(statusFilter) ? null : statusFilter,
+                    search
+            );
+
+            noOfPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+        }
+
         System.out.println("Rooms found: " + rooms.size());
         System.out.println("Total records: " + totalRecords);
-
-        int noOfPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+        System.out.println("Has valid filters: " + hasValidFilters);
 
         // Get data for filters
         List<String> locations = cinemaDAO.getAllLocations();
@@ -654,7 +660,7 @@ public class AdminDashboardServlet extends HttpServlet {
         request.setAttribute("allLocations", getLocationsWithNone(locations));
         request.setAttribute("allRoomTypes", roomTypes);
         request.setAttribute("cinemasByLocation", getCinemasWithNone(cinemas));
-        request.setAttribute("hasValidFilters", true); // SỬA: Luôn true vì DAO mới xử lý được null
+        request.setAttribute("hasValidFilters", hasValidFilters);
         request.setAttribute("section", "screening-room-management");
     }
 
@@ -667,29 +673,29 @@ public class AdminDashboardServlet extends HttpServlet {
             ScreeningRoom room = roomDAO.getRoomById(roomId);
 
             if (room == null) {
-                sendToast(request, "error", "Room not found");
+                sendToast(request, "danger", "Room not found");
                 response.sendRedirect("dashboard?section=screening-room-management");
                 return;
             }
 
             List<SeatM> seats = seatDAO.getSeatsByRoom(roomId);
-            
+
             // Lấy thống kê ghế chi tiết từ DAO mới
             Map<String, Integer> seatStatusCounts = roomDAO.countSeatsByStatus(roomId);
             Map<String, Integer> seatTypeCounts = roomDAO.countSeatsByType(roomId);
-            
+
             request.setAttribute("viewRoom", room);
             request.setAttribute("seats", seats);
             request.setAttribute("seatStatusCounts", seatStatusCounts);
             request.setAttribute("seatTypeCounts", seatTypeCounts);
             request.setAttribute("section", "screening-room-management");
 
-            System.out.println("Loaded room: " + room.getRoomName() + 
-                             ", seats: " + seats.size() + 
-                             ", capacity: " + room.getSeatCapacity());
+            System.out.println("Loaded room: " + room.getRoomName()
+                    + ", seats: " + seats.size()
+                    + ", capacity: " + room.getSeatCapacity());
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid room ID");
+            sendToast(request, "danger", "Invalid room ID");
             response.sendRedirect("dashboard?section=screening-room-management");
         }
     }
@@ -721,7 +727,7 @@ public class AdminDashboardServlet extends HttpServlet {
             ScreeningRoom room = roomDAO.getRoomById(roomId);
 
             if (seat == null || room == null) {
-                sendToast(request, "error", "Seat or room not found");
+                sendToast(request, "danger", "Seat or room not found");
                 response.sendRedirect("dashboard?section=screening-room-management");
                 return;
             }
@@ -733,33 +739,33 @@ public class AdminDashboardServlet extends HttpServlet {
             request.setAttribute("section", "screening-room-management");
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid seat or room ID");
+            sendToast(request, "danger", "Invalid seat or room ID");
             response.sendRedirect("dashboard?section=screening-room-management");
         }
     }
 
     private void handleSeatStatistics(HttpServletRequest request, HttpServletResponse response,
             ScreeningRoomDAO roomDAO) throws ServletException, IOException {
-        
+
         try {
             int roomId = Integer.parseInt(request.getParameter("id"));
             ScreeningRoom room = roomDAO.getRoomById(roomId);
-            
+
             if (room == null) {
-                sendToast(request, "error", "Room not found");
+                sendToast(request, "danger", "Room not found");
                 response.sendRedirect("dashboard?section=screening-room-management");
                 return;
             }
-            
+
             // Lấy thống kê chi tiết từ DAO mới
             Map<String, Object> seatStats = roomDAO.getDetailedSeatStatistics(roomId);
-            
+
             request.setAttribute("viewRoom", room);
             request.setAttribute("seatStats", seatStats);
             request.setAttribute("section", "screening-room-management");
-            
+
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid room ID");
+            sendToast(request, "danger", "Invalid room ID");
             response.sendRedirect("dashboard?section=screening-room-management");
         }
     }
@@ -774,7 +780,7 @@ public class AdminDashboardServlet extends HttpServlet {
             ScreeningRoom room = roomDAO.getRoomById(roomId);
             if (room == null) {
                 System.out.println("ERROR: Room not found with ID: " + roomId);
-                sendToast(request, "error", "Room not found");
+                sendToast(request, "danger", "Room not found");
                 response.sendRedirect("dashboard?section=screening-room-management");
                 return;
             }
@@ -787,7 +793,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
             if (seats == null || seats.isEmpty()) {
                 System.out.println("ERROR: No seats generated by SeatLayout");
-                sendToast(request, "error", "No seats were generated");
+                sendToast(request, "danger", "No seats were generated");
                 response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
                 return;
             }
@@ -800,7 +806,6 @@ public class AdminDashboardServlet extends HttpServlet {
                 System.out.println("Deleted existing seats: " + deleted);
             } catch (Exception e) {
                 System.out.println("Error deleting existing seats: " + e.getMessage());
-                // Continue anyway - maybe no seats existed
             }
 
             // Create new seats
@@ -808,11 +813,10 @@ public class AdminDashboardServlet extends HttpServlet {
             System.out.println("Seats creation result: " + seatsCreated);
 
             if (seatsCreated) {
-                // KHÔNG cần update room capacity nữa vì DAO tự động tính
                 sendToast(request, "success", "Successfully generated " + seats.size() + " seats");
                 System.out.println("=== SEAT GENERATION COMPLETED SUCCESSFULLY ===");
             } else {
-                sendToast(request, "error", "Failed to save seats to database");
+                sendToast(request, "danger", "Failed to save seats to database");
                 System.out.println("=== SEAT GENERATION FAILED - DATABASE ERROR ===");
             }
 
@@ -820,11 +824,11 @@ public class AdminDashboardServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             System.out.println("ERROR: Invalid room ID format");
-            sendToast(request, "error", "Invalid room ID");
+            sendToast(request, "danger", "Invalid room ID");
             response.sendRedirect("dashboard?section=screening-room-management");
         } catch (IOException e) {
             System.out.println("ERROR in generateSeats: " + e.getMessage());
-            sendToast(request, "error", "System error: " + e.getMessage());
+            sendToast(request, "danger", "System error: " + e.getMessage());
             response.sendRedirect("dashboard?section=screening-room-management");
         }
     }
@@ -864,7 +868,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         } catch (ServletException | IOException e) {
             System.out.println("Error in screening room management POST: " + e.getMessage());
-            sendToast(request, "error", "System error: " + e.getMessage());
+            sendToast(request, "danger", "System error: " + e.getMessage());
             response.sendRedirect("dashboard?section=screening-room-management");
         }
     }
@@ -876,23 +880,25 @@ public class AdminDashboardServlet extends HttpServlet {
             int cinemaId = Integer.parseInt(request.getParameter("cinemaId"));
             String roomName = request.getParameter("roomName");
             String roomType = request.getParameter("roomType");
+//            System.out.println(roomName);
+//            System.out.println(roomType);
             boolean isActive = request.getParameter("isActive") != null;
 
             // Validation
             if (roomName == null || roomName.trim().isEmpty()) {
-                sendToast(request, "error", "Room name is required");
-                response.sendRedirect("dashboard?section=screening-room-management&action=create&cinemaId=" + cinemaId);
+                sendToast(request, "danger", "Room name is required");
+                redirectBackToCreateWithFilters(request, response, cinemaId);
                 return;
             }
 
             // Check duplicate room name
             if (roomDAO.isRoomNameExists(cinemaId, roomName)) {
-                sendToast(request, "error", "Room name already exists in this cinema");
-                response.sendRedirect("dashboard?section=screening-room-management&action=create&cinemaId=" + cinemaId);
+                sendToast(request, "danger", "Room name already exists in this cinema");
+                redirectBackToCreateWithFilters(request, response, cinemaId);
                 return;
             }
 
-            // Create room - KHÔNG cần set seatCapacity nữa
+            // Create room 
             ScreeningRoom room = new ScreeningRoom();
             room.setCinemaID(cinemaId);
             room.setRoomName(roomName);
@@ -913,17 +919,18 @@ public class AdminDashboardServlet extends HttpServlet {
                 } else {
                     // Rollback room creation
                     roomDAO.deleteRoom(roomId);
-                    sendToast(request, "error", "Failed to create seat layout");
+                    sendToast(request, "danger", "Failed to create seat layout");
                 }
             } else {
-                sendToast(request, "error", "Failed to create room");
+                sendToast(request, "danger", "Failed to create room");
             }
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid input data");
+            sendToast(request, "danger", "Invalid input data");
         }
 
-        response.sendRedirect("dashboard?section=screening-room-management");
+        // Redirect back to list with preserved filters
+        redirectBackToListWithFilters(request, response);
     }
 
     private void handleUpdateRoomPost(HttpServletRequest request, HttpServletResponse response,
@@ -937,26 +944,26 @@ public class AdminDashboardServlet extends HttpServlet {
 
             ScreeningRoom room = roomDAO.getRoomById(roomId);
             if (room == null) {
-                sendToast(request, "error", "Room not found");
-                response.sendRedirect("dashboard?section=screening-room-management");
+                sendToast(request, "danger", "Room not found");
+                redirectBackToListWithFilters(request, response);
                 return;
             }
 
             // Validation
             if (roomName == null || roomName.trim().isEmpty()) {
-                sendToast(request, "error", "Room name is required");
-                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                sendToast(request, "danger", "Room name is required");
+                redirectBackToEditWithFilters(request, response, roomId);
                 return;
             }
 
             // Check duplicate (excluding current room)
             if (roomDAO.isRoomNameExists(room.getCinemaID(), roomName, roomId)) {
-                sendToast(request, "error", "Room name already exists in this cinema");
-                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                sendToast(request, "danger", "Room name already exists in this cinema");
+                redirectBackToEditWithFilters(request, response, roomId);
                 return;
             }
 
-            // Update room - KHÔNG cần update seatCapacity nữa
+            // Update room 
             room.setRoomName(roomName);
             room.setRoomType(roomType);
             room.setActive(isActive);
@@ -966,14 +973,15 @@ public class AdminDashboardServlet extends HttpServlet {
             if (success) {
                 sendToast(request, "success", "Room updated successfully");
             } else {
-                sendToast(request, "error", "Failed to update room");
+                sendToast(request, "danger", "Failed to update room");
             }
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid input data");
+            sendToast(request, "danger", "Invalid input data");
         }
 
-        response.sendRedirect("dashboard?section=screening-room-management");
+        // Redirect back to list with preserved filters
+        redirectBackToListWithFilters(request, response);
     }
 
     private void handleDeleteRoomPost(HttpServletRequest request, HttpServletResponse response,
@@ -981,19 +989,20 @@ public class AdminDashboardServlet extends HttpServlet {
 
         try {
             int roomId = Integer.parseInt(request.getParameter("id"));
-            boolean success = roomDAO.deleteRoom(roomId);
+            boolean success = roomDAO.deleteHRoom(roomId);
 
             if (success) {
                 sendToast(request, "success", "Room deleted successfully");
             } else {
-                sendToast(request, "error", "Failed to delete room");
+                sendToast(request, "danger", "Failed to delete room");
             }
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid room ID");
+            sendToast(request, "danger", "Invalid room ID");
         }
 
-        response.sendRedirect("dashboard?section=screening-room-management");
+        // Redirect back to list with preserved filters
+        redirectBackToListWithFilters(request, response);
     }
 
     private void handleUpdateSeatPost(HttpServletRequest request, HttpServletResponse response,
@@ -1008,15 +1017,14 @@ public class AdminDashboardServlet extends HttpServlet {
 
             SeatM seat = seatDAO.getSeatById(seatId);
             if (seat == null) {
-                sendToast(request, "error", "Seat not found");
+                sendToast(request, "danger", "Seat not found");
                 response.sendRedirect("dashboard?section=screening-room-management");
                 return;
             }
 
             if (!seat.canBeModified()) {
-                sendToast(request, "error", "Cannot modify booked seat");
-                // Redirect back với đầy đủ parameters
-                redirectBackToRoom(request, response, roomId, mode);
+                sendToast(request, "danger", "Cannot modify booked seat");
+                redirectBackToRoomWithFilters(request, response, roomId, mode);
                 return;
             }
 
@@ -1028,15 +1036,14 @@ public class AdminDashboardServlet extends HttpServlet {
             if (success) {
                 sendToast(request, "success", "Seat updated successfully");
             } else {
-                sendToast(request, "error", "Failed to update seat");
+                sendToast(request, "danger", "Failed to update seat");
             }
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid seat data");
+            sendToast(request, "danger", "Invalid seat data");
         }
 
-        // Redirect back với đầy đủ parameters
-        redirectBackToRoom(request, response,
+        redirectBackToRoomWithFilters(request, response,
                 Integer.parseInt(request.getParameter("roomId")),
                 request.getParameter("mode"));
     }
@@ -1051,14 +1058,14 @@ public class AdminDashboardServlet extends HttpServlet {
 
             SeatM seat = seatDAO.getSeatById(seatId);
             if (seat == null) {
-                sendToast(request, "error", "Seat not found");
-                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
+                sendToast(request, "danger", "Seat not found");
+                redirectBackToRoomWithFilters(request, response, roomId, mode);
                 return;
             }
 
             if (!seat.canBeModified()) {
-                sendToast(request, "error", "Cannot delete booked seat");
-                response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
+                sendToast(request, "danger", "Cannot delete booked seat");
+                redirectBackToRoomWithFilters(request, response, roomId, mode);
                 return;
             }
 
@@ -1067,16 +1074,16 @@ public class AdminDashboardServlet extends HttpServlet {
             if (success) {
                 sendToast(request, "success", "Seat deleted successfully");
             } else {
-                sendToast(request, "error", "Failed to delete seat");
+                sendToast(request, "danger", "Failed to delete seat");
             }
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid seat ID");
+            sendToast(request, "danger", "Invalid seat ID");
         }
 
-        String roomId = request.getParameter("roomId");
-        String mode = request.getParameter("mode");
-        response.sendRedirect("dashboard?section=screening-room-management&action=" + mode + "&id=" + roomId);
+        redirectBackToRoomWithFilters(request, response,
+                Integer.parseInt(request.getParameter("roomId")),
+                request.getParameter("mode"));
     }
 
     private void handleBulkSeatActionPost(HttpServletRequest request, HttpServletResponse response,
@@ -1088,8 +1095,8 @@ public class AdminDashboardServlet extends HttpServlet {
 
             String[] seatIdsParam = request.getParameterValues("seatIds");
             if (seatIdsParam == null || seatIdsParam.length == 0) {
-                sendToast(request, "error", "No seats selected");
-                response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+                sendToast(request, "danger", "No seats selected");
+                redirectBackToRoomWithFilters(request, response, roomId, "edit");
                 return;
             }
 
@@ -1119,15 +1126,98 @@ public class AdminDashboardServlet extends HttpServlet {
             if (success) {
                 sendToast(request, "success", message);
             } else {
-                sendToast(request, "error", "Failed to update seats");
+                sendToast(request, "danger", "Failed to update seats");
             }
 
         } catch (NumberFormatException e) {
-            sendToast(request, "error", "Invalid seat IDs");
+            sendToast(request, "danger", "Invalid seat IDs");
         }
 
-        String roomId = request.getParameter("roomId");
-        response.sendRedirect("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+        redirectBackToRoomWithFilters(request, response,
+                Integer.parseInt(request.getParameter("roomId")), "edit");
+    }
+
+    // ========== FILTER PRESERVATION HELPER METHODS ==========
+    
+    private void redirectBackToListWithFilters(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management");
+
+        // Get all filter parameters from request
+        String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
+        
+        for (String param : filterParams) {
+            String value = request.getParameter(param);
+            if (isValidFilterValue(value)) {
+                redirectUrl.append("&").append(param).append("=").append(encodeValue(value));
+            }
+        }
+
+        System.out.println("Redirecting to list with filters: " + redirectUrl.toString());
+        response.sendRedirect(redirectUrl.toString());
+    }
+
+    private void redirectBackToCreateWithFilters(HttpServletRequest request, HttpServletResponse response, int cinemaId) throws IOException {
+        StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management&action=create&cinemaId=" + cinemaId);
+
+        // Get all filter parameters from request
+        String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
+        
+        for (String param : filterParams) {
+            String value = request.getParameter(param);
+            if (isValidFilterValue(value)) {
+                redirectUrl.append("&").append(param).append("=").append(encodeValue(value));
+            }
+        }
+
+        response.sendRedirect(redirectUrl.toString());
+    }
+
+    private void redirectBackToEditWithFilters(HttpServletRequest request, HttpServletResponse response, int roomId) throws IOException {
+        StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management&action=edit&id=" + roomId);
+
+        // Get all filter parameters from request
+        String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
+        
+        for (String param : filterParams) {
+            String value = request.getParameter(param);
+            if (isValidFilterValue(value)) {
+                redirectUrl.append("&").append(param).append("=").append(encodeValue(value));
+            }
+        }
+
+        response.sendRedirect(redirectUrl.toString());
+    }
+
+    private void redirectBackToRoomWithFilters(HttpServletRequest request, HttpServletResponse response,
+            int roomId, String mode) throws IOException {
+        
+        StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management");
+        redirectUrl.append("&action=").append(mode != null ? mode : "edit");
+        redirectUrl.append("&id=").append(roomId);
+
+        // Get all filter parameters from request
+        String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
+        
+        for (String param : filterParams) {
+            String value = request.getParameter(param);
+            if (isValidFilterValue(value)) {
+                redirectUrl.append("&").append(param).append("=").append(encodeValue(value));
+            }
+        }
+
+        response.sendRedirect(redirectUrl.toString());
+    }
+
+    private boolean isValidFilterValue(String value) {
+        return value != null && !value.trim().isEmpty() && !value.equals("none") && !value.equals("all");
+    }
+
+    private String encodeValue(String value) {
+        try {
+            return java.net.URLEncoder.encode(value, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            return value;
+        }
     }
 
     // ========== HELPER METHODS ==========
@@ -1140,7 +1230,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         System.err.println("Error in " + context + ": " + e.getMessage());
 
-        sendToast(request, "error", "System error occurred");
+        sendToast(request, "danger", "System error occurred");
         response.sendRedirect("dashboard");
     }
 
@@ -1188,41 +1278,8 @@ public class AdminDashboardServlet extends HttpServlet {
         }
     }
 
-    // Helper method để redirect back với đầy đủ parameters
-    private void redirectBackToRoom(HttpServletRequest request, HttpServletResponse response,
-            int roomId, String mode) throws IOException {
-
-        StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management");
-        redirectUrl.append("&action=").append(mode != null ? mode : "edit");
-        redirectUrl.append("&id=").append(roomId);
-
-        // Thêm các filter parameters
-        addFilterParameter(request, redirectUrl, "locationFilter");
-        addFilterParameter(request, redirectUrl, "cinemaFilter");
-        addFilterParameter(request, redirectUrl, "roomType");
-        addFilterParameter(request, redirectUrl, "status");
-        addFilterParameter(request, redirectUrl, "search");
-        addFilterParameter(request, redirectUrl, "page");
-
-        response.sendRedirect(redirectUrl.toString());
-    }
-
-    // Helper method để thêm parameter nếu có giá trị
-    private void addFilterParameter(HttpServletRequest request,
-            StringBuilder url, String paramName) {
-        String value = request.getParameter(paramName);
-        if (value != null && !value.trim().isEmpty() && !value.equals("none") && !value.equals("all")) {
-            try {
-                url.append("&").append(paramName).append("=")
-                        .append(java.net.URLEncoder.encode(value, "UTF-8"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                url.append("&").append(paramName).append("=").append(value);
-            }
-        }
-    }
-
     @Override
     public String getServletInfo() {
-        return "Admin Dashboard Servlet - Updated for new DAO";
+        return "Admin Dashboard Servlet - Updated with Filter Preservation";
     }
 }

@@ -11,7 +11,7 @@
                         <i class="bi
                            <c:choose>
                                <c:when test="${toastType == 'success'}">bi-check-circle-fill</c:when>
-                               <c:when test="${toastType == 'error'}">bi-exclamation-circle-fill</c:when>
+                               <c:when test="${toastType == 'danger'}">bi-exclamation-circle-fill</c:when>
                                <c:when test="${toastType == 'warning'}">bi-exclamation-triangle-fill</c:when>
                                <c:otherwise>bi-info-circle-fill</c:otherwise>
                            </c:choose>
@@ -54,39 +54,28 @@
                 </ol>
             </nav>
         </div>
-        <!-- Sửa nút Back to List để giữ lại filters -->
-        <%
-            // Lấy các tham số filter từ request
-            String locationFilter = request.getParameter("locationFilter");
-            String cinemaFilter = request.getParameter("cinemaFilter");
-            String roomType = request.getParameter("roomType");
-            String status = request.getParameter("status");
-            String search = request.getParameter("search");
-            String page1 = request.getParameter("page");
-    
-            // Tạo URL với các tham số filter
-            StringBuilder backUrl = new StringBuilder("dashboard?section=screening-room-management");
-            if (locationFilter != null && !locationFilter.equals("none")) {
-                backUrl.append("&locationFilter=").append(locationFilter);
-            }
-            if (cinemaFilter != null && !cinemaFilter.equals("none")) {
-                backUrl.append("&cinemaFilter=").append(cinemaFilter);
-            }
-            if (roomType != null && !roomType.equals("all")&&!roomType.equals("all")) {
-                backUrl.append("&roomType=").append(roomType);
-            }
-            if (status != null && !status.equals("all")) {
-                backUrl.append("&status=").append(status);
-            }
-            if (search != null && !search.trim().isEmpty()) {
-                backUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
-            }
-            if (page1 != null && !page1.equals("1")) {
-                backUrl.append("&page=").append(page);
-            }
-        %>
+        <!-- Back to List button with preserved filters -->
+        <c:set var="backUrl" value="dashboard?section=screening-room-management"/>
+        <c:if test="${not empty param.locationFilter && param.locationFilter != 'none'}">
+            <c:set var="backUrl" value="${backUrl}&locationFilter=${param.locationFilter}"/>
+        </c:if>
+        <c:if test="${not empty param.cinemaFilter && param.cinemaFilter != 'none'}">
+            <c:set var="backUrl" value="${backUrl}&cinemaFilter=${param.cinemaFilter}"/>
+        </c:if>
+        <c:if test="${not empty param.roomType && param.roomType != 'all'}">
+            <c:set var="backUrl" value="${backUrl}&roomType=${param.roomType}"/>
+        </c:if>
+        <c:if test="${not empty param.status && param.status != 'all'}">
+            <c:set var="backUrl" value="${backUrl}&status=${param.status}"/>
+        </c:if>
+        <c:if test="${not empty param.search}">
+            <c:set var="backUrl" value="${backUrl}&search=${param.search}"/>
+        </c:if>
+        <c:if test="${not empty param.page && param.page != '1'}">
+            <c:set var="backUrl" value="${backUrl}&page=${param.page}"/>
+        </c:if>
 
-        <a href="<%= backUrl.toString() %>" class="btn btn-outline-secondary">
+        <a href="${backUrl}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to List
         </a>
     </div>
@@ -104,6 +93,27 @@
                     <form id="roomForm" action="dashboard" method="POST">
                         <input type="hidden" name="action" value="${param.action == 'create' ? 'create' : 'update'}">
                         <input type="hidden" name="section" value="screening-room-management">
+                        
+                        <!-- Preserve filter parameters in form -->
+                        <c:if test="${not empty param.locationFilter && param.locationFilter != 'none'}">
+                            <input type="hidden" name="locationFilter" value="${param.locationFilter}">
+                        </c:if>
+                        <c:if test="${not empty param.cinemaFilter && param.cinemaFilter != 'none'}">
+                            <input type="hidden" name="cinemaFilter" value="${param.cinemaFilter}">
+                        </c:if>
+                        <c:if test="${not empty param.roomType && param.roomType != 'all'}">
+                            <input type="hidden" name="roomType" value="${param.roomType}">
+                        </c:if>
+                        <c:if test="${not empty param.status && param.status != 'all'}">
+                            <input type="hidden" name="status" value="${param.status}">
+                        </c:if>
+                        <c:if test="${not empty param.search}">
+                            <input type="hidden" name="search" value="${param.search}">
+                        </c:if>
+                        <c:if test="${not empty param.page && param.page != '1'}">
+                            <input type="hidden" name="page" value="${param.page}">
+                        </c:if>
+                        
                         <c:if test="${param.action != 'create'}">
                             <input type="hidden" name="roomId" value="${viewRoom.roomID}">
                         </c:if>
@@ -151,45 +161,41 @@
                             </c:choose>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Seat Capacity <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="seatCapacity" 
-                                   value="${viewRoom.seatCapacity}" 
-                                   ${param.action == 'view' ? 'readonly' : ''} 
-                                   required 
-                                   min="1" 
-                                   max="500"
-                                   placeholder="Enter seat capacity">
-                            <c:if test="${param.action != 'view'}">
-                                <div class="form-text">
-                                    Actual capacity will be updated after generating seats
-                                </div>
-                            </c:if>
-                        </div>
-
+                        <!-- REMOVED Seat Capacity field for create mode -->
                         <c:if test="${param.action != 'create'}">
                             <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <c:choose>
-                                    <c:when test="${param.action == 'view'}">
-                                        <input type="text" class="form-control" 
-                                               value="${viewRoom.active ? 'Active' : 'Inactive'}" readonly>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" name="isActive" 
-                                                   id="isActiveSwitch" ${viewRoom.active ? 'checked' : ''}>
-                                            <label class="form-check-label" for="isActiveSwitch">
-                                                Active Room
-                                            </label>
-                                        </div>
-                                        <div class="form-text">
-                                            Inactive rooms cannot be used for screenings
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
+                                <label class="form-label">Seat Capacity</label>
+                                <input type="number" class="form-control" 
+                                       value="${viewRoom.seatCapacity}" 
+                                       readonly>
+                                <div class="form-text">
+                                    Capacity is automatically calculated from seat layout
+                                </div>
                             </div>
                         </c:if>
+
+                        <!-- ADDED Status field for create mode -->
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <c:choose>
+                                <c:when test="${param.action == 'view'}">
+                                    <input type="text" class="form-control" 
+                                           value="${viewRoom.active ? 'Active' : 'Inactive'}" readonly>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="isActive" 
+                                               id="isActiveSwitch" ${viewRoom.active ? 'checked' : (param.action == 'create' ? 'checked' : '')}>
+                                        <label class="form-check-label" for="isActiveSwitch">
+                                            Active Room
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Inactive rooms cannot be used for screenings
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
 
                         <c:if test="${param.action != 'view'}">
                             <div class="d-grid gap-2">
@@ -486,6 +492,25 @@
                 <form id="deleteRoomForm" method="POST" action="dashboard">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="section" value="screening-room-management">
+                    <!-- Preserve filter parameters in delete form -->
+                    <c:if test="${not empty param.locationFilter && param.locationFilter != 'none'}">
+                        <input type="hidden" name="locationFilter" value="${param.locationFilter}">
+                    </c:if>
+                    <c:if test="${not empty param.cinemaFilter && param.cinemaFilter != 'none'}">
+                        <input type="hidden" name="cinemaFilter" value="${param.cinemaFilter}">
+                    </c:if>
+                    <c:if test="${not empty param.roomType && param.roomType != 'all'}">
+                        <input type="hidden" name="roomType" value="${param.roomType}">
+                    </c:if>
+                    <c:if test="${not empty param.status && param.status != 'all'}">
+                        <input type="hidden" name="status" value="${param.status}">
+                    </c:if>
+                    <c:if test="${not empty param.search}">
+                        <input type="hidden" name="search" value="${param.search}">
+                    </c:if>
+                    <c:if test="${not empty param.page && param.page != '1'}">
+                        <input type="hidden" name="page" value="${param.page}">
+                    </c:if>
                     <input type="hidden" name="id" id="deleteRoomId">
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash"></i> Delete
@@ -587,7 +612,7 @@
         height: 35px;
     }
 
-    /* COUPLE seat - DOUBLE WIDTH */
+    /* COUPLE seat */
     .seat.couple {
         width: 70px; /* Double width */
         height: 35px;
@@ -804,7 +829,7 @@
         deleteModal.show();
     }
 
-    // Generate seats modal function - WORKING VERSION
+    // Generate seats modal function
     function showGenerateSeatsModal(roomId, actionType) {
         console.log('showGenerateSeatsModal called with:', roomId, actionType);
 
@@ -920,7 +945,7 @@
         if (roomForm) {
             roomForm.addEventListener('submit', function (e) {
                 const roomName = this.querySelector('input[name="roomName"]');
-                const seatCapacity = this.querySelector('input[name="seatCapacity"]');
+                const roomType = this.querySelector('select[name="roomType"]');
 
                 if (roomName && roomName.value.trim() === '') {
                     e.preventDefault();
@@ -929,10 +954,10 @@
                     return;
                 }
 
-                if (seatCapacity && (seatCapacity.value < 1 || seatCapacity.value > 500)) {
+                if (roomType && roomType.value === '') {
                     e.preventDefault();
-                    alert('Seat capacity must be between 1 and 500');
-                    seatCapacity.focus();
+                    alert('Please select a room type');
+                    roomType.focus();
                     return;
                 }
             });
