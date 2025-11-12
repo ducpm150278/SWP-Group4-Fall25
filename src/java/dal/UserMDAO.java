@@ -32,40 +32,6 @@ public class UserMDAO extends DBContext {
     // Test function
     public static void main(String[] args) {
         UserDAO ud = new UserDAO();
-
-        // Test get all user infor
-//        for (User user : ud.getAllUser()) {
-//            System.out.println(user);
-//        }
-        // Test add new account
-        Random random = new Random();
-
-        // Gender data
-        String[] gender = {"Male", "Female", "Other"};
-
-        // Role data -  theo bảng mới
-        String[] role = {"Customer", "Admin", "Staff"};
-
-        //Status data -  theo bảng mới
-        String[] status = {"Active", "Disabled", "Suspended", "Temporary"};
-
-        // Generator user data
-        String fullName;
-
-//        for (int i = 0; i < 20; i++) {
-//            //Get fullname data
-//            fullName = ud.generateRandomFullName();
-//
-//            ud.addNewUser(fullName, ud.generateRandomEmail(fullName), ud.generatePhoneNumber(), ud.generatePassword(12),
-//                    gender[random.nextInt(gender.length)], role[random.nextInt(role.length)], ud.generateAddress(),
-//                    Date.valueOf(ud.generateRandomDOB(18, 55)), status[random.nextInt(status.length)]);
-//        }
-        // Test delete user
-//            ud.deleteUser(1);
-        // Test update uset setting
-//        ud.updateSettingUser(role[random.nextInt(role.length)], status[random.nextInt(status.length)], 7);
-        // Test get user by id
-//        System.out.println(ud.getUserByID(7));
         // Test filter list user
         for (User allUser : ud.getAllUsers(null, "all", "all", "name_asc")) {
             System.out.println(allUser);
@@ -134,8 +100,8 @@ public class UserMDAO extends DBContext {
 
         String ALL_ALLOWED = UPPER + LOWER + DIGITS + SPECIAL;
 
-        if (length < 4) {
-            throw new IllegalArgumentException("Độ dài mật khẩu phải ít nhất 4 ký tự");
+        if (length < 6) {
+            throw new IllegalArgumentException("Độ dài mật khẩu phải ít nhất 6 ký tự");
         }
 
         SecureRandom random = new SecureRandom();
@@ -148,7 +114,7 @@ public class UserMDAO extends DBContext {
         password.add(LOWER.charAt(random.nextInt(LOWER.length())));
 
         // Thêm các ký tự còn lại
-        for (int i = 4; i < length; i++) {
+        for (int i = 6; i < length; i++) {
             password.add(ALL_ALLOWED.charAt(random.nextInt(ALL_ALLOWED.length())));
         }
 
@@ -164,54 +130,54 @@ public class UserMDAO extends DBContext {
         return sb.toString();
     }
 
-    //Fullname generator
-    public String generateRandomFullName() {
-        Random random = new Random();
-        String[] FIRST_NAMES = {
-            "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Võ", "Đặng", "Bùi", "Đỗ", "Hồ"
-        };
-
-        String[] MIDDLE_NAMES = {
-            "Văn", "Thị", "Hữu", "Quang", "Gia", "Thanh", "Ngọc", "Minh", "Xuân", "Phúc"
-        };
-
-        String[] LAST_NAMES = {
-            "An", "Bình", "Chi", "Dũng", "Hạnh", "Hòa", "Khánh", "Lan", "Nam", "Tú"
-        };
-        String first = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)];
-        String middle = MIDDLE_NAMES[random.nextInt(MIDDLE_NAMES.length)];
-        String last = LAST_NAMES[random.nextInt(LAST_NAMES.length)];
-
-        return first + " " + middle + " " + last;
-    }
-
-    // Xóa dấu tiếng Việt, chuyển thành dạng ascii
-    private static String normalize(String input) {
-        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").toLowerCase(Locale.ROOT);
-    }
-
-    public static String generateRandomEmail(String fullName) {
-        String normalized = normalize(fullName); // ví dụ: "Nguyễn Văn An" → "nguyen van an"
-        String[] parts = normalized.split(" ");
-        StringBuilder emailName = new StringBuilder();
-
-        for (int i = 0; i < parts.length; i++) {
-            emailName.append(parts[i]);
-        }
-
-        // Thêm số ngẫu nhiên để tránh trùng
-        Random random = new Random();
-        int number = 10 + random.nextInt(90);
-
-        String[] DOMAINS = {
-            "@gmail.com", "@yahoo.com", "@outlook.com", "@example.com"
-        };
-
-        String domain = DOMAINS[random.nextInt(DOMAINS.length)];
-        return emailName + String.valueOf(number) + domain;
-    }
+//    //Fullname generator
+//    public String generateRandomFullName() {
+//        Random random = new Random();
+//        String[] FIRST_NAMES = {
+//            "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Võ", "Đặng", "Bùi", "Đỗ", "Hồ"
+//        };
+//
+//        String[] MIDDLE_NAMES = {
+//            "Văn", "Thị", "Hữu", "Quang", "Gia", "Thanh", "Ngọc", "Minh", "Xuân", "Phúc"
+//        };
+//
+//        String[] LAST_NAMES = {
+//            "An", "Bình", "Chi", "Dũng", "Hạnh", "Hòa", "Khánh", "Lan", "Nam", "Tú"
+//        };
+//        String first = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)];
+//        String middle = MIDDLE_NAMES[random.nextInt(MIDDLE_NAMES.length)];
+//        String last = LAST_NAMES[random.nextInt(LAST_NAMES.length)];
+//
+//        return first + " " + middle + " " + last;
+//    }
+//
+//    // Xóa dấu tiếng Việt, chuyển thành dạng ascii
+//    private static String normalize(String input) {
+//        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+//        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+//        return pattern.matcher(normalized).replaceAll("").toLowerCase(Locale.ROOT);
+//    }
+//
+//    public static String generateRandomEmail(String fullName) {
+//        String normalized = normalize(fullName); // ví dụ: "Nguyễn Văn An" → "nguyen van an"
+//        String[] parts = normalized.split(" ");
+//        StringBuilder emailName = new StringBuilder();
+//
+//        for (int i = 0; i < parts.length; i++) {
+//            emailName.append(parts[i]);
+//        }
+//
+//        // Thêm số ngẫu nhiên để tránh trùng
+//        Random random = new Random();
+//        int number = 10 + random.nextInt(90);
+//
+//        String[] DOMAINS = {
+//            "@gmail.com", "@yahoo.com", "@outlook.com", "@example.com"
+//        };
+//
+//        String domain = DOMAINS[random.nextInt(DOMAINS.length)];
+//        return emailName + String.valueOf(number) + domain;
+//    }
 
     // Date of birth generator
     public LocalDate generateRandomDOB(int minAge, int maxAge) {
@@ -634,7 +600,7 @@ public class UserMDAO extends DBContext {
             int rows = ps.executeUpdate();
             System.out.println("➡️ Rows affected: " + rows);
             return rows > 0;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("❌ DAO Exception: " + e);
         }
         return false;
@@ -650,7 +616,7 @@ public class UserMDAO extends DBContext {
             int rows = ps.executeUpdate();
             System.out.println("Password updated for userID: " + userId);
             return rows > 0;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Error updating password: " + e);
         }
         return false;

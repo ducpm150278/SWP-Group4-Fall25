@@ -76,15 +76,43 @@
                             <div class="screen-bar">SCREEN</div>
                         </div>
 
+                        <!-- Seat Legend với icon -->
+                        <div class="seat-legend mb-3">
+                            <div class="legend-item">
+                                <div class="seat standard" style="width: 20px; height: 20px;"></div>
+                                <span>💺 Standard</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat vip" style="width: 20px; height: 20px;"></div>
+                                <span>⭐ VIP</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat couple" style="width: 40px; height: 20px;"></div>
+                                <span>💑 Couple</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="seat disabled" style="width: 20px; height: 20px;"></div>
+                                <span>♿ Disabled</span>
+                            </div>
+                        </div>
+
+                        <!-- UPDATED: Sử dụng cấu trúc seat-row giống screening-room-details.jsp -->
                         <c:if test="${not empty seats}">
                             <div class="seats-container">
-                                <c:forEach var="seat" items="${seats}">
-                                    <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()}
-                                         <c:if test="${editSeat.seatID == seat.seatID}">selected-seat</c:if>"
-                                             data-bs-toggle="tooltip" 
-                                             title="Row ${seat.seatRow}, Number ${seat.seatNumber} - ${seat.seatType} - ${seat.status}">
-                                        ${seat.seatRow}${seat.seatNumber}
-                                    </div>
+                                <c:forEach var="row" items="${['A','B','C','D','E','F','G','H','I','J','K','L','M','N']}">
+                                    <c:set var="rowSeats" value="${seats.stream().filter(s -> s.seatRow == row).toList()}"/>
+                                    <c:if test="${not empty rowSeats}">
+                                        <div class="seat-row" data-row="${row}">
+                                            <c:forEach var="seat" items="${rowSeats}">
+                                                <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()} 
+                                                     <c:if test="${editSeat.seatID == seat.seatID}">selected-seat</c:if>"
+                                                     data-bs-toggle="tooltip" 
+                                                     title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
+                                                    <span class="seat-text">${seat.seatRow}${seat.seatNumber}</span>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
                                 </c:forEach>
                             </div>
                         </c:if>
@@ -222,90 +250,186 @@
 </div>
 
 <style>
-    /* Screen Styles */
+    /* Screen Styles - Giống screening-room-details.jsp */
     .screen {
-        background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+        background: linear-gradient(180deg, #333 0%, #555 100%);
         height: 20px;
-        border-radius: 8px;
+        border-radius: 10px;
         margin: 0 20px;
         position: relative;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .screen-bar {
-        color: #ecf0f1;
+        color: white;
         font-size: 12px;
         font-weight: bold;
         position: absolute;
-        top: -22px;
+        top: -25px;
         left: 0;
         right: 0;
         text-align: center;
     }
 
-    /* Seat Container - Optimized for full layout display */
+    /* Seat Container - Giống screening-room-details.jsp */
     .seats-container {
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        gap: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         padding: 15px;
-        justify-items: center;
-        max-width: 100%;
-        overflow: visible;
+        align-items: center;
     }
 
-    /* Base Seat Styles - Slightly smaller */
+    .seat-row {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Base seat style - Giống screening-room-details.jsp */
     .seat {
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
+        border-radius: 5px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 10px;
         font-weight: bold;
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
         cursor: default;
+        transition: all 0.3s ease;
+        border: 1px solid #dee2e6;
+        color: white;
+        position: relative;
+        overflow: hidden;
     }
 
-    /* Seat Type Colors */
+    /* Standard seat size */
+    .seat.standard {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* VIP seat size */
+    .seat.vip {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* Disabled seat size */
+    .seat.disabled {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* COUPLE seat - DOUBLE WIDTH - Giống screening-room-details.jsp */
+    .seat.couple {
+        width: 70px; /* Double width */
+        height: 35px;
+        background: linear-gradient(135deg, #e83e8c, #d91a72);
+        position: relative;
+    }
+
+    /* Seat type colors - Giống screening-room-details.jsp */
     .seat.standard {
         background: linear-gradient(135deg, #6c757d, #5a6268);
-        color: white;
-        border-color: #495057;
     }
     .seat.vip {
         background: linear-gradient(135deg, #ffc107, #e0a800);
-        color: #000;
-        border-color: #d39e00;
+        color: black;
     }
     .seat.couple {
         background: linear-gradient(135deg, #e83e8c, #d91a72);
-        color: white;
-        border-color: #c2185b;
     }
     .seat.disabled {
         background: linear-gradient(135deg, #17a2b8, #138496);
-        color: white;
-        border-color: #117a8b;
     }
 
-    /* Status Indicators */
+    /* Seat status styles - Giống screening-room-details.jsp */
     .seat.available {
         opacity: 1;
     }
     .seat.maintenance {
         background: linear-gradient(135deg, #fd7e14, #e55a00) !important;
-        color: white !important;
-        border-color: #dc6500 !important;
     }
     .seat.unavailable {
-        background: linear-gradient(135deg, #6c757d, #5a6268) !important;
-        opacity: 0.4;
-        color: white !important;
+        opacity: 0.5;
     }
 
-    /* Selected Seat Highlight */
+    /* Icons for seats - Giống screening-room-details.jsp */
+    .seat.standard::before {
+        content: "💺";
+        font-size: 12px;
+        margin-right: 2px;
+    }
+
+    .seat.vip::before {
+        content: "⭐";
+        font-size: 12px;
+        margin-right: 2px;
+    }
+
+    .seat.couple::before {
+        content: "💑";
+        font-size: 14px;
+        margin-right: 4px;
+    }
+
+    .seat.disabled::before {
+        content: "♿";
+        font-size: 12px;
+        margin-right: 2px;
+    }
+
+    /* Hide text for very small seats, show only icon */
+    .seat .seat-text {
+        font-size: 9px;
+    }
+
+    /* For couple seats, we can show both icon and text nicely */
+    .seat.couple .seat-text {
+        font-size: 10px;
+    }
+
+    /* Seat legend - Giống screening-room-details.jsp */
+    .seat-legend {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+    }
+    .legend-color {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
+    }
+
+    /* NEW: Special styling for couple seats to make them stand out - Giống screening-room-details.jsp */
+    .seat.couple {
+        border: 2px solid #c2185b;
+        box-shadow: 0 2px 4px rgba(232, 62, 140, 0.3);
+    }
+
+    .seat.couple::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        pointer-events: none;
+    }
+
+    /* Selected Seat Highlight - Giữ lại từ file cũ */
     .selected-seat {
         border: 3px solid #dc3545 !important;
         box-shadow: 0 0 15px rgba(220, 53, 69, 0.6) !important;
@@ -324,6 +448,34 @@
         }
         100% {
             box-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
+        }
+    }
+
+    /* Responsive design - Giống screening-room-details.jsp */
+    @media (max-width: 768px) {
+        .seat.standard, .seat.vip, .seat.disabled {
+            width: 30px;
+            height: 30px;
+            font-size: 9px;
+        }
+        .seat.couple {
+            width: 60px;
+            height: 30px;
+        }
+        .seats-container {
+            gap: 6px;
+            padding: 10px;
+        }
+        .seat-row {
+            gap: 4px;
+        }
+        .seat::before {
+            font-size: 10px;
+            margin-right: 1px;
+        }
+        .seat.couple::before {
+            font-size: 12px;
+            margin-right: 2px;
         }
     }
 
@@ -372,33 +524,6 @@
     .alert-warning {
         font-size: 0.875rem;
         padding: 0.5rem 0.75rem;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 992px) {
-        .seats-container {
-            grid-template-columns: repeat(10, 1fr);
-            gap: 5px;
-            padding: 10px;
-        }
-
-        .seat {
-            width: 28px;
-            height: 28px;
-            font-size: 9px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .seats-container {
-            grid-template-columns: repeat(8, 1fr);
-        }
-
-        .seat {
-            width: 26px;
-            height: 26px;
-            font-size: 8px;
-        }
     }
 
     /* Text sizes for compact layout */

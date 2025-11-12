@@ -451,7 +451,7 @@
                         <i class="bi
                            <c:choose>
                                <c:when test="${toastType == 'success'}">bi-check-circle-fill</c:when>
-                               <c:when test="${toastType == 'error'}">bi-exclamation-circle-fill</c:when>
+                               <c:when test="${toastType == 'danger'}">bi-exclamation-circle-fill</c:when>
                                <c:when test="${toastType == 'warning'}">bi-exclamation-triangle-fill</c:when>
                                <c:otherwise>bi-info-circle-fill</c:otherwise>
                            </c:choose>
@@ -479,8 +479,8 @@
                     <c:when test="${sessionScope.toastType == 'success'}">
                         showToast('✅ ${sessionScope.toastMessage}', 'success');
                     </c:when>
-                    <c:when test="${sessionScope.toastType == 'error'}">
-                        showToast('❌ ${sessionScope.toastMessage}', 'error');
+                    <c:when test="${sessionScope.toastType == 'danger'}">
+                        showToast('❌ ${sessionScope.toastMessage}', 'danger');
                     </c:when>
                     <c:when test="${sessionScope.toastType == 'warning'}">
                         showToast('⚠️ ${sessionScope.toastMessage}', 'warning');
@@ -500,10 +500,10 @@
                         showToast('⚠️ User created but email sending failed!', 'warning');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_error_email'}">
-                        showToast('❌ Email already exists!', 'error');
+                        showToast('❌ Email already exists!', 'danger');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'add_error_phone'}">
-                        showToast('❌ Phone number already exists!', 'error');
+                        showToast('❌ Phone number already exists!', 'danger');
                     </c:when>
                     <c:when test="${sessionScope.showToast == 'update_success'}">
                         showToast('✅ User updated successfully!', 'success');
@@ -512,7 +512,7 @@
                         showToast('🗑️ User deleted successfully!', 'success');
                     </c:when>
                     <c:otherwise>
-                        showToast('❌ Operation failed!', 'error');
+                        showToast('❌ Operation failed!', 'danger');
                     </c:otherwise>
                 </c:choose>
                 <c:remove var="showToast" scope="session"/>
@@ -526,7 +526,7 @@
             
             const bgClass = {
                 'success': 'text-bg-success',
-                'error': 'text-bg-danger',
+                'danger': 'text-bg-danger',
                 'warning': 'text-bg-warning',
                 'info': 'text-bg-info'
             }[type] || 'text-bg-info';

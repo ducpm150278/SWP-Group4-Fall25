@@ -72,20 +72,20 @@ public class ScreeningRoomDAO {
             }
 
             ResultSet rs = ps.executeQuery();
-            
+
             // Lấy danh sách room IDs để đếm ghế hiệu quả
             List<Integer> roomIds = new ArrayList<>();
             List<ScreeningRoom> tempRooms = new ArrayList<>();
-            
+
             while (rs.next()) {
                 ScreeningRoom room = mapResultSetToScreeningRoom(rs);
                 tempRooms.add(room);
                 roomIds.add(room.getRoomID());
             }
-            
+
             // Đếm số ghế cho tất cả các phòng một lần
             Map<Integer, Integer> seatCounts = countSeatsForRooms(roomIds);
-            
+
             // Gán seat capacity cho từng phòng
             for (ScreeningRoom room : tempRooms) {
                 int seatCount = seatCounts.getOrDefault(room.getRoomID(), 0);
@@ -264,6 +264,21 @@ public class ScreeningRoomDAO {
         }
     }
 
+    // Hard delete
+    public boolean deleteHRoom(int roomId) {
+        String sql = "DELETE FROM ScreeningRooms WHERE RoomID = ?";
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, roomId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error in deleteHRoom: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Lấy rooms by cinema ID với seat capacity
     public List<ScreeningRoom> getRoomsByCinemaId(int cinemaId) {
         List<ScreeningRoom> list = new ArrayList<>();
@@ -285,16 +300,16 @@ public class ScreeningRoomDAO {
             // Lấy danh sách room IDs để đếm ghế hiệu quả
             List<Integer> roomIds = new ArrayList<>();
             List<ScreeningRoom> tempRooms = new ArrayList<>();
-            
+
             while (rs.next()) {
                 ScreeningRoom room = mapResultSetToScreeningRoom(rs);
                 tempRooms.add(room);
                 roomIds.add(room.getRoomID());
             }
-            
+
             // Đếm số ghế cho tất cả các phòng một lần
             Map<Integer, Integer> seatCounts = countSeatsForRooms(roomIds);
-            
+
             // Gán seat capacity cho từng phòng
             for (ScreeningRoom room : tempRooms) {
                 int seatCount = seatCounts.getOrDefault(room.getRoomID(), 0);
@@ -430,16 +445,16 @@ public class ScreeningRoomDAO {
             // Lấy danh sách room IDs để đếm ghế hiệu quả
             List<Integer> roomIds = new ArrayList<>();
             List<ScreeningRoom> tempRooms = new ArrayList<>();
-            
+
             while (rs.next()) {
                 ScreeningRoom room = mapResultSetToScreeningRoom(rs);
                 tempRooms.add(room);
                 roomIds.add(room.getRoomID());
             }
-            
+
             // Đếm số ghế cho tất cả các phòng một lần
             Map<Integer, Integer> seatCounts = countSeatsForRooms(roomIds);
-            
+
             // Gán seat capacity cho từng phòng
             for (ScreeningRoom room : tempRooms) {
                 int seatCount = seatCounts.getOrDefault(room.getRoomID(), 0);
@@ -470,16 +485,16 @@ public class ScreeningRoomDAO {
             // Lấy danh sách room IDs để đếm ghế hiệu quả
             List<Integer> roomIds = new ArrayList<>();
             List<ScreeningRoom> tempRooms = new ArrayList<>();
-            
+
             while (rs.next()) {
                 ScreeningRoom room = mapResultSetToScreeningRoom(rs);
                 tempRooms.add(room);
                 roomIds.add(room.getRoomID());
             }
-            
+
             // Đếm số ghế cho tất cả các phòng một lần
             Map<Integer, Integer> seatCounts = countSeatsForRooms(roomIds);
-            
+
             // Gán seat capacity cho từng phòng
             for (ScreeningRoom room : tempRooms) {
                 int seatCount = seatCounts.getOrDefault(room.getRoomID(), 0);
@@ -495,8 +510,6 @@ public class ScreeningRoomDAO {
         return list;
     }
 
-    // SEAT CAPACITY METHODS - ĐÃ SỬA THEO BẢNG SEATS MỚI
-
     // Phương thức đếm số ghế của một phòng chiếu (chỉ đếm ghế Available và Maintenance)
     public int countSeatsByRoomId(int roomId) {
         String sql = """
@@ -504,13 +517,12 @@ public class ScreeningRoomDAO {
             FROM Seats 
             WHERE RoomID = ? AND Status IN ('Available', 'Maintenance')
         """;
-        
-        try (Connection conn = db.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, roomId);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 return rs.getInt("seatCount");
             }
@@ -527,7 +539,7 @@ public class ScreeningRoomDAO {
         if (roomIds == null || roomIds.isEmpty()) {
             return seatCounts;
         }
-        
+
         // Tạo placeholders cho query
         String placeholders = String.join(",", Collections.nCopies(roomIds.size(), "?"));
         String sql = String.format("""
@@ -536,15 +548,14 @@ public class ScreeningRoomDAO {
             WHERE RoomID IN (%s) AND Status IN ('Available', 'Maintenance')
             GROUP BY RoomID
         """, placeholders);
-        
-        try (Connection conn = db.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             // Set parameters
             for (int i = 0; i < roomIds.size(); i++) {
                 ps.setInt(i + 1, roomIds.get(i));
             }
-            
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 seatCounts.put(rs.getInt("RoomID"), rs.getInt("seatCount"));
@@ -565,13 +576,12 @@ public class ScreeningRoomDAO {
             WHERE RoomID = ?
             GROUP BY Status
         """;
-        
-        try (Connection conn = db.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, roomId);
             ResultSet rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 statusCounts.put(rs.getString("Status"), rs.getInt("count"));
             }
@@ -591,13 +601,12 @@ public class ScreeningRoomDAO {
             WHERE RoomID = ? AND Status IN ('Available', 'Maintenance')
             GROUP BY SeatType
         """;
-        
-        try (Connection conn = db.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, roomId);
             ResultSet rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 typeCounts.put(rs.getString("SeatType"), rs.getInt("count"));
             }
@@ -635,7 +644,7 @@ public class ScreeningRoomDAO {
                 String roomType = rs.getString("RoomType");
                 int roomCount = rs.getInt("roomCount");
                 int seatCount = rs.getInt("totalSeats");
-                
+
                 totalRooms += roomCount;
                 totalSeats += seatCount;
                 seatsByType.put(roomType, seatCount);
@@ -655,60 +664,60 @@ public class ScreeningRoomDAO {
     // Lấy thống kê chi tiết về ghế cho một phòng
     public Map<String, Object> getDetailedSeatStatistics(int roomId) {
         Map<String, Object> stats = new HashMap<>();
-        
+
         // Tổng số ghế
         int totalSeats = countSeatsByRoomId(roomId);
         stats.put("totalSeats", totalSeats);
-        
+
         // Số ghế theo trạng thái
         Map<String, Integer> statusCounts = countSeatsByStatus(roomId);
         stats.put("seatsByStatus", statusCounts);
-        
+
         // Số ghế theo loại
         Map<String, Integer> typeCounts = countSeatsByType(roomId);
         stats.put("seatsByType", typeCounts);
-        
+
         return stats;
     }
 
     // MAIN METHOD FOR TESTING
     public static void main(String[] args) {
         ScreeningRoomDAO srd = new ScreeningRoomDAO();
-        
+
         System.out.println("=== TESTING SCREENING ROOM DAO ===");
-        
+
         // Test lấy danh sách phòng với seat capacity
         List<ScreeningRoom> rooms = srd.getRoomsWithFilters("Cần Thơ", null, "all", "all", "", 0, 10);
         System.out.println("Found " + rooms.size() + " rooms in Cần Thơ");
-        
+
         for (ScreeningRoom room : rooms) {
-            System.out.println("Room: " + room.getRoomName() + 
-                              " | Cinema: " + room.getCinema().getCinemaName() +
-                              " | Type: " + room.getRoomType() +
-                              " | Seats: " + room.getSeatCapacity() +
-                              " | Active: " + room.isActive());
-            
+            System.out.println("Room: " + room.getRoomName()
+                    + " | Cinema: " + room.getCinema().getCinemaName()
+                    + " | Type: " + room.getRoomType()
+                    + " | Seats: " + room.getSeatCapacity()
+                    + " | Active: " + room.isActive());
+
             // Test thống kê chi tiết ghế cho mỗi phòng
             if (room.getSeatCapacity() > 0) {
                 Map<String, Object> seatStats = srd.getDetailedSeatStatistics(room.getRoomID());
                 System.out.println("  - Seat Details: " + seatStats);
             }
         }
-        
+
         // Test count
         int totalCount = srd.countRoomsWithFilters("Cần Thơ", null, "all", "all", "");
         System.out.println("Total count: " + totalCount);
-        
+
         // Test lấy room types
         List<String> roomTypes = srd.getAvailableRoomTypes();
         System.out.println("Available room types: " + roomTypes);
-        
+
         if (!rooms.isEmpty()) {
             // Test lấy phòng cụ thể
             ScreeningRoom room = srd.getRoomById(rooms.get(0).getRoomID());
-            System.out.println("Room detail - Name: " + room.getRoomName() + 
-                              ", Seats: " + room.getSeatCapacity());
-            
+            System.out.println("Room detail - Name: " + room.getRoomName()
+                    + ", Seats: " + room.getSeatCapacity());
+
             // Test thống kê ghế theo trạng thái và loại
             Map<String, Integer> statusCounts = srd.countSeatsByStatus(room.getRoomID());
             Map<String, Integer> typeCounts = srd.countSeatsByType(room.getRoomID());
