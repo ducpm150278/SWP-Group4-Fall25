@@ -197,23 +197,37 @@
                 color: #7f8c8d;
             }
 
-            /* Filter Container Styles */
+            /* Filter Container Styles - UPDATED */
             .filter-container {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .filter-group {
                 position: relative;
             }
 
-            .filter-container select {
+            .filter-group label {
+                display: block;
+                font-size: 0.8rem;
+                color: #7f8c8d;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .filter-group select {
                 padding: 12px 15px;
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 font-size: 0.9rem;
                 background-color: white;
                 cursor: pointer;
-                min-width: 200px;
+                min-width: 150px;
                 transition: border-color 0.3s;
             }
 
-            .filter-container select:focus {
+            .filter-group select:focus {
                 outline: none;
                 border-color: #3498db;
             }
@@ -382,7 +396,7 @@
                 margin: 5% auto;
                 padding: 25px;
                 border: 1px solid #888;
-                width: 50%;
+                width: 70%;
                 border-radius: 8px;
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                 max-height: 80vh;
@@ -390,7 +404,7 @@
             }
 
             .view-modal-content {
-                max-width: 600px;
+                max-width: 800px;
             }
 
             .close {
@@ -427,6 +441,24 @@
             }
 
             /* View Modal Specific Styles */
+            .view-modal-columns {
+                display: flex;
+                gap: 30px;
+                margin-top: 20px;
+            }
+
+            .view-column {
+                flex: 1;
+            }
+
+            .view-column-left {
+                flex: 1;
+            }
+
+            .view-column-right {
+                flex: 1;
+            }
+
             .view-field {
                 margin-bottom: 15px;
                 padding-bottom: 15px;
@@ -437,10 +469,12 @@
                 font-weight: 600;
                 color: #2c3e50;
                 margin-bottom: 5px;
+                font-size: 0.9rem;
             }
 
             .view-value {
                 color: #555;
+                word-break: break-word;
             }
 
             .modal-actions {
@@ -448,6 +482,61 @@
                 gap: 10px;
                 margin-top: 20px;
                 justify-content: flex-end;
+            }
+
+            /* Image Preview Styles */
+            .image-preview-container {
+                margin-top: 10px;
+                text-align: center;
+            }
+
+            .image-preview {
+                max-width: 100%;
+                max-height: 200px;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+            }
+
+            .image-placeholder {
+                width: 100%;
+                height: 200px;
+                background-color: #f8f9fa;
+                border: 1px dashed #ddd;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6c757d;
+            }
+
+            .truncate-url {
+                display: block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .full-url {
+                display: none;
+                position: absolute;
+                background: white;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 100;
+                max-width: 400px;
+                word-break: break-all;
+            }
+
+            .url-container {
+                position: relative;
+                cursor: pointer;
+            }
+
+            .url-container:hover .full-url {
+                display: block;
             }
 
             /* Pagination Styles - Updated to match image */
@@ -522,6 +611,11 @@
                 .sidebar {
                     width: 30%;
                 }
+
+                .view-modal-columns {
+                    flex-direction: column;
+                    gap: 20px;
+                }
             }
 
             @media (max-width: 768px) {
@@ -564,15 +658,21 @@
 
                 .filter-container {
                     width: 100%;
+                    flex-direction: column;
+                    align-items: flex-start;
                 }
 
-                .filter-container select {
+                .filter-group {
+                    width: 100%;
+                }
+
+                .filter-group select {
                     width: 100%;
                 }
 
                 .modal-content {
-                    width: 90%;
-                    margin: 10% auto;
+                    width: 95%;
+                    margin: 5% auto;
                 }
 
                 .food-image, .food-image-placeholder {
@@ -590,6 +690,11 @@
                 .pagination {
                     justify-content: center;
                     flex-wrap: wrap;
+                }
+
+                .view-modal-columns {
+                    flex-direction: column;
+                    gap: 15px;
                 }
             }
         </style>
@@ -639,15 +744,24 @@
                         <input type="text" id="searchInput" placeholder="Search food items..." onkeyup="searchFood()">
                     </div>
 
+                    <!-- UPDATED FILTER CONTAINER -->
                     <div class="filter-container">
-                        <select id="filterSelect" onchange="filterFood()">
-                            <option value="all">All Categories & Status</option>
-                            <option value="category:Snack">Category: Snack</option>
-                            <option value="category:Drink">Category: Drink</option>
-                            <option value="category:Dessert">Category: Dessert</option>
-                            <option value="status:available">Status: Available</option>
-                            <option value="status:unavailable">Status: Unavailable</option>
-                        </select>
+                        <div class="filter-group">
+                            <select id="categoryFilter" onchange="filterFood()">
+                                <option value="all">All Categories</option>
+                                <option value="Snack">Snack</option>
+                                <option value="Drink">Drink</option>
+                                <option value="Dessert">Dessert</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <select id="statusFilter" onchange="filterFood()">
+                                <option value="all">All Status</option>
+                                <option value="available">Available</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button class="btn btn-primary" onclick="openAddFoodModal()">
@@ -681,6 +795,7 @@
                             <td>
                                 <% if (imageUrl != null) { %>
                                 <img src="<%= imageUrl %>" alt="<%= food.getFoodName() %>" class="food-image" 
+                                     data-image-url="<%= imageUrl %>"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="food-image-placeholder" style="display: none;">No Image</div>
                                 <% } else { %>
@@ -839,34 +954,62 @@
                 <span class="close" onclick="closeViewFoodModal()">&times;</span>
                 <h3 style="margin-bottom: 20px; color: #2c3e50;">Food Details</h3>
 
-                <div class="view-field">
-                    <div class="view-label">Food ID</div>
-                    <div class="view-value" id="viewFoodId">N/A</div>
-                </div>
+                <div class="view-modal-columns">
+                    <!-- Column 1: Food Information -->
+                    <div class="view-column view-column-left">
+                        <div class="view-field">
+                            <div class="view-label">Food ID</div>
+                            <div class="view-value" id="viewFoodId">N/A</div>
+                        </div>
 
-                <div class="view-field">
-                    <div class="view-label">Food Name</div>
-                    <div class="view-value" id="viewFoodName">N/A</div>
-                </div>
+                        <div class="view-field">
+                            <div class="view-label">Food Name</div>
+                            <div class="view-value" id="viewFoodName">N/A</div>
+                        </div>
 
-                <div class="view-field">
-                    <div class="view-label">Description</div>
-                    <div class="view-value" id="viewDescription">N/A</div>
-                </div>
+                        <div class="view-field">
+                            <div class="view-label">Description</div>
+                            <div class="view-value" id="viewDescription">N/A</div>
+                        </div>
 
-                <div class="view-field">
-                    <div class="view-label">Price</div>
-                    <div class="view-value" id="viewPrice">N/A</div>
-                </div>
+                        <div class="view-field">
+                            <div class="view-label">Price</div>
+                            <div class="view-value" id="viewPrice">N/A</div>
+                        </div>
 
-                <div class="view-field">
-                    <div class="view-label">Food Type</div>
-                    <div class="view-value" id="viewFoodType">N/A</div>
-                </div>
+                        <div class="view-field">
+                            <div class="view-label">Food Type</div>
+                            <div class="view-value" id="viewFoodType">N/A</div>
+                        </div>
 
-                <div class="view-field">
-                    <div class="view-label">Status</div>
-                    <div class="view-value" id="viewStatus">N/A</div>
+                        <div class="view-field">
+                            <div class="view-label">Status</div>
+                            <div class="view-value" id="viewStatus">N/A</div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Image Information -->
+                    <div class="view-column view-column-right">
+                        <div class="view-field">
+                            <div class="view-label">Image URL</div>
+                            <div class="view-value url-container" id="viewImageURLContainer">
+                                <span class="truncate-url" id="viewImageURL">N/A</span>
+                                <div class="full-url" id="viewFullImageURL"></div>
+                            </div>
+                        </div>
+
+                        <div class="view-field">
+                            <div class="view-label">Image Preview</div>
+                            <div class="view-value">
+                                <div class="image-preview-container">
+                                    <img id="viewFoodImage" src="" alt="Food Image" class="image-preview" style="display: none;">
+                                    <div id="viewImagePlaceholder" class="image-placeholder">
+                                        No Image Available
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-actions">
@@ -954,21 +1097,65 @@
                 }
 
                 const cells = targetRow.cells;
+
+                // Lấy URL hình ảnh từ hàng trong bảng
+                const imageCell = cells[1];
+                let imageUrl = null;
+                const imgElement = imageCell.querySelector('img');
+                if (imgElement && imgElement.getAttribute('data-image-url')) {
+                    imageUrl = imgElement.getAttribute('data-image-url');
+                }
+
                 const foodData = {
                     id: cells[0].textContent,
                     name: cells[2].textContent,
                     description: cells[3].textContent,
                     type: cells[4].querySelector('.food-type').textContent,
                     price: cells[5].textContent,
-                    status: cells[6].querySelector('.status').textContent
+                    status: cells[6].querySelector('.status').textContent,
+                    imageUrl: imageUrl
                 };
 
+                // Cập nhật thông tin vào modal - Column 1
                 document.getElementById('viewFoodId').textContent = foodData.id;
                 document.getElementById('viewFoodName').textContent = foodData.name;
                 document.getElementById('viewDescription').textContent = foodData.description;
                 document.getElementById('viewPrice').textContent = foodData.price;
                 document.getElementById('viewFoodType').textContent = foodData.type;
                 document.getElementById('viewStatus').textContent = foodData.status;
+
+                // Cập nhật Image URL và hiển thị hình ảnh - Column 2
+                const imageUrlElement = document.getElementById('viewImageURL');
+                const fullImageUrlElement = document.getElementById('viewFullImageURL');
+                const foodImageElement = document.getElementById('viewFoodImage');
+                const imagePlaceholderElement = document.getElementById('viewImagePlaceholder');
+
+                if (foodData.imageUrl && foodData.imageUrl !== 'null' && foodData.imageUrl !== 'N/A') {
+                    // Hiển thị URL rút gọn (50 ký tự)
+                    const truncatedUrl = foodData.imageUrl.length > 50
+                            ? foodData.imageUrl.substring(0, 50) + '...'
+                            : foodData.imageUrl;
+
+                    imageUrlElement.textContent = truncatedUrl;
+                    fullImageUrlElement.textContent = foodData.imageUrl;
+
+                    foodImageElement.src = foodData.imageUrl;
+                    foodImageElement.style.display = 'block';
+                    imagePlaceholderElement.style.display = 'none';
+
+                    // Xử lý lỗi tải hình ảnh
+                    foodImageElement.onerror = function () {
+                        foodImageElement.style.display = 'none';
+                        imagePlaceholderElement.style.display = 'flex';
+                        imagePlaceholderElement.textContent = 'Failed to load image';
+                    };
+                } else {
+                    imageUrlElement.textContent = 'No Image URL';
+                    fullImageUrlElement.textContent = 'No Image URL';
+                    foodImageElement.style.display = 'none';
+                    imagePlaceholderElement.style.display = 'flex';
+                    imagePlaceholderElement.textContent = 'No Image Available';
+                }
 
                 document.getElementById('viewFoodModal').style.display = 'block';
             }
@@ -997,18 +1184,20 @@
                 applyFilters();
             }
 
-            // Filter functionality
+            // Filter functionality - UPDATED
             function filterFood() {
                 applyFilters();
             }
 
-            // Combined search and filter function
+            // Combined search and filter function - UPDATED
             function applyFilters() {
                 const searchInput = document.getElementById('searchInput');
-                const filterSelect = document.getElementById('filterSelect');
+                const categoryFilter = document.getElementById('categoryFilter');
+                const statusFilter = document.getElementById('statusFilter');
 
                 const searchTerm = searchInput.value.toLowerCase();
-                const filterValue = filterSelect.value;
+                const categoryValue = categoryFilter.value;
+                const statusValue = statusFilter.value;
 
                 const rows = document.querySelectorAll('#foodTableBody tr');
 
@@ -1026,18 +1215,17 @@
                             description.includes(searchTerm) ||
                             foodType.includes(searchTerm);
 
-                    let matchesFilter = true;
-                    if (filterValue !== 'all') {
-                        const [filterType, filterValueText] = filterValue.split(':');
-
-                        if (filterType === 'category') {
-                            matchesFilter = foodType.includes(filterValueText.toLowerCase());
-                        } else if (filterType === 'status') {
-                            matchesFilter = status.includes(filterValueText.toLowerCase());
-                        }
+                    let matchesCategory = true;
+                    if (categoryValue !== 'all') {
+                        matchesCategory = foodType.includes(categoryValue.toLowerCase());
                     }
 
-                    row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+                    let matchesStatus = true;
+                    if (statusValue !== 'all') {
+                        matchesStatus = status.includes(statusValue.toLowerCase());
+                    }
+
+                    row.style.display = (matchesSearch && matchesCategory && matchesStatus) ? '' : 'none';
                 });
             }
 
