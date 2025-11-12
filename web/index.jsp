@@ -797,9 +797,9 @@
                         <span>Khám Phá Phim</span>
                     </a>
                 <% } else { %>
-                    <a href="${pageContext.request.contextPath}/auth/login" class="hero-btn hero-btn-primary">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Đăng Nhập Ngay</span>
+                    <a href="${pageContext.request.contextPath}/auth/signup" class="hero-btn hero-btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Đăng Ký Ngay</span>
                     </a>
                     <a href="${pageContext.request.contextPath}/guest-movies" class="hero-btn hero-btn-secondary">
                         <i class="fas fa-film"></i>
@@ -900,15 +900,15 @@
             <!-- Call to Action for Guest Users -->
             <div class="cta-section" data-aos="zoom-in" data-aos-duration="800">
                 <h2>Bắt Đầu Hành Trình Điện Ảnh!</h2>
-                <p>Đăng nhập hoặc tạo tài khoản ngay để trải nghiệm dịch vụ đặt vé tốt nhất và nhận nhiều ưu đãi hấp dẫn</p>
+                <p>Đăng ký tài khoản ngay để trải nghiệm dịch vụ đặt vé tốt nhất và nhận nhiều ưu đãi hấp dẫn</p>
                 <div class="cta-buttons">
-                    <a href="${pageContext.request.contextPath}/auth/login" class="cta-button">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Đăng Nhập Ngay</span>
-                    </a>
                     <a href="${pageContext.request.contextPath}/auth/signup" class="cta-button">
                         <i class="fas fa-user-plus"></i>
-                        <span>Đăng Ký Miễn Phí</span>
+                        <span>Đăng Ký Ngay</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/auth/login" class="cta-button">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Đã Có Tài Khoản?</span>
                     </a>
                 </div>
             </div>
