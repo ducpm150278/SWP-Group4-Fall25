@@ -8,7 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.sql.Connection;
+import java.sql.SQLException;
 /**
  * Data Access Object for Booking operations
  */
@@ -788,15 +789,47 @@ public class BookingDAO extends DBContext {
 
     //Staff chấp nhận hoàn tiền -> Chuyển status thành Cancelled
     // todo: làm logic gọi API hoàn tiền?
-    // Hiện đang chỉ cập nhật status
-    public boolean approveRefund(int bookingID) {
-        String sql = "UPDATE Bookings SET Status = 'Cancelled', PaymentStatus = 'Refunded' WHERE BookingID = ? AND Status = 'RefundRequested'";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, bookingID);
-            return ps.executeUpdate() > 0;
+public boolean approveRefund(int bookingID) {
+        String sqlDeleteTickets = "DELETE FROM Tickets WHERE BookingID = ?";
+        String sqlUpdateBooking = "UPDATE Bookings SET Status = 'Cancelled', PaymentStatus = 'Refunded' " +
+                                  "WHERE BookingID = ? AND Status = 'RefundRequested'";
+        
+        Connection conn = null;
+        PreparedStatement psDelete = null;
+        PreparedStatement psUpdate = null;
+        
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false); 
+            psDelete = conn.prepareStatement(sqlDeleteTickets);
+            psDelete.setInt(1, bookingID);
+            psDelete.executeUpdate(); 
+            psUpdate = conn.prepareStatement(sqlUpdateBooking);
+            psUpdate.setInt(1, bookingID);
+            int bookingUpdatedRows = psUpdate.executeUpdate();
+
+            if (bookingUpdatedRows > 0) {
+                conn.commit(); 
+                return true;
+            } else {
+                conn.rollback();
+                return false;
+            }
+
         } catch (SQLException e) {
-            System.err.println("Error approving refund: " + e.getMessage());
+            System.err.println("LỖI GIAO DỊCH KHI HOÀN TIỀN: " + e.getMessage());
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             return false;
+        } finally {
+            try { if (psDelete != null) psDelete.close(); } catch (SQLException e) {  }
+            try { if (psUpdate != null) psUpdate.close(); } catch (SQLException e) {  }
+            try { if (conn != null) conn.close(); } catch (SQLException e) {  }
         }
     }
 
