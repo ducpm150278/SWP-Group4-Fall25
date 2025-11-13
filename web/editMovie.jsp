@@ -1,5 +1,22 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+    // Kiểm tra đăng nhập và quyền truy cập
+    Object userObj = session.getAttribute("user");
+    String userRole = (String) session.getAttribute("userRole");
+
+    if (userObj == null) {
+        // Nếu chưa đăng nhập, quay về trang đăng nhập
+        response.sendRedirect("login.jsp");
+        return;
+    }
+
+    if (!"admin".equalsIgnoreCase(userRole)) {
+        // Nếu không phải admin, quay lại trang chủ
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -73,8 +90,8 @@
                                     <label class="form-label">Thời lượng (phút)</label>
                                     <input type="number" name="duration" min="1" class="form-control"
                                            value="${movie.duration}" required>
-                                    <c:if test="${not empty errorDuration}">
-                                        <div class="text-danger mt-1">${errorDuration}</div>
+                                    <c:if test="${not empty errors.errorDuration}">
+                                        <div class="text-danger mt-1">${errors.errorDuration}</div>
                                     </c:if>
                                 </div>
 
@@ -86,8 +103,8 @@
                                     <label class="form-label">Ngày kết thúc</label>
                                     <input type="date" name="endDate" class="form-control"
                                            value="${movie.endDate}" required>
-                                    <c:if test="${not empty errorDate}">
-                                        <div class="text-danger mt-1">${errorDate}</div>
+                                    <c:if test="${not empty errors.errorDate}">
+                                        <div class="text-danger mt-1">${errors.errorDate}</div>
                                     </c:if>
                                 </div>
 
@@ -136,9 +153,20 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
     <script>
+
         // Lấy ngày hôm nay ở định dạng yyyy-mm-dd
         const today = new Date().toISOString().split("T")[0];
-        document.querySelector('input[name="releasedDate"]').setAttribute('min', today);
+        const releasedDateInput = document.querySelector('input[name="releasedDate"]');
+        const endDateInput = document.querySelector('input[name="endDate"]');
+
+        // Giới hạn không cho chọn ngày trước hôm nay
+        releasedDateInput.setAttribute('min', today);
+        endDateInput.setAttribute('min', today);
+
+        // Khi người dùng chọn ngày công chiếu → tự động giới hạn ngày kết thúc
+        releasedDateInput.addEventListener('change', function () {
+            endDateInput.setAttribute('min', this.value);
+        });
     </script>
 
 </html>

@@ -7,7 +7,23 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%
+    // Kiểm tra đăng nhập và quyền truy cập
+    Object userObj = session.getAttribute("user");
+    String userRole = (String) session.getAttribute("userRole");
 
+    if (userObj == null) {
+        // Nếu chưa đăng nhập, quay về trang đăng nhập
+        response.sendRedirect("login.jsp");
+        return;
+    }
+
+    if (!"admin".equalsIgnoreCase(userRole)) {
+        // Nếu không phải admin, quay lại trang chủ
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 
 <!DOCTYPE html>
 <html lang="vi">

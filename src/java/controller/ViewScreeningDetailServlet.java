@@ -5,7 +5,9 @@
 package controller;
 
 import dal.ScreeningDAO;
+import dal.SeatDAO;
 import entity.Screening;
+import entity.Seat;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -59,7 +61,7 @@ public class ViewScreeningDetailServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
+     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -71,14 +73,26 @@ public class ViewScreeningDetailServlet extends HttpServlet {
 
         try {
             int screeningID = Integer.parseInt(idStr);
-            ScreeningDAO dao = new ScreeningDAO();
+            ScreeningDAO screeningDAO = new ScreeningDAO();
+            SeatDAO seatDAO = new SeatDAO();
 
-            Screening detail = dao.getScreeningDetails(screeningID);
-
+            // Lấy chi tiết lịch chiếu
+            Screening detail = screeningDAO.getScreeningDetails(screeningID);
             if (detail == null) {
                 response.sendRedirect("listScreening");
                 return;
             }
+
+            // Lấy danh sách ghế của phòng
+            List<Seat> allSeats = seatDAO.getSeatsByRoomID(detail.getRoomID());
+
+            // Lấy danh sách ghế đã được đặt trong lịch chiếu này
+            List<Integer> bookedSeatIDs = seatDAO.getBookedSeatsForScreening(screeningID);
+
+            // Đếm tổng số ghế trống và đã đặt
+            long bookedCount = bookedSeatIDs.size();
+            long totalSeats = allSeats.size();
+            long availableCount = totalSeats - bookedCount;
 
             // Định dạng lại ngày chiếu
             String formattedDate = detail.getFormattedScreeningDate();
@@ -86,8 +100,13 @@ public class ViewScreeningDetailServlet extends HttpServlet {
             // Gửi dữ liệu sang JSP
             request.setAttribute("detail", detail);
             request.setAttribute("formattedDate", formattedDate);
+            request.setAttribute("allSeats", allSeats);
+            request.setAttribute("bookedSeatIDs", bookedSeatIDs);
+            request.setAttribute("bookedCount", bookedCount);
+            request.setAttribute("availableCount", availableCount);
+            request.setAttribute("totalSeats", totalSeats);
 
-            // Chuyển tiếp sang trang viewScreening.jsp
+            // Chuyển tiếp sang JSP
             request.getRequestDispatcher("viewScreening.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {

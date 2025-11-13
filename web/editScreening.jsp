@@ -5,6 +5,24 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%
+    // Kiểm tra đăng nhập và quyền truy cập
+    Object userObj = session.getAttribute("user");
+    String userRole = (String) session.getAttribute("userRole");
+
+    if (userObj == null) {
+        // Nếu chưa đăng nhập, quay về trang đăng nhập
+        response.sendRedirect("login.jsp");
+        return;
+    }
+
+    if (!"admin".equalsIgnoreCase(userRole)) {
+        // Nếu không phải admin, quay lại trang chủ
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>

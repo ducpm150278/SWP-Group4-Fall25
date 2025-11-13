@@ -6,6 +6,23 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+    // Kiểm tra đăng nhập và quyền truy cập
+    Object userObj = session.getAttribute("user");
+    String userRole = (String) session.getAttribute("userRole");
+
+    if (userObj == null) {
+        // Nếu chưa đăng nhập, quay về trang đăng nhập
+        response.sendRedirect("login.jsp");
+        return;
+    }
+
+    if (!"admin".equalsIgnoreCase(userRole)) {
+        // Nếu không phải admin, quay lại trang chủ
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -85,8 +102,8 @@
                                         <label class="form-label">Thời lượng (phút)</label>
                                         <input type="number" name="duration" min="1" class="form-control" 
                                                value="${duration}" required>
-                                        <c:if test="${not empty errorDuration}">
-                                            <div class="text-danger mt-1">${errorDuration}</div>
+                                        <c:if test="${not empty errors.errorDuration}">
+                                            <div class="text-danger mt-1">${errors.errorDuration}</div>
                                         </c:if>
                                     </div>
 
@@ -100,8 +117,8 @@
                                         <label class="form-label">Ngày kết thúc</label>
                                         <input type="date" name="endDate" class="form-control" 
                                                value="${endDate}" required>
-                                        <c:if test="${not empty errorDate}">
-                                            <div class="text-danger mt-1">${errorDate}</div>
+                                        <c:if test="${not empty errors.errorDate}">
+                                            <div class="text-danger mt-1">${errors.errorDate}</div>
                                         </c:if>
                                     </div>
 
@@ -152,9 +169,17 @@
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            // Lấy ngày hiện tại (theo local timezone)
             const today = new Date().toISOString().split("T")[0];
-            document.getElementById("releasedDate").setAttribute("min", today);
+            const releasedDateInput = document.getElementById("releasedDate");
+            const endDateInput = document.querySelector('input[name="endDate"]');
+
+            releasedDateInput.setAttribute("min", today);
+            endDateInput.setAttribute("min", today);
+
+            // Khi người dùng chọn ngày công chiếu, tự động giới hạn ngày kết thúc
+            releasedDateInput.addEventListener("change", function () {
+                endDateInput.setAttribute("min", this.value);
+            });
         </script>
 
     </body>
