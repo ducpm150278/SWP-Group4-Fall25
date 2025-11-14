@@ -464,12 +464,6 @@
 
                 <div class="sidebar-menu">
                     <ul>
-    <!--                    <li class="${param.section eq 'statistical' or empty param.section ? 'active' : ''}">
-                            <a href="<c:url value='/admin/dashboard?section=statistical'/>">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Statistical</span>
-                            </a>
-                        </li>-->
                         <li class="${param.section eq 'user-management' ? 'active' : ''}">
                             <a href="<c:url value='/adminFE/dashboard?section=user-management'/>">
                                 <i class="fas fa-users"></i>
@@ -487,19 +481,13 @@
                                 <i class="fas fa-history"></i>
                                 <span>Screening Room Management</span>
                             </a>
-                        </li><!--
-                        <li class="${param.section eq 'request-management' ? 'active' : ''}">
-                            <a href="<c:url value='/adminFE/dashboard?section=request-management'/>">
-                                <i class="fas fa-envelope"></i>
-                                <span>Request</span>
-                            </a>
-                        </li>-->
+                        </li>
                     </ul>
                 </div>
 
                 <div class="sidebar-footer">
-                    <button class="btn btn-danger btn-block" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                    <button class="btn btn-danger btn-block">
+                        <a href="/SWP-Group4-Fall25/list"><i class="fas fa-sign-out-alt"></i> Back</a>
                     </button>
                 </div>
             </div>
@@ -530,9 +518,6 @@
                         <c:when test="${param.section eq 'screening-room-management'}">
                             <jsp:include page="screening_room_management.jsp"/>
                         </c:when>
-                        <c:when test="${param.section eq 'request-management'}">
-                            <jsp:include page="request.jsp"/>
-                        </c:when>
                         <c:otherwise> 
                             <!-- Default section or dashboard home -->
                             <div class="text-center py-5">
@@ -549,14 +534,5 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             <!-- Chart.js -->
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-            <script>
-                        // Logout function
-                        function logout() {
-                            if (confirm('Are you sure you want to logout?')) {
-                                window.location.href = '<c:url value="/admin/logout"/>';
-                            }
-                        }
-            </script>
         </body>
     </html>

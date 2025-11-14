@@ -77,7 +77,7 @@ public class CinemaMDAO {
                    + "c.[IsActive], c.[CreatedDate], "
                    + "COUNT(sr.RoomID) as TotalRooms " 
                    + "FROM [dbo].[Cinemas] c "
-                   + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 "
+                   + "LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID "
                    + "GROUP BY c.[CinemaID], c.[CinemaName], c.[Location], c.[Address], c.[IsActive], c.[CreatedDate] "
                    + "ORDER BY c.[CinemaName] ASC";
 
@@ -238,7 +238,7 @@ public class CinemaMDAO {
            .append("c.[IsActive], c.[CreatedDate], ")
            .append("COUNT(sr.RoomID) as TotalRooms ")
            .append("FROM [dbo].[Cinemas] c ")
-           .append("LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID AND sr.IsActive = 1 ")
+           .append("LEFT JOIN [dbo].[ScreeningRooms] sr ON c.CinemaID = sr.CinemaID ")
            .append("WHERE 1=1");
 
         List<Object> params = new ArrayList<>();

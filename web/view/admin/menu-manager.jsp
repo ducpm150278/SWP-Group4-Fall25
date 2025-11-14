@@ -79,7 +79,7 @@
                             </a>
 
                             <div class="sb-sidenav-menu-heading">Quản lý</div>
-                            <a class="<%= uri.equals("/hotelrentalmanagement/views/dashboard/room.jsp") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard">
+                            <a class="<%= uri.equals("/adminFE/dashboard?section=user-management") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard?section=user-management">
                                 <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
                                 Quản lý tài khoản
                             </a>
@@ -88,12 +88,12 @@
                                 Quản lý phim
                             </a>
 
-                            <a class="<%= uri.contains("feedbackmanager") ? "nav-link active" : "nav-link" %>" href="feedbackmanager">
+                            <a class="<%= uri.contains("/adminFE/dashboard?section=cinema-management") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard?section=cinema-management">
                                 <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
                                 Quản lý rạp chiếu
                             </a>
 
-                            <a class="<%= uri.contains("management-feedback-room.jsp") ? "nav-link active" : "nav-link" %>" href="feedbackroommanagement">
+                            <a class="<%= uri.contains("/adminFE/dashboard?section=screening-room-management") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard?section=screening-room-management">
                                 <div class="sb-nav-link-icon"><i class="fas fa-video""></i></div>
                                 Quản lý phòng chiếu
                             </a>
