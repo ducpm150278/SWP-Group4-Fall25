@@ -35,6 +35,8 @@ public final class AuthConstants {
     // ========== VALIDATION (KIỂM TRA DỮ LIỆU) ==========
     /** Độ dài tối thiểu của mật khẩu (6 ký tự) */
     public static final int MIN_PASSWORD_LENGTH = 6;
+    /** Regex pattern để validate định dạng email */
+    public static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
     
     // ========== GIÁ TRỊ MẶC ĐỊNH (DEFAULT VALUES) ==========
     /** Giới tính mặc định khi người dùng không chọn */
