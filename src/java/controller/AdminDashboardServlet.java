@@ -16,6 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -858,8 +860,6 @@ public class AdminDashboardServlet extends HttpServlet {
                     handleDeleteRoomPost(request, response, roomDAO);
                 case "updateSeat" ->
                     handleUpdateSeatPost(request, response, seatDAO);
-                case "deleteSeat" ->
-                    handleDeleteSeatPost(request, response, seatDAO);
                 case "bulkSeatAction" ->
                     handleBulkSeatActionPost(request, response, seatDAO);
                 default ->
@@ -1009,11 +1009,28 @@ public class AdminDashboardServlet extends HttpServlet {
             SeatMDAO seatDAO) throws ServletException, IOException {
 
         try {
+            System.out.println("=== DETAILED DEBUG UPDATE SEAT ===");
+
+            // Debug method và content type
+            System.out.println("Request Method: " + request.getMethod());
+            System.out.println("Content Type: " + request.getContentType());
+
+            // Debug tất cả parameters
+            System.out.println("All parameters:");
+            Enumeration<String> paramNames = request.getParameterNames();
+            while (paramNames.hasMoreElements()) {
+                String paramName = paramNames.nextElement();
+                String[] values = request.getParameterValues(paramName);
+                System.out.println("  " + paramName + ": " + Arrays.toString(values));
+            }
+
+            // Debug headers
+            System.out.println("Important headers:");
+            System.out.println("  Content-Length: " + request.getHeader("Content-Length"));
             int seatId = Integer.parseInt(request.getParameter("seatId"));
             int roomId = Integer.parseInt(request.getParameter("roomId"));
-            String seatType = request.getParameter("seatType");
-            String status = request.getParameter("status");
-            String mode = request.getParameter("mode");
+            String status = request.getParameter("seatStatus");
+            String mode = request.getParameter("action");
 
             SeatM seat = seatDAO.getSeatById(seatId);
             if (seat == null) {
@@ -1028,10 +1045,7 @@ public class AdminDashboardServlet extends HttpServlet {
                 return;
             }
 
-            seat.setSeatType(seatType);
-            seat.setStatus(status);
-
-            boolean success = seatDAO.updateSeat(seat);
+            boolean success = seatDAO.updateSeatStatus(status, seatId);
 
             if (success) {
                 sendToast(request, "success", "Seat updated successfully");
@@ -1041,44 +1055,6 @@ public class AdminDashboardServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             sendToast(request, "danger", "Invalid seat data");
-        }
-
-        redirectBackToRoomWithFilters(request, response,
-                Integer.parseInt(request.getParameter("roomId")),
-                request.getParameter("mode"));
-    }
-
-    private void handleDeleteSeatPost(HttpServletRequest request, HttpServletResponse response,
-            SeatMDAO seatDAO) throws ServletException, IOException {
-
-        try {
-            int seatId = Integer.parseInt(request.getParameter("seatId"));
-            int roomId = Integer.parseInt(request.getParameter("roomId"));
-            String mode = request.getParameter("mode");
-
-            SeatM seat = seatDAO.getSeatById(seatId);
-            if (seat == null) {
-                sendToast(request, "danger", "Seat not found");
-                redirectBackToRoomWithFilters(request, response, roomId, mode);
-                return;
-            }
-
-            if (!seat.canBeModified()) {
-                sendToast(request, "danger", "Cannot delete booked seat");
-                redirectBackToRoomWithFilters(request, response, roomId, mode);
-                return;
-            }
-
-            boolean success = seatDAO.deleteSeat(seatId);
-
-            if (success) {
-                sendToast(request, "success", "Seat deleted successfully");
-            } else {
-                sendToast(request, "danger", "Failed to delete seat");
-            }
-
-        } catch (NumberFormatException e) {
-            sendToast(request, "danger", "Invalid seat ID");
         }
 
         redirectBackToRoomWithFilters(request, response,
@@ -1138,13 +1114,12 @@ public class AdminDashboardServlet extends HttpServlet {
     }
 
     // ========== FILTER PRESERVATION HELPER METHODS ==========
-    
     private void redirectBackToListWithFilters(HttpServletRequest request, HttpServletResponse response) throws IOException {
         StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management");
 
         // Get all filter parameters from request
         String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
-        
+
         for (String param : filterParams) {
             String value = request.getParameter(param);
             if (isValidFilterValue(value)) {
@@ -1161,7 +1136,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Get all filter parameters from request
         String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
-        
+
         for (String param : filterParams) {
             String value = request.getParameter(param);
             if (isValidFilterValue(value)) {
@@ -1177,7 +1152,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
         // Get all filter parameters from request
         String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
-        
+
         for (String param : filterParams) {
             String value = request.getParameter(param);
             if (isValidFilterValue(value)) {
@@ -1190,14 +1165,14 @@ public class AdminDashboardServlet extends HttpServlet {
 
     private void redirectBackToRoomWithFilters(HttpServletRequest request, HttpServletResponse response,
             int roomId, String mode) throws IOException {
-        
+
         StringBuilder redirectUrl = new StringBuilder("dashboard?section=screening-room-management");
-        redirectUrl.append("&action=").append(mode != null ? mode : "edit");
+        redirectUrl.append("&action=").append(mode != "" ? mode : "edit");
         redirectUrl.append("&id=").append(roomId);
 
         // Get all filter parameters from request
         String[] filterParams = {"locationFilter", "cinemaFilter", "roomType", "status", "search", "page"};
-        
+
         for (String param : filterParams) {
             String value = request.getParameter(param);
             if (isValidFilterValue(value)) {
