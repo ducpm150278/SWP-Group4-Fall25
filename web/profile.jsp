@@ -56,6 +56,17 @@
                             <i class="fas fa-exclamation-circle"></i> ${error}
                         </div>
                     </c:if>
+                    
+                    <c:if test="${not empty errors}">
+        <div class="alert-cinema alert-danger-cinema">
+            <strong><i class="fas fa-exclamation-triangle"></i> Vui lòng sửa các lỗi sau:</strong>
+            <ul style="margin-top: 10px; margin-bottom: 0;">
+                <c:forEach var="e" items="${errors}">
+                    <li>${e}</li>
+                </c:forEach>
+            </ul>
+        </div>
+    </c:if>
 
                     <form action="${pageContext.request.contextPath}/CustomerProfile" method="post">
                         <input type="hidden" name="userId" value="${sessionScope.user.userID}">
