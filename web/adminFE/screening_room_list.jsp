@@ -331,11 +331,6 @@
                                                            class="btn btn-outline-warning" title="Edit Room">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        <button class="btn btn-outline-danger" 
-                                                                onclick="showDeleteModal(${room.roomID}, '${room.roomName}')"
-                                                                title="Delete Room">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -452,71 +447,7 @@
     </c:choose>
 </div>
 
-<!-- Delete Confirm Modal -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Deletion</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the following screening room?</p>
-                <div class="card border-warning">
-                    <div class="card-body">
-                        <p class="mb-1"><strong>Room Name:</strong> <span id="deleteRoomName" class="fw-bold"></span></p>
-                        <p class="mb-1"><strong>Cinema:</strong> <span id="deleteCinemaName"></span></p>
-                        <p class="mb-1"><strong>Seat Capacity:</strong> <span id="deleteSeatCapacity"></span></p>
-                        <p class="mb-0"><strong>Room Type:</strong> <span id="deleteRoomType"></span></p>
-                    </div>
-                </div>
-                <div class="alert alert-warning mt-3">
-                    <i class="bi bi-exclamation-triangle-fill"></i> 
-                    <strong>Warning:</strong> This action cannot be undone. All related seats and scheduled screenings will also be deleted.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteRoomForm" method="POST" action="dashboard">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="section" value="screening-room-management">
-                    <input type="hidden" name="id" id="deleteRoomId">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Delete Room
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    // Delete modal function
-    function showDeleteModal(roomId, roomName) {
-        // Find the room details from the table
-        const roomRow = document.querySelector(`tr:has(button[onclick="showDeleteModal(${roomId}, '${roomName}')"])`);
-        if (roomRow) {
-            const cinemaName = roomRow.cells[1].querySelector('small').textContent;
-            const seatCapacity = roomRow.cells[3].querySelector('.fw-semibold').textContent;
-            const roomType = roomRow.cells[2].querySelector('.badge').textContent.trim();
-
-            document.getElementById('deleteRoomName').textContent = roomName;
-            document.getElementById('deleteCinemaName').textContent = cinemaName;
-            document.getElementById('deleteSeatCapacity').textContent = seatCapacity + ' seats';
-            document.getElementById('deleteRoomType').textContent = roomType;
-        } else {
-            document.getElementById('deleteRoomName').textContent = roomName;
-            document.getElementById('deleteCinemaName').textContent = 'N/A';
-            document.getElementById('deleteSeatCapacity').textContent = 'N/A';
-            document.getElementById('deleteRoomType').textContent = 'N/A';
-        }
-
-        document.getElementById('deleteRoomId').value = roomId;
-
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-        deleteModal.show();
-    }
-
     // Initialize on page load - disable cinema filter if no location selected
     document.addEventListener('DOMContentLoaded', function () {
         const locationFilter = document.getElementById('locationFilter');

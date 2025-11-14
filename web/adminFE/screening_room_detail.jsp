@@ -287,10 +287,10 @@
                                                 <div class="seat couple" style="width: 40px; height: 20px;"></div>
                                                 <span>💑 Couple</span>
                                             </div>
-                                            <div class="legend-item">
+<!--                                            <div class="legend-item">
                                                 <div class="seat disabled" style="width: 20px; height: 20px;"></div>
                                                 <span>♿ Disabled</span>
-                                            </div>
+                                            </div>-->
                                         </div>
 
                                         <!-- UPDATED seats-container với icon và cấu trúc HTML cho ghế -->
@@ -385,7 +385,7 @@
                                                     </small>
                                                 </div>
                                                 <!-- Disabled Seats -->
-                                                <div class="col-3 col-sm-2">
+<!--                                                <div class="col-3 col-sm-2">
                                                     <c:set var="disabledCount" value="0"/>
                                                     <c:forEach var="seat" items="${seats}">
                                                         <c:if test="${seat.seatType == 'Disabled'}">
@@ -396,7 +396,7 @@
                                                     <small class="text-muted">
                                                         <i class="bi bi-wheelchair"></i> Disabled
                                                     </small>
-                                                </div>
+                                                </div>-->
                                             </div>
 
                                             <!-- Additional Status Statistics -->
@@ -427,7 +427,7 @@
                                                         <i class="bi bi-slash-circle"></i> Unavailable
                                                     </small>
                                                 </div>
-                                                <!-- Booked -->
+<!--                                                 Booked 
                                                 <div class="col-4">
                                                     <c:set var="bookedCount" value="0"/>
                                                     <c:forEach var="seat" items="${seats}">
@@ -439,7 +439,7 @@
                                                     <small class="text-muted">
                                                         <i class="bi bi-ticket-perforated"></i> Booked
                                                     </small>
-                                                </div>
+                                                </div>-->
                                             </div>
                                         </div>
                                     </c:when>
@@ -606,11 +606,11 @@
         height: 35px;
     }
 
-    /* Disabled seat size */
+/*     Disabled seat size 
     .seat.disabled {
         width: 35px;
         height: 35px;
-    }
+    }*/
 
     /* COUPLE seat */
     .seat.couple {
@@ -679,11 +679,11 @@
         margin-right: 4px;
     }
 
-    .seat.disabled::before {
+/*    .seat.disabled::before {
         content: "♿";
         font-size: 12px;
         margin-right: 2px;
-    }
+    }*/
 
     /* Hide text for very small seats, show only icon */
     .seat .seat-text {
