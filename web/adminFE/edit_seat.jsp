@@ -104,10 +104,10 @@
                                     <c:if test="${not empty rowSeats}">
                                         <div class="seat-row" data-row="${row}">
                                             <c:forEach var="seat" items="${rowSeats}">
-                                                <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()} 
+                                                <div class="seat ${seat.seatType.toLowerCase()} ${seat.status.toLowerCase()}
                                                      <c:if test="${editSeat.seatID == seat.seatID}">selected-seat</c:if>"
-                                                     data-bs-toggle="tooltip" 
-                                                     title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
+                                                         data-bs-toggle="tooltip" 
+                                                         title="Row ${seat.seatRow}, Number ${seat.seatNumber}&#10;Type: ${seat.seatType}&#10;Status: ${seat.status}">
                                                     <span class="seat-text">${seat.seatRow}${seat.seatNumber}</span>
                                                 </div>
                                             </c:forEach>
@@ -173,7 +173,6 @@
                         <input type="hidden" name="action" value="updateSeat">
                         <input type="hidden" name="seatId" value="${editSeat.seatID}">
                         <input type="hidden" name="roomId" value="${viewRoom.roomID}">
-                        <input type="hidden" name="mode" value="${param.mode}">
 
                         <!-- Thêm các hidden fields để giữ filters -->
                         <input type="hidden" name="locationFilter" value="${param.locationFilter}">
@@ -187,20 +186,8 @@
                             <label class="form-label small fw-semibold mb-1">
                                 <i class="bi bi-tag me-1"></i>Seat Type
                             </label>
-                            <select class="form-select form-select-sm" name="seatType" required>
-                                <option value="Standard" ${editSeat.seatType == 'Standard' ? 'selected' : ''}>
-                                    🪑 Standard
-                                </option>
-                                <option value="VIP" ${editSeat.seatType == 'VIP' ? 'selected' : ''}>
-                                    ⭐ VIP
-                                </option>
-                                <option value="Couple" ${editSeat.seatType == 'Couple' ? 'selected' : ''}>
-                                    💑 Couple
-                                </option>
-                                <option value="Disabled" ${editSeat.seatType == 'Disabled' ? 'selected' : ''}>
-                                    ♿ Disabled
-                                </option>
-                            </select>
+                            <input type="text" class="form-control form-control-sm bg-white" 
+                                   value="${editSeat.seatType}" readonly>
                         </div>
 
                         <!-- Status Selection -->
@@ -208,7 +195,7 @@
                             <label class="form-label small fw-semibold mb-1">
                                 <i class="bi bi-circle-fill me-1"></i>Status
                             </label>
-                            <select class="form-select form-select-sm" name="status" required>
+                            <select class="form-select form-select-sm" name="seatStatus" required>
                                 <option value="Available" ${editSeat.status == 'Available' ? 'selected' : ''}>
                                     🟢 Available
                                 </option>

@@ -100,16 +100,12 @@ public class SeatMDAO {
     }
 
     // 4. Cập nhật ghế
-    public boolean updateSeat(SeatM seat) {
-        String sql = "UPDATE Seats SET SeatRow = ?, SeatNumber = ?, SeatType = ?, Status = ? WHERE SeatID = ?";
+    public boolean updateSeatStatus(String seatStatus, int seat_id) {
+        String sql = "UPDATE Seats SET Status = ? WHERE SeatID = ?";
 
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, seat.getSeatRow());
-            ps.setString(2, seat.getSeatNumber());
-            ps.setString(3, seat.getSeatType());
-            ps.setString(4, seat.getStatus());
-            ps.setInt(5, seat.getSeatID());
+            ps.setString(1, seatStatus);
+            ps.setInt(2,seat_id);
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -505,5 +501,12 @@ public class SeatMDAO {
             e.printStackTrace();
             throw e;
         }
+    }
+    
+    public static void main(String[] args) {
+        SeatMDAO sd = new SeatMDAO();
+        System.out.println(sd.getSeatById(1209));
+        sd.updateSeatStatus(1209, "Maintenance");
+        System.out.println(sd.getSeatById(1209));
     }
 }
