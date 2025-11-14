@@ -28,7 +28,7 @@
             <%@ include file="view/admin/header.jsp" %>  
         </nav>
         <div id="layoutSidenav">
-            <%@ include file="view/admin/menu-manager.jsp" %>  
+            <%@ include file="menu-staff.jsp" %>  
             <div id="layoutSidenav_content">
                 <main class="p-4">
                     <div class="container-fluid">

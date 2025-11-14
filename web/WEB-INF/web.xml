@@ -30,6 +30,10 @@
         <servlet-name>StaffSupportDetailServlet</servlet-name>
         <servlet-class>controller.StaffSupportDetailServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ManagerServlet</servlet-name>
+        <servlet-class>controller.ManagerServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ListRefundsServlet</servlet-name>
         <url-pattern>/list-refunds</url-pattern>
@@ -232,6 +236,10 @@
     <servlet-mapping>
         <servlet-name>StaffSupportDetailServlet</servlet-name>
         <url-pattern>/staff-support-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerServlet</servlet-name>
+        <url-pattern>/manager</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
