@@ -58,7 +58,7 @@
     <!-- User logout -->
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
-        <servlet-class>controller.LogoutServlet</servlet-class>
+        <servlet-class>controller.auth.LogoutServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
@@ -67,7 +67,7 @@
     <!-- Google OAuth callback -->
     <servlet>
         <servlet-name>GoogleAuthCallbackServlet</servlet-name>
-        <servlet-class>controller.GoogleAuthCallbackController</servlet-class>
+        <servlet-class>controller.auth.GoogleAuthCallbackController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>GoogleAuthCallbackServlet</servlet-name>
@@ -105,7 +105,7 @@
     <!-- Main authentication controller -->
     <servlet>
         <servlet-name>AuthController</servlet-name>
-        <servlet-class>controller.AuthController</servlet-class>
+        <servlet-class>controller.auth.AuthController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>AuthController</servlet-name>
@@ -114,7 +114,7 @@
     <!-- Google OAuth authentication -->
     <servlet>
         <servlet-name>GoogleAuthController</servlet-name>
-        <servlet-class>controller.GoogleAuthController</servlet-class>
+        <servlet-class>controller.auth.GoogleAuthController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>GoogleAuthController</servlet-name>
@@ -133,7 +133,7 @@
     <!-- Guest movie list -->
     <servlet>
         <servlet-name>GuestMovieListServlet</servlet-name>
-        <servlet-class>controller.GuestMovieListServlet</servlet-class>
+        <servlet-class>controller.guest.GuestMovieListServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>GuestMovieListServlet</servlet-name>
@@ -142,7 +142,7 @@
     <!-- Guest movie detail -->
     <servlet>
         <servlet-name>GuestMovieDetailServlet</servlet-name>
-        <servlet-class>controller.GuestMovieDetailServlet</servlet-class>
+        <servlet-class>controller.guest.GuestMovieDetailServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>GuestMovieDetailServlet</servlet-name>
@@ -161,7 +161,7 @@
     <!-- Step 1: Select screening -->
     <servlet>
         <servlet-name>BookingSelectScreeningServlet</servlet-name>
-        <servlet-class>controller.BookingSelectScreeningServlet</servlet-class>
+        <servlet-class>controller.booking.BookingSelectScreeningServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BookingSelectScreeningServlet</servlet-name>
@@ -170,7 +170,7 @@
     <!-- Step 2: Select seats -->
     <servlet>
         <servlet-name>BookingSeatSelectionServlet</servlet-name>
-        <servlet-class>controller.BookingSeatSelectionServlet</servlet-class>
+        <servlet-class>controller.booking.BookingSeatSelectionServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BookingSeatSelectionServlet</servlet-name>
@@ -179,7 +179,7 @@
     <!-- Step 3: Select food (optional) -->
     <servlet>
         <servlet-name>BookingFoodSelectionServlet</servlet-name>
-        <servlet-class>controller.BookingFoodSelectionServlet</servlet-class>
+        <servlet-class>controller.booking.BookingFoodSelectionServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BookingFoodSelectionServlet</servlet-name>
@@ -188,7 +188,7 @@
     <!-- Step 4: Payment -->
     <servlet>
         <servlet-name>BookingPaymentServlet</servlet-name>
-        <servlet-class>controller.BookingPaymentServlet</servlet-class>
+        <servlet-class>controller.booking.BookingPaymentServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BookingPaymentServlet</servlet-name>
@@ -197,7 +197,7 @@
     <!-- VNPay callback -->
     <servlet>
         <servlet-name>VNPayCallbackServlet</servlet-name>
-        <servlet-class>controller.VNPayCallbackServlet</servlet-class>
+        <servlet-class>controller.booking.VNPayCallbackServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>VNPayCallbackServlet</servlet-name>
