@@ -5,6 +5,7 @@ import entity.User;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -312,6 +313,15 @@ public class AuthController extends HttpServlet {
             return;
         }
         
+        // Validation định dạng email bằng regex
+        String trimmedEmail = email.trim();
+        Pattern emailPattern = Pattern.compile(AuthConstants.EMAIL_REGEX);
+        if (!emailPattern.matcher(trimmedEmail).matches()) {
+            request.setAttribute("error", "Invalid email format. Please enter a valid email address.");
+            request.getRequestDispatcher(AuthConstants.JSP_SIGNUP).forward(request, response);
+            return;
+        }
+        
         // Bước 3: Kiểm tra password và confirmPassword có khớp không
         if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "Passwords do not match");
@@ -327,7 +337,7 @@ public class AuthController extends HttpServlet {
         }
         
         // Bước 5: Kiểm tra email đã tồn tại trong database chưa
-        if (userDAO.checkExistedEmail(email.trim())) {
+        if (userDAO.checkExistedEmail(trimmedEmail)) {
             request.setAttribute("error", "Email already exists");
             request.getRequestDispatcher(AuthConstants.JSP_SIGNUP).forward(request, response);
             return;
@@ -358,7 +368,7 @@ public class AuthController extends HttpServlet {
         // Vai trò mặc định là Customer, trạng thái mặc định là Active
         boolean success = userDAO.addNewUser(
             fullName.trim(),                                    // Tên đầy đủ
-            email.trim(),                                       // Email
+            trimmedEmail,                                       // Email (đã validate format)
             phoneNumber != null ? phoneNumber.trim() : null,    // Số điện thoại (có thể null)
             password,                                           // Mật khẩu (chưa hash, DAO sẽ hash)
             gender != null ? gender : AuthConstants.DEFAULT_GENDER, // Giới tính (mặc định "Other")
