@@ -37,7 +37,7 @@
                 <div class="sb-sidenav-menu-heading">Tài Khoản</div>
                 
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/auth/logout">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/logout">
                         <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                         Đăng xuất
                     </a>

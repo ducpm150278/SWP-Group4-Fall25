@@ -85,7 +85,7 @@
 
 <div class="header">
     <h1>Admin Dashboard</h1>
-    <form action="${pageContext.request.contextPath}/auth/logout" method="post">
+    <form action="${pageContext.request.contextPath}/logout" method="post">
         <button type="submit" class="logout-btn">Logout</button>
     </form>
 </div>
