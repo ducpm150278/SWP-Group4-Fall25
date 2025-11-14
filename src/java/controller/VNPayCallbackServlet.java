@@ -28,6 +28,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Properties;
+import entity.User;
+import dal.UserDAO;
+import java.time.format.DateTimeFormatter; 
+import java.util.Locale;
 /**
  * Servlet to handle VNPay payment callback
  */
@@ -40,7 +53,7 @@ public class VNPayCallbackServlet extends HttpServlet {
     private BookingDAO bookingDAO;
     private FoodDAO foodDAO;
     private ComboDAO comboDAO;
-    
+    private UserDAO userDAO;
     @Override
     public void init() throws ServletException {
         ticketDAO = new TicketDAO();
@@ -49,6 +62,7 @@ public class VNPayCallbackServlet extends HttpServlet {
         bookingDAO = new BookingDAO();
         foodDAO = new FoodDAO();
         comboDAO = new ComboDAO();
+        userDAO = new UserDAO();
     }
     
     @Override
@@ -147,6 +161,18 @@ public class VNPayCallbackServlet extends HttpServlet {
                 request.setAttribute("amount", Long.parseLong(amount) / 100); // Convert back from VNPay format
                 request.setAttribute("bookingSession", bookingSession);
                 
+                // gui email
+                Integer userID = (Integer) session.getAttribute("userId");
+                if (userID != null) {
+                    User user = userDAO.getUserById(userID);
+                    String bookingCode = (String) session.getAttribute("lastBookingCode"); // Lấy mã booking đã lưu
+                    if (user != null && bookingCode != null) {
+                        sendBookingConfirmationEmail(bookingSession, bookingCode, user);
+                    } else {
+                        System.err.println("✗ Lỗi: Không thể gửi email. Không tìm thấy User hoặc BookingCode trong session.");
+                    }
+                }
+                
                 // Clear booking session
                 BookingSessionManager.clearBookingSession(session);
                 
@@ -190,6 +216,9 @@ public class VNPayCallbackServlet extends HttpServlet {
             // Step 1: Create main Booking record
             System.out.println("\n=== Step 1: Creating Booking Record ===");
             String bookingCode = bookingDAO.generateBookingCode();
+            // đang lưu tạm booking code 
+            session.setAttribute("lastBookingCode", bookingCode);
+            
             double totalAmount = bookingSession.getTotalAmount();
             double discountAmount = bookingSession.getDiscountAmount();
             double finalAmount = totalAmount - discountAmount;
@@ -361,6 +390,80 @@ public class VNPayCallbackServlet extends HttpServlet {
             System.err.println("Exception Type: " + e.getClass().getName());
             System.err.println("Error Message: " + e.getMessage());
             System.err.println("Stack Trace:");
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    // Gửi email xác nhận đặt vé thành công cho khách hàng
+private boolean sendBookingConfirmationEmail(BookingSession bookingSession, String bookingCode, User user) {
+        
+        System.out.println("Chuẩn bị gửi email xác nhận đến: " + user.getEmail());
+        
+        // 1. Thông tin người gửi
+        final String fromEmail = "swordartonline282@gmail.com"; 
+        final String password = "lfbo sxny fzru zygm"; 
+        
+        // 2. Cấu hình Properties
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587"); // TLS Port
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        
+        // 3. Tạo Authen
+        Authenticator auth = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, password);
+            }
+        };
+        Session mailSession = Session.getInstance(props, auth);
+        
+        try {
+            MimeMessage msg = new MimeMessage(mailSession);
+            msg.setFrom(new InternetAddress(fromEmail));
+            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+            
+            // 4. Tạo Nội dung Email
+            msg.setSubject("Xác nhận đặt vé thành công! Mã vé: " + bookingCode, "UTF-8");
+            
+            // Lấy thông tin chi tiết từ bookingSession
+            String movieTitle = bookingSession.getMovieTitle();
+            LocalDateTime screeningTimeObj = bookingSession.getScreeningTime(); 
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy - HH:mm", new Locale("vi", "VN"));
+            String screeningTime = screeningTimeObj.format(formatter); 
+            String cinemaName = bookingSession.getCinemaName();
+            String roomName = bookingSession.getRoomName();
+            String seats = String.join(", ", bookingSession.getSelectedSeatLabels());
+            double finalAmount = bookingSession.getTotalAmount() - bookingSession.getDiscountAmount();
+            
+            String emailBody = "Chào " + user.getFullName() + ",\n\n"
+                    + "Cảm ơn bạn đã đặt vé tại Cinema! Đơn hàng của bạn đã được xác nhận.\n\n"
+                    + "--------------------------------------------------\n"
+                    + "THÔNG TIN VÉ (Mã: " + bookingCode + ")\n"
+                    + "--------------------------------------------------\n\n"
+                    + "Phim: " + movieTitle + "\n"
+                    + "Rạp: " + cinemaName + "\n"
+                    + "Phòng: " + roomName + "\n"
+                    + "Suất chiếu: " + screeningTime + "\n"
+                    + "Ghế: " + seats + "\n\n"
+                    + "Tổng Thanh Toán: " + String.format("%,.0f VNĐ", finalAmount) + "\n"
+                    + "Để lấy vé, vui lòng mở màn hình email này tới quầy Hướng Dẫn tại rạp chiếu phim bạn đã chọn\n\n"
+                    + "--------------------------------------------------\n\n"
+                    + "Chúc bạn có một buổi xem phim vui vẻ!\n\n"
+                    + "Trân trọng,\n"
+                    + "Đội ngũ Cinema";
+            
+            msg.setText(emailBody, "UTF-8");
+
+            // 5. Gửi Email
+            Transport.send(msg);
+            System.out.println("✓ Email xác nhận đã gửi thành công!");
+            return true;
+            
+        } catch (Exception e) { // bắt lỗi format
+            System.err.println("✗ Lỗi khi gửi email: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
