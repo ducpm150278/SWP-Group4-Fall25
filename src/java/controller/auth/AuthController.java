@@ -1,10 +1,11 @@
 package controller.auth;
 
 import dal.UserDAO;
+import dal.VerificationTokenDAO;
 import entity.User;
+import entity.VerificationToken;
 import java.io.IOException;
 import java.sql.Date;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,6 +30,8 @@ public class AuthController extends HttpServlet {
 
     /** DAO để thao tác với dữ liệu người dùng trong database */
     private UserDAO userDAO = new UserDAO();
+    /** DAO để thao tác với verification tokens trong database */
+    private VerificationTokenDAO tokenDAO = new VerificationTokenDAO();
     /** Service để gửi email (dùng cho chức năng quên mật khẩu) */
     private EmailService emailService = new EmailService();
 
@@ -194,10 +197,24 @@ public class AuthController extends HttpServlet {
             return;
         }
         
-        // TODO: Validate token in database - kiểm tra token có tồn tại và chưa hết hạn
-        // Hiện tại chỉ kiểm tra token có tồn tại, chưa kiểm tra trong database
+        // Validate token trong database - kiểm tra token có tồn tại, chưa hết hạn và chưa được sử dụng
+        boolean isValid = tokenDAO.isTokenValid(token);
+        if (!isValid) {
+            // Token không hợp lệ, đã hết hạn hoặc đã được sử dụng
+            request.setAttribute("error", "Invalid or expired reset token. Please request a new password reset link.");
+            request.getRequestDispatcher(AuthConstants.JSP_FORGOT_PASSWORD).forward(request, response);
+            return;
+        }
         
-        // Lưu token vào request attribute để JSP sử dụng
+        // Kiểm tra token type phải là PasswordReset
+        VerificationToken tokenObj = tokenDAO.getTokenByString(token);
+        if (tokenObj == null || !"PasswordReset".equals(tokenObj.getTokenType())) {
+            request.setAttribute("error", "Invalid token type");
+            request.getRequestDispatcher(AuthConstants.JSP_FORGOT_PASSWORD).forward(request, response);
+            return;
+        }
+        
+        // Token hợp lệ, lưu token vào request attribute để JSP sử dụng
         request.setAttribute("token", token);
         // Forward đến trang đặt lại mật khẩu
         request.getRequestDispatcher(AuthConstants.JSP_RESET_PASSWORD).forward(request, response);
@@ -437,16 +454,12 @@ public class AuthController extends HttpServlet {
             return;
         }
         
-        // Bước 5: Tạo reset token ngẫu nhiên (UUID)
-        // Token này sẽ được gửi qua email và dùng để xác thực khi reset password
-        String resetToken = UUID.randomUUID().toString();
+        // Bước 5: Tạo reset token và lưu vào bảng VerificationTokens
+        // Token sẽ được tạo với thời gian hết hạn 1 giờ (60 phút)
+        String resetToken = tokenDAO.createVerificationToken(user.getUserID(), "PasswordReset", 1);
         
-        // Bước 6: Lưu reset token vào database
-        // Token sẽ được lưu kèm với thời gian hết hạn (thường là 1 giờ)
-        boolean tokenStored = userDAO.storePasswordResetToken(email.trim(), resetToken);
-        
-        if (!tokenStored) {
-            // Nếu không lưu được token, hiển thị lỗi
+        if (resetToken == null || resetToken.trim().isEmpty()) {
+            // Nếu không tạo được token, hiển thị lỗi
             request.setAttribute("error", "Failed to generate reset token. Please try again.");
             request.getRequestDispatcher(AuthConstants.JSP_FORGOT_PASSWORD).forward(request, response);
             return;
@@ -536,21 +549,34 @@ public class AuthController extends HttpServlet {
             return;
         }
         
-        // Bước 6: Validate token và lấy user từ database
-        // Token phải tồn tại trong database và chưa hết hạn
-        User user = userDAO.getUserByResetToken(token);
+        // Bước 6: Validate token và lấy userID từ database
+        // Token phải tồn tại trong database, chưa hết hạn và chưa được sử dụng
+        Object[] tokenResult = tokenDAO.verifyToken(token, "PasswordReset");
+        boolean isValid = (Boolean) tokenResult[0];
+        int userID = (Integer) tokenResult[1];
         
-        // Bước 7: Kiểm tra token có hợp lệ và chưa hết hạn không
+        // Bước 7: Kiểm tra token có hợp lệ không
+        if (!isValid || userID == 0) {
+            // Token không tồn tại, đã hết hạn hoặc đã được sử dụng
+            request.setAttribute("error", "Invalid or expired reset token. Please request a new password reset link.");
+            request.getRequestDispatcher(AuthConstants.JSP_FORGOT_PASSWORD).forward(request, response);
+            return;
+        }
+        
+        // Lấy thông tin user từ userID
+        User user = userDAO.getUserByID(userID);
         if (user == null) {
-            // Token không tồn tại hoặc đã hết hạn
-            request.setAttribute("error", "Invalid or expired reset token");
+            request.setAttribute("error", "User not found");
             request.getRequestDispatcher(AuthConstants.JSP_FORGOT_PASSWORD).forward(request, response);
             return;
         }
         
         // Bước 8: Update password mới cho user
-        // Password sẽ được hash trước khi lưu vào database
-        boolean success = userDAO.updatePasswordByToken(token, newPassword);
+        boolean success = userDAO.updatePassword(userID, newPassword);
+        
+        // Đánh dấu token đã được sử dụng (nếu verifyToken chưa tự động đánh dấu)
+        // verifyToken đã tự động đánh dấu token là used, nhưng để chắc chắn ta vẫn gọi markTokenAsUsed
+        tokenDAO.markTokenAsUsed(token);
         
         // Bước 9: Thông báo kết quả và redirect đến trang đăng nhập
         if (success) {

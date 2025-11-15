@@ -979,7 +979,8 @@
                 const movieId = parseInt(movieCard.dataset.movieId);
                 const movieName = movieCard.dataset.movieName;
                 
-                if (!movieId || isNaN(movieId)) {
+                // Check for NaN explicitly - allow 0 as valid ID
+                if (isNaN(movieId) || movieCard.dataset.movieId === undefined) {
                     console.error('Invalid movie ID:', movieCard.dataset.movieId);
                     return;
                 }
@@ -1071,8 +1072,9 @@
                 return;
             }
             
-            // Only load showtimes if all selections are made AND selectedDate is valid
-            if (selectedMovie && selectedDate && selectedDate !== '--' && selectedDate !== 'null' && 
+            // Only load showtimes if all selections are made AND selectedDate is valid - allow movie ID = 0
+            if (selectedMovie !== null && selectedMovie !== undefined && 
+                selectedDate && selectedDate !== '--' && selectedDate !== 'null' && 
                 /^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
                 loadShowtimes();
             } else {
@@ -1120,8 +1122,8 @@
             selectedTime = '';
             document.getElementById('continueBtn').disabled = true;
             
-            // Only load showtimes if all selections are made
-            if (selectedMovie && selectedCinema) {
+            // Only load showtimes if all selections are made - allow movie ID = 0
+            if (selectedMovie !== null && selectedMovie !== undefined && selectedCinema) {
                 loadShowtimes();
             }
             updateSummary();
@@ -1159,8 +1161,10 @@
                 dateType: typeof selectedDate
             });
             
-            // Validate all required selections
-            if (!selectedMovie || !selectedCinema || !selectedDate) {
+            // Validate all required selections - allow movie ID = 0
+            if (selectedMovie === null || selectedMovie === undefined || 
+                selectedCinema === null || selectedCinema === undefined || 
+                !selectedDate) {
                 console.log('Cannot load showtimes - missing selection:', {
                     movie: selectedMovie,
                     cinema: selectedCinema,
@@ -1349,7 +1353,9 @@
         function updateSummary() {
             const summary = document.getElementById('selectionSummary');
             
-            if (selectedMovie && selectedCinema && selectedDate && selectedScreening) {
+            // Allow movie ID = 0
+            if (selectedMovie !== null && selectedMovie !== undefined && 
+                selectedCinema && selectedDate && selectedScreening) {
                 summary.style.display = 'block';
                 
                 document.getElementById('summaryMovie').textContent = selectedMovieName;
