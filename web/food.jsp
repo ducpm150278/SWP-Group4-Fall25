@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page import="entity.Food" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.math.BigDecimal" %>
@@ -33,6 +33,8 @@
     if (foodList != null && !foodList.isEmpty()) {
         currentPageFoodList = foodList.subList(startIndex, endIndex);
     }
+    
+    String foodUri = request.getRequestURI().toLowerCase();
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -40,6 +42,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Food Management</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+        <link href="css/style-room.css" rel="stylesheet" type="text/css"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
+
         <style>
             * {
                 margin: 0;
@@ -49,97 +55,73 @@
             }
 
             body {
-                display: flex;
-                min-height: 100vh;
                 background-color: #f5f7fa;
                 color: #333;
+                min-height: 100vh;
             }
 
-            /* Sidebar Styles */
-            .sidebar {
-                width: 23%;
-                background-color: #2c3e50;
-                color: white;
-                padding: 20px 0;
+            .nav-link.active {
+                background-color: #0d6efd !important;
+                color: white !important;
+            }
+            .nav-link.active i {
+                color: white !important;
+            }
+            .sb-sidenav-menu-nested .nav-link.active {
+                background-color: #0d6efd !important;
+                color: white !important;
+            }
+
+            /* Layout container */
+            #layoutSidenav {
                 display: flex;
-                flex-direction: column;
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                min-height: 100vh;
             }
 
-            .logo {
-                padding: 0 20px 20px;
-                border-bottom: 1px solid #34495e;
-                margin-bottom: 20px;
-            }
-
-            .logo h1 {
-                font-size: 1.5rem;
-                font-weight: 600;
-            }
-
-            .nav-menu {
-                flex-grow: 1;
-            }
-
-            .nav-item {
-                padding: 15px 20px;
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                text-decoration: none;
-                color: white;
-            }
-
-            .nav-item:hover {
-                background-color: #34495e;
-            }
-
-            .nav-item.active {
-                background-color: #3498db;
-            }
-
-            .nav-item i {
-                margin-right: 10px;
-                font-size: 1.2rem;
-            }
-
-            .user-info {
-                padding: 15px 20px;
-                border-top: 1px solid #34495e;
-                display: flex;
-                align-items: center;
-            }
-
-            .user-avatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background-color: #3498db;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 10px;
-                font-weight: bold;
-            }
-
-            /* Main Content Styles */
-            .main-content {
-                flex-grow: 1;
-                padding: 30px;
+            /* Sidebar cố định */
+            #layoutSidenav_nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 250px;
+                height: 100vh;
                 overflow-y: auto;
+                z-index: 1000;
+                background-color: #2c3e50;
             }
 
+            /* Nội dung chính - FIXED */
+            #layoutSidenav_content {
+                margin-left: 250px;
+                width: calc(100% - 250px);
+                min-height: 100vh;
+                background-color: #f5f7fa;
+                padding: 0;
+            }
+
+            /* Main Content Container */
+            .main-content-container {
+                padding: 30px;
+                width: 100%;
+                min-height: 100vh;
+            }
+
+            /* Food Management Specific Styles */
             .header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 30px;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             }
 
             .header h2 {
                 font-size: 1.8rem;
                 color: #2c3e50;
+                margin: 0;
             }
 
             .header-controls {
@@ -197,7 +179,7 @@
                 color: #7f8c8d;
             }
 
-            /* Filter Container Styles - UPDATED */
+            /* Filter Container Styles */
             .filter-container {
                 display: flex;
                 gap: 15px;
@@ -238,6 +220,7 @@
                 border-radius: 8px;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
                 overflow: hidden;
+                margin-bottom: 20px;
             }
 
             table {
@@ -383,7 +366,7 @@
             .modal {
                 display: none;
                 position: fixed;
-                z-index: 1000;
+                z-index: 1100;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -539,7 +522,7 @@
                 display: block;
             }
 
-            /* Pagination Styles - Updated to match image */
+            /* Pagination Styles */
             .pagination-container {
                 display: flex;
                 justify-content: space-between;
@@ -608,10 +591,6 @@
 
             /* Responsive Design */
             @media (max-width: 1024px) {
-                .sidebar {
-                    width: 30%;
-                }
-
                 .view-modal-columns {
                     flex-direction: column;
                     gap: 20px;
@@ -619,26 +598,19 @@
             }
 
             @media (max-width: 768px) {
-                body {
-                    flex-direction: column;
-                }
-
-                .sidebar {
+                #layoutSidenav_nav {
                     width: 100%;
-                    padding: 10px 0;
+                    height: auto;
+                    position: relative;
                 }
 
-                .nav-menu {
-                    display: flex;
-                    overflow-x: auto;
+                #layoutSidenav_content {
+                    margin-left: 0;
+                    width: 100%;
                 }
 
-                .nav-item {
-                    flex-shrink: 0;
-                }
-
-                .user-info {
-                    display: none;
+                .main-content-container {
+                    padding: 15px;
                 }
 
                 .header {
@@ -672,7 +644,7 @@
 
                 .modal-content {
                     width: 95%;
-                    margin: 5% auto;
+                    margin: 10% auto;
                 }
 
                 .food-image, .food-image-placeholder {
@@ -700,565 +672,550 @@
         </style>
     </head>
     <body>
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <h1>Admin Dashboard</h1>
-            </div>
-            <div class="nav-menu">
-                <a href="users.jsp" class="nav-item">
-                    <i>👥</i> User Management
-                </a>
-                <a href="food-management" class="nav-item active">
-                    <i>🍿</i> Food Management
-                </a>
-                <a href="combo-management" class="nav-item">
-                    <i>📦</i> Combo Management
-                </a>
-                <a href="movies.jsp" class="nav-item">
-                    <i>🎬</i> Movie Management
-                </a>
-                <a href="reports.jsp" class="nav-item">
-                    <i>📊</i> Reports
-                </a>
-                <a href="settings.jsp" class="nav-item">
-                    <i>⚙️</i> Settings
-                </a>
-            </div>
-            <div class="user-info">
-                <div class="user-avatar">AD</div>
-                <div>
-                    <div>Admin User</div>
-                    <div style="font-size: 0.8rem; color: #bdc3c7;">Administrator</div>
-                </div>
-            </div>
-        </div>
+        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+            <%@ include file="view/admin/header.jsp" %>
+        </nav>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h2>Food Management</h2>
-                <div class="header-controls">
-                    <div class="search-container">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="searchInput" placeholder="Search food items..." onkeyup="searchFood()">
-                    </div>
+        <div id="layoutSidenav">
+            <!-- Sidebar -->
+            <%@ include file="view/admin/menu-manager.jsp" %>
+            <!-- Main Content -->
+            <div id="layoutSidenav_content">
+                <div class="main-content-container">
+                    <div class="header">
+                        <h2>Food Management</h2>
+                        <div class="header-controls">
+                            <div class="search-container">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="searchInput" placeholder="Search food items..." onkeyup="searchFood()">
+                            </div>
 
-                    <!-- UPDATED FILTER CONTAINER -->
-                    <div class="filter-container">
-                        <div class="filter-group">
-                            <select id="categoryFilter" onchange="filterFood()">
-                                <option value="all">All Categories</option>
-                                <option value="Snack">Snack</option>
-                                <option value="Drink">Drink</option>
-                                <option value="Dessert">Dessert</option>
-                            </select>
-                        </div>
+                            <!-- UPDATED FILTER CONTAINER -->
+                            <div class="filter-container">
+                                <div class="filter-group">
+                                    <select id="categoryFilter" onchange="filterFood()">
+                                        <option value="all">All Categories</option>
+                                        <option value="Snack">Snack</option>
+                                        <option value="Drink">Drink</option>
+                                        <option value="Dessert">Dessert</option>
+                                    </select>
+                                </div>
 
-                        <div class="filter-group">
-                            <select id="statusFilter" onchange="filterFood()">
-                                <option value="all">All Status</option>
-                                <option value="available">Available</option>
-                                <option value="unavailable">Unavailable</option>
-                            </select>
+                                <div class="filter-group">
+                                    <select id="statusFilter" onchange="filterFood()">
+                                        <option value="all">All Status</option>
+                                        <option value="available">Available</option>
+                                        <option value="unavailable">Unavailable</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="openAddFoodModal()">
+                                <i>➕</i> Add New Food
+                            </button>
                         </div>
                     </div>
 
-                    <button class="btn btn-primary" onclick="openAddFoodModal()">
-                        <i>➕</i> Add New Food
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Image</th>
-                            <th>Food Name</th>
-                            <th>Description</th>
-                            <th>Type</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="foodTableBody">
-                        <% if (currentPageFoodList != null && !currentPageFoodList.isEmpty()) { 
-                            for (Food food : currentPageFoodList) { 
-                                String foodTypeClass = food.getFoodType() != null ? food.getFoodType().toLowerCase() : "snack";
-                                String imageUrl = food.getImageURL() != null && !food.getImageURL().isEmpty() ? food.getImageURL() : null;
-                        %>
-                        <tr data-food-id="<%= food.getFoodID() != null ? food.getFoodID() : 0 %>">
-                            <td><%= food.getFoodID() != null ? food.getFoodID() : "N/A" %></td>
-                            <td>
-                                <% if (imageUrl != null) { %>
-                                <img src="<%= imageUrl %>" alt="<%= food.getFoodName() %>" class="food-image" 
-                                     data-image-url="<%= imageUrl %>"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="food-image-placeholder" style="display: none;">No Image</div>
-                                <% } else { %>
-                                <div class="food-image-placeholder">No Image</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Food Name</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="foodTableBody">
+                                <% if (currentPageFoodList != null && !currentPageFoodList.isEmpty()) { 
+                                    for (Food food : currentPageFoodList) { 
+                                        String foodTypeClass = food.getFoodType() != null ? food.getFoodType().toLowerCase() : "snack";
+                                        String imageUrl = food.getImageURL() != null && !food.getImageURL().isEmpty() ? food.getImageURL() : null;
+                                %>
+                                <tr data-food-id="<%= food.getFoodID() != null ? food.getFoodID() : 0 %>">
+                                    <td><%= food.getFoodID() != null ? food.getFoodID() : "N/A" %></td>
+                                    <td>
+                                        <% if (imageUrl != null) { %>
+                                        <img src="<%= imageUrl %>" alt="<%= food.getFoodName() %>" class="food-image" 
+                                             data-image-url="<%= imageUrl %>"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="food-image-placeholder" style="display: none;">No Image</div>
+                                        <% } else { %>
+                                        <div class="food-image-placeholder">No Image</div>
+                                        <% } %>
+                                    </td>
+                                    <td><%= food.getFoodName() != null ? food.getFoodName() : "N/A" %></td>
+                                    <td><%= food.getDescription() != null ? food.getDescription() : "N/A" %></td>
+                                    <td>
+                                        <span class="food-type <%= foodTypeClass %>">
+                                            <%= food.getFoodType() != null ? food.getFoodType() : "N/A" %>
+                                        </span>
+                                    </td>
+                                    <td class="price"><%= formatPrice(food.getPrice()) %></td>
+                                    <td>
+                                        <span class="status <%= food.getIsAvailable() != null && food.getIsAvailable() ? "available" : "unavailable" %>">
+                                            <%= food.getIsAvailable() != null && food.getIsAvailable() ? "Available" : "Unavailable" %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn view" onclick="viewFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
+                                            View
+                                        </button>
+                                        <button class="action-btn delete" onclick="deleteFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% } 
+                            } else { %>
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 40px;">
+                                        <div style="color: #7f8c8d; font-size: 1.1rem;">
+                                            <% if (foodList != null && !foodList.isEmpty()) { %>
+                                            No food items found on this page.
+                                            <% } else { %>
+                                            No food items found.
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
                                 <% } %>
-                            </td>
-                            <td><%= food.getFoodName() != null ? food.getFoodName() : "N/A" %></td>
-                            <td><%= food.getDescription() != null ? food.getDescription() : "N/A" %></td>
-                            <td>
-                                <span class="food-type <%= foodTypeClass %>">
-                                    <%= food.getFoodType() != null ? food.getFoodType() : "N/A" %>
-                                </span>
-                            </td>
-                            <td class="price"><%= formatPrice(food.getPrice()) %></td>
-                            <td>
-                                <span class="status <%= food.getIsAvailable() != null && food.getIsAvailable() ? "available" : "unavailable" %>">
-                                    <%= food.getIsAvailable() != null && food.getIsAvailable() ? "Available" : "Unavailable" %>
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn view" onclick="viewFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
-                                    View
-                                </button>
-                                <button class="action-btn delete" onclick="deleteFood(<%= food.getFoodID() != null ? food.getFoodID() : 0 %>)">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                        <% } 
-                    } else { %>
-                        <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px;">
-                                <div style="color: #7f8c8d; font-size: 1.1rem;">
-                                    <% if (foodList != null && !foodList.isEmpty()) { %>
-                                    No food items found on this page.
-                                    <% } else { %>
-                                    No food items found.
-                                    <% } %>
-                                </div>
-                            </td>
-                        </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Pagination Controls - Separate container like in the image -->
-            <% if (totalPages > 0) { %>
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> entries
-                </div>
-                <div class="pagination">
-                    <%-- Previous button --%>
-                    <% if (currentPage > 1) { %>
-                    <button class="page-btn" onclick="goToPage(<%= currentPage - 1 %>)">
-                        ‹
-                    </button>
-                    <% } else { %>
-                    <button class="page-btn disabled">‹</button>
-                    <% } %>
+                    <!-- Pagination Controls -->
+                    <% if (totalPages > 0) { %>
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> entries
+                        </div>
+                        <div class="pagination">
+                            <%-- Previous button --%>
+                            <% if (currentPage > 1) { %>
+                            <button class="page-btn" onclick="goToPage(<%= currentPage - 1 %>)">
+                                ‹
+                            </button>
+                            <% } else { %>
+                            <button class="page-btn disabled">‹</button>
+                            <% } %>
 
-                    <%-- Page numbers --%>
-                    <% 
-                        int startPage = Math.max(1, currentPage - 1);
-                        int endPage = Math.min(totalPages, currentPage + 1);
-                    
-                        // Always show first page
-                        if (startPage > 1) { 
-                    %>
-                    <button class="page-btn <%= 1 == currentPage ? "active" : "" %>" onclick="goToPage(1)">1</button>
-                    <% if (startPage > 2) { %>
-                    <span class="page-dots">...</span>
-                    <% } %>
-                    <% } %>
+                            <%-- Page numbers --%>
+                            <% 
+                                int startPage = Math.max(1, currentPage - 1);
+                                int endPage = Math.min(totalPages, currentPage + 1);
+                            
+                                // Always show first page
+                                if (startPage > 1) { 
+                            %>
+                            <button class="page-btn <%= 1 == currentPage ? "active" : "" %>" onclick="goToPage(1)">1</button>
+                            <% if (startPage > 2) { %>
+                            <span class="page-dots">...</span>
+                            <% } %>
+                            <% } %>
 
-                    <% for (int i = startPage; i <= endPage; i++) { %>
-                    <button class="page-btn <%= i == currentPage ? "active" : "" %>" onclick="goToPage(<%= i %>)"><%= i %></button>
-                    <% } %>
+                            <% for (int i = startPage; i <= endPage; i++) { %>
+                            <button class="page-btn <%= i == currentPage ? "active" : "" %>" onclick="goToPage(<%= i %>)"><%= i %></button>
+                            <% } %>
 
-                    <%-- Always show last page if needed --%>
-                    <% if (endPage < totalPages) { %>
-                    <% if (endPage < totalPages - 1) { %>
-                    <span class="page-dots">...</span>
-                    <% } %>
-                    <button class="page-btn <%= totalPages == currentPage ? "active" : "" %>" onclick="goToPage(<%= totalPages %>)"><%= totalPages %></button>
-                    <% } %>
+                            <%-- Always show last page if needed --%>
+                            <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                            <span class="page-dots">...</span>
+                            <% } %>
+                            <button class="page-btn <%= totalPages == currentPage ? "active" : "" %>" onclick="goToPage(<%= totalPages %>)"><%= totalPages %></button>
+                            <% } %>
 
-                    <%-- Next button --%>
-                    <% if (currentPage < totalPages) { %>
-                    <button class="page-btn" onclick="goToPage(<%= currentPage + 1 %>)">›</button>
-                    <% } else { %>
-                    <button class="page-btn disabled">›</button>
+                            <%-- Next button --%>
+                            <% if (currentPage < totalPages) { %>
+                            <button class="page-btn" onclick="goToPage(<%= currentPage + 1 %>)">›</button>
+                            <% } else { %>
+                            <button class="page-btn disabled">›</button>
+                            <% } %>
+                        </div>
+                    </div>
                     <% } %>
                 </div>
             </div>
-            <% } %>
         </div>
+    </div>
 
-        <!-- Modal Add Food -->
-        <div id="addFoodModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeAddFoodModal()">&times;</span>
-                <h3 style="margin-bottom: 20px; color: #2c3e50;">Add New Food</h3>
-                <form id="addFoodForm" action="food-management" method="POST">
-                    <input type="hidden" name="action" value="create">
+    <!-- Modal Add Food -->
+    <div id="addFoodModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddFoodModal()">&times;</span>
+            <h3 style="margin-bottom: 20px; color: #2c3e50;">Add New Food</h3>
+            <form id="addFoodForm" action="food-management" method="POST">
+                <input type="hidden" name="action" value="create">
 
-                    <div class="form-group">
-                        <label for="foodName">Food Name:</label>
-                        <input type="text" id="foodName" name="foodName" required>
-                    </div>
+                <div class="form-group">
+                    <label for="foodName">Food Name:</label>
+                    <input type="text" id="foodName" name="foodName" required>
+                </div>
 
-                    <div class="form-group">
-                        <label for="description">Description:</label>
-                        <textarea id="description" name="description" rows="3"></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" rows="3"></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="price">Price (VND):</label>
-                        <input type="number" id="price" name="price" step="1000" min="0" required>
-                    </div>
+                <div class="form-group">
+                    <label for="price">Price (VND):</label>
+                    <input type="number" id="price" name="price" step="1000" min="0" required>
+                </div>
 
-                    <div class="form-group">
-                        <label for="foodType">Food Type:</label>
-                        <select id="foodType" name="foodType" required>
-                            <option value="Snack">Snack</option>
-                            <option value="Drink">Drink</option>
-                            <option value="Dessert">Dessert</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="foodType">Food Type:</label>
+                    <select id="foodType" name="foodType" required>
+                        <option value="Snack">Snack</option>
+                        <option value="Drink">Drink</option>
+                        <option value="Dessert">Dessert</option>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label for="imageURL">Image URL:</label>
-                        <input type="text" id="imageURL" name="imageURL" placeholder="https://example.com/image.jpg">
-                    </div>
+                <div class="form-group">
+                    <label for="imageURL">Image URL:</label>
+                    <input type="text" id="imageURL" name="imageURL" placeholder="https://example.com/image.jpg">
+                </div>
 
-                    <div class="form-group">
-                        <label style="display: inline-flex; align-items: center;">
-                            <input type="checkbox" name="isAvailable" value="true" checked style="width: auto; margin-right: 8px;">
-                            Available
-                        </label>
-                    </div>
+                <div class="form-group">
+                    <label style="display: inline-flex; align-items: center;">
+                        <input type="checkbox" name="isAvailable" value="true" checked style="width: auto; margin-right: 8px;">
+                        Available
+                    </label>
+                </div>
 
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary" style="flex: 1;">Add Food</button>
-                        <button type="button" class="btn" onclick="closeAddFoodModal()" 
-                                style="flex: 1; background-color: #95a5a6; color: white;">Cancel</button>
-                    </div>
-                </form>
-            </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Add Food</button>
+                    <button type="button" class="btn" onclick="closeAddFoodModal()" 
+                            style="flex: 1; background-color: #95a5a6; color: white;">Cancel</button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- Modal View Food -->
-        <div id="viewFoodModal" class="modal">
-            <div class="modal-content view-modal-content">
-                <span class="close" onclick="closeViewFoodModal()">&times;</span>
-                <h3 style="margin-bottom: 20px; color: #2c3e50;">Food Details</h3>
+    <!-- Modal View Food -->
+    <div id="viewFoodModal" class="modal">
+        <div class="modal-content view-modal-content">
+            <span class="close" onclick="closeViewFoodModal()">&times;</span>
+            <h3 style="margin-bottom: 20px; color: #2c3e50;">Food Details</h3>
 
-                <div class="view-modal-columns">
-                    <!-- Column 1: Food Information -->
-                    <div class="view-column view-column-left">
-                        <div class="view-field">
-                            <div class="view-label">Food ID</div>
-                            <div class="view-value" id="viewFoodId">N/A</div>
-                        </div>
+            <div class="view-modal-columns">
+                <!-- Column 1: Food Information -->
+                <div class="view-column view-column-left">
+                    <div class="view-field">
+                        <div class="view-label">Food ID</div>
+                        <div class="view-value" id="viewFoodId">N/A</div>
+                    </div>
 
-                        <div class="view-field">
-                            <div class="view-label">Food Name</div>
-                            <div class="view-value" id="viewFoodName">N/A</div>
-                        </div>
+                    <div class="view-field">
+                        <div class="view-label">Food Name</div>
+                        <div class="view-value" id="viewFoodName">N/A</div>
+                    </div>
 
-                        <div class="view-field">
-                            <div class="view-label">Description</div>
-                            <div class="view-value" id="viewDescription">N/A</div>
-                        </div>
+                    <div class="view-field">
+                        <div class="view-label">Description</div>
+                        <div class="view-value" id="viewDescription">N/A</div>
+                    </div>
 
-                        <div class="view-field">
-                            <div class="view-label">Price</div>
-                            <div class="view-value" id="viewPrice">N/A</div>
-                        </div>
+                    <div class="view-field">
+                        <div class="view-label">Price</div>
+                        <div class="view-value" id="viewPrice">N/A</div>
+                    </div>
 
-                        <div class="view-field">
-                            <div class="view-label">Food Type</div>
-                            <div class="view-value" id="viewFoodType">N/A</div>
-                        </div>
+                    <div class="view-field">
+                        <div class="view-label">Food Type</div>
+                        <div class="view-value" id="viewFoodType">N/A</div>
+                    </div>
 
-                        <div class="view-field">
-                            <div class="view-label">Status</div>
-                            <div class="view-value" id="viewStatus">N/A</div>
+                    <div class="view-field">
+                        <div class="view-label">Status</div>
+                        <div class="view-value" id="viewStatus">N/A</div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Image Information -->
+                <div class="view-column view-column-right">
+                    <div class="view-field">
+                        <div class="view-label">Image URL</div>
+                        <div class="view-value url-container" id="viewImageURLContainer">
+                            <span class="truncate-url" id="viewImageURL">N/A</span>
+                            <div class="full-url" id="viewFullImageURL"></div>
                         </div>
                     </div>
 
-                    <!-- Column 2: Image Information -->
-                    <div class="view-column view-column-right">
-                        <div class="view-field">
-                            <div class="view-label">Image URL</div>
-                            <div class="view-value url-container" id="viewImageURLContainer">
-                                <span class="truncate-url" id="viewImageURL">N/A</span>
-                                <div class="full-url" id="viewFullImageURL"></div>
-                            </div>
-                        </div>
-
-                        <div class="view-field">
-                            <div class="view-label">Image Preview</div>
-                            <div class="view-value">
-                                <div class="image-preview-container">
-                                    <img id="viewFoodImage" src="" alt="Food Image" class="image-preview" style="display: none;">
-                                    <div id="viewImagePlaceholder" class="image-placeholder">
-                                        No Image Available
-                                    </div>
+                    <div class="view-field">
+                        <div class="view-label">Image Preview</div>
+                        <div class="view-value">
+                            <div class="image-preview-container">
+                                <img id="viewFoodImage" src="" alt="Food Image" class="image-preview" style="display: none;">
+                                <div id="viewImagePlaceholder" class="image-placeholder">
+                                    No Image Available
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-primary" id="editFoodBtn">Edit</button>
-                    <button type="button" class="btn" onclick="closeViewFoodModal()" 
-                            style="background-color: #95a5a6; color: white;">Cancel</button>
-                </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" id="editFoodBtn">Edit</button>
+                <button type="button" class="btn" onclick="closeViewFoodModal()" 
+                        style="background-color: #95a5a6; color: white;">Cancel</button>
             </div>
         </div>
+    </div>
 
-        <script>
-            // Check for success/error messages from URL parameters
-            window.addEventListener('DOMContentLoaded', function () {
-                const urlParams = new URLSearchParams(window.location.search);
-                const success = urlParams.get('success');
-                const error = urlParams.get('error');
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="js/scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+    <script src="assets/demo/chart-area-demo.js"></script>
+    <script src="assets/demo/chart-bar-demo.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+    <script src="js/datatables-simple-demo.js"></script>
 
-                if (success) {
-                    alert('Operation successful: ' + success);
-                    // Remove success parameter from URL
-                    const newUrl = window.location.pathname;
-                    window.history.replaceState({}, document.title, newUrl);
-                }
+    <script>
+                    // Check for success/error messages from URL parameters
+                    window.addEventListener('DOMContentLoaded', function () {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const success = urlParams.get('success');
+                        const error = urlParams.get('error');
 
-                if (error) {
-                    alert('Operation failed: ' + error);
-                    // Remove error parameter from URL
-                    const newUrl = window.location.pathname;
-                    window.history.replaceState({}, document.title, newUrl);
-                }
-
-                // Setup event listener for edit button
-                document.getElementById('editFoodBtn').addEventListener('click', function () {
-                    if (currentFoodId !== 0) {
-                        // Redirect to edit page through servlet
-                        window.location.href = 'food-management?action=edit&id=' + currentFoodId;
-                    } else {
-                        alert('No food item selected');
-                    }
-                });
-            });
-
-            // Global variable to store current food ID
-            let currentFoodId = 0;
-
-            // Pagination function
-            function goToPage(page) {
-                const urlParams = new URLSearchParams(window.location.search);
-                urlParams.set('page', page);
-                window.location.href = window.location.pathname + '?' + urlParams.toString();
-            }
-
-            // Modal functions
-            function openAddFoodModal() {
-                document.getElementById('addFoodModal').style.display = 'block';
-            }
-
-            function closeAddFoodModal() {
-                document.getElementById('addFoodModal').style.display = 'none';
-            }
-
-            // View Food Modal functions
-            function viewFood(foodId) {
-                if (foodId === 0) {
-                    alert('Invalid food ID');
-                    return;
-                }
-
-                currentFoodId = foodId;
-
-                const allRows = document.querySelectorAll('#foodTableBody tr');
-                let targetRow = null;
-
-                for (let row of allRows) {
-                    const rowFoodId = row.getAttribute('data-food-id');
-                    if (rowFoodId && parseInt(rowFoodId) === foodId) {
-                        targetRow = row;
-                        break;
-                    }
-                }
-
-                if (!targetRow) {
-                    alert('Food item not found in table. FoodId: ' + foodId);
-                    return;
-                }
-
-                const cells = targetRow.cells;
-
-                // Lấy URL hình ảnh từ hàng trong bảng
-                const imageCell = cells[1];
-                let imageUrl = null;
-                const imgElement = imageCell.querySelector('img');
-                if (imgElement && imgElement.getAttribute('data-image-url')) {
-                    imageUrl = imgElement.getAttribute('data-image-url');
-                }
-
-                const foodData = {
-                    id: cells[0].textContent,
-                    name: cells[2].textContent,
-                    description: cells[3].textContent,
-                    type: cells[4].querySelector('.food-type').textContent,
-                    price: cells[5].textContent,
-                    status: cells[6].querySelector('.status').textContent,
-                    imageUrl: imageUrl
-                };
-
-                // Cập nhật thông tin vào modal - Column 1
-                document.getElementById('viewFoodId').textContent = foodData.id;
-                document.getElementById('viewFoodName').textContent = foodData.name;
-                document.getElementById('viewDescription').textContent = foodData.description;
-                document.getElementById('viewPrice').textContent = foodData.price;
-                document.getElementById('viewFoodType').textContent = foodData.type;
-                document.getElementById('viewStatus').textContent = foodData.status;
-
-                // Cập nhật Image URL và hiển thị hình ảnh - Column 2
-                const imageUrlElement = document.getElementById('viewImageURL');
-                const fullImageUrlElement = document.getElementById('viewFullImageURL');
-                const foodImageElement = document.getElementById('viewFoodImage');
-                const imagePlaceholderElement = document.getElementById('viewImagePlaceholder');
-
-                if (foodData.imageUrl && foodData.imageUrl !== 'null' && foodData.imageUrl !== 'N/A') {
-                    // Hiển thị URL rút gọn (50 ký tự)
-                    const truncatedUrl = foodData.imageUrl.length > 50
-                            ? foodData.imageUrl.substring(0, 50) + '...'
-                            : foodData.imageUrl;
-
-                    imageUrlElement.textContent = truncatedUrl;
-                    fullImageUrlElement.textContent = foodData.imageUrl;
-
-                    foodImageElement.src = foodData.imageUrl;
-                    foodImageElement.style.display = 'block';
-                    imagePlaceholderElement.style.display = 'none';
-
-                    // Xử lý lỗi tải hình ảnh
-                    foodImageElement.onerror = function () {
-                        foodImageElement.style.display = 'none';
-                        imagePlaceholderElement.style.display = 'flex';
-                        imagePlaceholderElement.textContent = 'Failed to load image';
-                    };
-                } else {
-                    imageUrlElement.textContent = 'No Image URL';
-                    fullImageUrlElement.textContent = 'No Image URL';
-                    foodImageElement.style.display = 'none';
-                    imagePlaceholderElement.style.display = 'flex';
-                    imagePlaceholderElement.textContent = 'No Image Available';
-                }
-
-                document.getElementById('viewFoodModal').style.display = 'block';
-            }
-
-            function closeViewFoodModal() {
-                document.getElementById('viewFoodModal').style.display = 'none';
-                currentFoodId = 0;
-            }
-
-            // Close modal when clicking outside
-            window.onclick = function (event) {
-                const addModal = document.getElementById('addFoodModal');
-                const viewModal = document.getElementById('viewFoodModal');
-
-                if (event.target === addModal) {
-                    closeAddFoodModal();
-                }
-
-                if (event.target === viewModal) {
-                    closeViewFoodModal();
-                }
-            }
-
-            // Search functionality
-            function searchFood() {
-                applyFilters();
-            }
-
-            // Filter functionality - UPDATED
-            function filterFood() {
-                applyFilters();
-            }
-
-            // Combined search and filter function - UPDATED
-            function applyFilters() {
-                const searchInput = document.getElementById('searchInput');
-                const categoryFilter = document.getElementById('categoryFilter');
-                const statusFilter = document.getElementById('statusFilter');
-
-                const searchTerm = searchInput.value.toLowerCase();
-                const categoryValue = categoryFilter.value;
-                const statusValue = statusFilter.value;
-
-                const rows = document.querySelectorAll('#foodTableBody tr');
-
-                rows.forEach(row => {
-                    if (row.cells.length < 7)
-                        return;
-
-                    const foodName = row.cells[2].textContent.toLowerCase();
-                    const description = row.cells[3].textContent.toLowerCase();
-                    const foodType = row.cells[4].textContent.toLowerCase();
-                    const status = row.cells[6].textContent.toLowerCase();
-
-                    const matchesSearch = searchTerm === '' ||
-                            foodName.includes(searchTerm) ||
-                            description.includes(searchTerm) ||
-                            foodType.includes(searchTerm);
-
-                    let matchesCategory = true;
-                    if (categoryValue !== 'all') {
-                        matchesCategory = foodType.includes(categoryValue.toLowerCase());
-                    }
-
-                    let matchesStatus = true;
-                    if (statusValue !== 'all') {
-                        matchesStatus = status.includes(statusValue.toLowerCase());
-                    }
-
-                    row.style.display = (matchesSearch && matchesCategory && matchesStatus) ? '' : 'none';
-                });
-            }
-
-            function deleteFood(foodId) {
-                if (foodId === 0) {
-                    alert('Invalid food ID');
-                    return;
-                }
-
-                if (confirm('Are you sure you want to delete this food item?')) {
-                    fetch('food-management?action=delete&foodID=' + foodId, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                        if (success) {
+                            alert('Operation successful: ' + success);
+                            // Remove success parameter from URL
+                            const newUrl = window.location.pathname;
+                            window.history.replaceState({}, document.title, newUrl);
                         }
-                    })
-                            .then(response => {
-                                if (response.ok) {
-                                    alert('Food item deleted successfully!');
-                                    location.reload();
-                                } else {
-                                    return response.text().then(text => {
-                                        throw new Error(text || 'Unknown error occurred');
-                                    });
+
+                        if (error) {
+                            alert('Operation failed: ' + error);
+                            // Remove error parameter from URL
+                            const newUrl = window.location.pathname;
+                            window.history.replaceState({}, document.title, newUrl);
+                        }
+
+                        // Setup event listener for edit button
+                        document.getElementById('editFoodBtn').addEventListener('click', function () {
+                            if (currentFoodId !== 0) {
+                                // Redirect to edit page through servlet
+                                window.location.href = 'food-management?action=edit&id=' + currentFoodId;
+                            } else {
+                                alert('No food item selected');
+                            }
+                        });
+                    });
+
+                    // Global variable to store current food ID
+                    let currentFoodId = 0;
+
+                    // Pagination function
+                    function goToPage(page) {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        urlParams.set('page', page);
+                        window.location.href = window.location.pathname + '?' + urlParams.toString();
+                    }
+
+                    // Modal functions
+                    function openAddFoodModal() {
+                        document.getElementById('addFoodModal').style.display = 'block';
+                    }
+
+                    function closeAddFoodModal() {
+                        document.getElementById('addFoodModal').style.display = 'none';
+                    }
+
+                    // View Food Modal functions
+                    function viewFood(foodId) {
+                        if (foodId === 0) {
+                            alert('Invalid food ID');
+                            return;
+                        }
+
+                        currentFoodId = foodId;
+
+                        const allRows = document.querySelectorAll('#foodTableBody tr');
+                        let targetRow = null;
+
+                        for (let row of allRows) {
+                            const rowFoodId = row.getAttribute('data-food-id');
+                            if (rowFoodId && parseInt(rowFoodId) === foodId) {
+                                targetRow = row;
+                                break;
+                            }
+                        }
+
+                        if (!targetRow) {
+                            alert('Food item not found in table. FoodId: ' + foodId);
+                            return;
+                        }
+
+                        const cells = targetRow.cells;
+
+                        // Lấy URL hình ảnh từ hàng trong bảng
+                        const imageCell = cells[1];
+                        let imageUrl = null;
+                        const imgElement = imageCell.querySelector('img');
+                        if (imgElement && imgElement.getAttribute('data-image-url')) {
+                            imageUrl = imgElement.getAttribute('data-image-url');
+                        }
+
+                        const foodData = {
+                            id: cells[0].textContent,
+                            name: cells[2].textContent,
+                            description: cells[3].textContent,
+                            type: cells[4].querySelector('.food-type').textContent,
+                            price: cells[5].textContent,
+                            status: cells[6].querySelector('.status').textContent,
+                            imageUrl: imageUrl
+                        };
+
+                        // Cập nhật thông tin vào modal - Column 1
+                        document.getElementById('viewFoodId').textContent = foodData.id;
+                        document.getElementById('viewFoodName').textContent = foodData.name;
+                        document.getElementById('viewDescription').textContent = foodData.description;
+                        document.getElementById('viewPrice').textContent = foodData.price;
+                        document.getElementById('viewFoodType').textContent = foodData.type;
+                        document.getElementById('viewStatus').textContent = foodData.status;
+
+                        // Cập nhật Image URL và hiển thị hình ảnh - Column 2
+                        const imageUrlElement = document.getElementById('viewImageURL');
+                        const fullImageUrlElement = document.getElementById('viewFullImageURL');
+                        const foodImageElement = document.getElementById('viewFoodImage');
+                        const imagePlaceholderElement = document.getElementById('viewImagePlaceholder');
+
+                        if (foodData.imageUrl && foodData.imageUrl !== 'null' && foodData.imageUrl !== 'N/A') {
+                            // Hiển thị URL rút gọn (50 ký tự)
+                            const truncatedUrl = foodData.imageUrl.length > 50
+                                    ? foodData.imageUrl.substring(0, 50) + '...'
+                                    : foodData.imageUrl;
+
+                            imageUrlElement.textContent = truncatedUrl;
+                            fullImageUrlElement.textContent = foodData.imageUrl;
+
+                            foodImageElement.src = foodData.imageUrl;
+                            foodImageElement.style.display = 'block';
+                            imagePlaceholderElement.style.display = 'none';
+
+                            // Xử lý lỗi tải hình ảnh
+                            foodImageElement.onerror = function () {
+                                foodImageElement.style.display = 'none';
+                                imagePlaceholderElement.style.display = 'flex';
+                                imagePlaceholderElement.textContent = 'Failed to load image';
+                            };
+                        } else {
+                            imageUrlElement.textContent = 'No Image URL';
+                            fullImageUrlElement.textContent = 'No Image URL';
+                            foodImageElement.style.display = 'none';
+                            imagePlaceholderElement.style.display = 'flex';
+                            imagePlaceholderElement.textContent = 'No Image Available';
+                        }
+
+                        document.getElementById('viewFoodModal').style.display = 'block';
+                    }
+
+                    function closeViewFoodModal() {
+                        document.getElementById('viewFoodModal').style.display = 'none';
+                        currentFoodId = 0;
+                    }
+
+                    // Close modal when clicking outside
+                    window.onclick = function (event) {
+                        const addModal = document.getElementById('addFoodModal');
+                        const viewModal = document.getElementById('viewFoodModal');
+
+                        if (event.target === addModal) {
+                            closeAddFoodModal();
+                        }
+
+                        if (event.target === viewModal) {
+                            closeViewFoodModal();
+                        }
+                    }
+
+                    // Search functionality
+                    function searchFood() {
+                        applyFilters();
+                    }
+
+                    // Filter functionality - UPDATED
+                    function filterFood() {
+                        applyFilters();
+                    }
+
+                    // Combined search and filter function - UPDATED
+                    function applyFilters() {
+                        const searchInput = document.getElementById('searchInput');
+                        const categoryFilter = document.getElementById('categoryFilter');
+                        const statusFilter = document.getElementById('statusFilter');
+
+                        const searchTerm = searchInput.value.toLowerCase();
+                        const categoryValue = categoryFilter.value;
+                        const statusValue = statusFilter.value;
+
+                        const rows = document.querySelectorAll('#foodTableBody tr');
+
+                        rows.forEach(row => {
+                            if (row.cells.length < 7)
+                                return;
+
+                            const foodName = row.cells[2].textContent.toLowerCase();
+                            const description = row.cells[3].textContent.toLowerCase();
+                            const foodType = row.cells[4].textContent.toLowerCase();
+                            const status = row.cells[6].textContent.toLowerCase();
+
+                            const matchesSearch = searchTerm === '' ||
+                                    foodName.includes(searchTerm) ||
+                                    description.includes(searchTerm) ||
+                                    foodType.includes(searchTerm);
+
+                            let matchesCategory = true;
+                            if (categoryValue !== 'all') {
+                                matchesCategory = foodType.includes(categoryValue.toLowerCase());
+                            }
+
+                            let matchesStatus = true;
+                            if (statusValue !== 'all') {
+                                matchesStatus = status.includes(statusValue.toLowerCase());
+                            }
+
+                            row.style.display = (matchesSearch && matchesCategory && matchesStatus) ? '' : 'none';
+                        });
+                    }
+
+                    function deleteFood(foodId) {
+                        if (foodId === 0) {
+                            alert('Invalid food ID');
+                            return;
+                        }
+
+                        if (confirm('Are you sure you want to delete this food item?')) {
+                            fetch('food-management?action=delete&foodID=' + foodId, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
                                 }
                             })
-                            .catch(error => {
-                                alert('Error deleting food item: ' + error.message);
-                            });
-                }
-            }
-        </script>
-    </body>
+                                    .then(response => {
+                                        if (response.ok) {
+                                            alert('Food item deleted successfully!');
+                                            location.reload();
+                                        } else {
+                                            return response.text().then(text => {
+                                                throw new Error(text || 'Unknown error occurred');
+                                            });
+                                        }
+                                    })
+                                    .catch(error => {
+                                        alert('Error deleting food item: ' + error.message);
+                                    });
+                        }
+                    }
+    </script>
+</body>
 </html>
 
 <%!
