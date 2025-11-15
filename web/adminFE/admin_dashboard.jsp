@@ -471,7 +471,7 @@
                     <div class="sb-sidenav-menu">
                         <div class="nav">
                             <div class="sb-sidenav-menu-heading">Thống kê</div>
-                            <a class="<%= uri.contains("chart") ? "nav-link active" : "nav-link" %>" href="list">
+                            <a class="<%= uri.contains("chart") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/admin-statistic">
                                 <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                                 Thống kê
                             </a>
@@ -509,6 +509,12 @@
                             <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/food-management">
                                 <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
                                 Quản lý đồ ăn
+                            </a>
+                                
+                                <!-- Quản lý đồ ăn -->
+                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/combo-management">
+                                <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
+                                Quản lý Combo
                             </a>
 
                             <!-- Tài khoản -->

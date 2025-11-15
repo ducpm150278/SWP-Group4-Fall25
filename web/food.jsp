@@ -379,7 +379,8 @@
                 margin: 5% auto;
                 padding: 25px;
                 border: 1px solid #888;
-                width: 70%;
+                width: 50%; /* Giảm từ 70% xuống 50% */
+                max-width: 600px; /* Thêm max-width để giới hạn kích thước tối đa */
                 border-radius: 8px;
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                 max-height: 80vh;
@@ -388,6 +389,7 @@
 
             .view-modal-content {
                 max-width: 800px;
+                width: 70%;
             }
 
             .close {
@@ -421,6 +423,11 @@
 
             .form-group {
                 margin-bottom: 15px;
+            }
+
+            #addFoodModal .modal-content {
+                width: 50%; /* Giảm kích thước */
+                max-width: 500px; /* Kích thước tối đa nhỏ hơn */
             }
 
             /* View Modal Specific Styles */
@@ -847,7 +854,6 @@
     <!-- Modal Add Food -->
     <div id="addFoodModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeAddFoodModal()">&times;</span>
             <h3 style="margin-bottom: 20px; color: #2c3e50;">Add New Food</h3>
             <form id="addFoodForm" action="food-management" method="POST">
                 <input type="hidden" name="action" value="create">
@@ -900,7 +906,6 @@
     <!-- Modal View Food -->
     <div id="viewFoodModal" class="modal">
         <div class="modal-content view-modal-content">
-            <span class="close" onclick="closeViewFoodModal()">&times;</span>
             <h3 style="margin-bottom: 20px; color: #2c3e50;">Food Details</h3>
 
             <div class="view-modal-columns">

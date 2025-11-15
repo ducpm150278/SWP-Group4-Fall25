@@ -133,9 +133,9 @@ public class AddScreeningServlet extends HttpServlet {
             // ✅ Tự động lấy sức chứa của phòng (không nhập tay)
             ScreeningDAO dao = new ScreeningDAO();
             // ✅ KIỂM TRA TRÙNG LỊCH
-            boolean isDuplicate = dao.existsScreening(movieID, roomID, date, timeSlot);
+            boolean isDuplicate = dao.existsScreening(roomID, date, timeSlot);
             if (isDuplicate) {
-                request.setAttribute("error", "❌ Lịch chiếu này đã tồn tại (phim, phòng, ngày, giờ chiếu trùng)!");
+                request.setAttribute("error", "Lịch chiếu này đã tồn tại (phòng, ngày, giờ chiếu trùng)!");
                 doGet(request, response);
                 return;
             }

@@ -958,7 +958,6 @@
         <!-- Modal View Combo -->
         <div id="viewComboModal" class="modal">
             <div class="modal-content view-modal-content">
-                <span class="close" onclick="closeViewComboModal()">&times;</span>
                 <h3 style="margin-bottom: 20px; color: #2c3e50;">Combo Details</h3>
 
                 <div class="view-modal-columns">

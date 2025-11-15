@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data Access Object for Screenings
- * Works with the new schema: ScreeningDate + Showtime, BaseTicketPrice
+ * Data Access Object for Screenings Works with the new schema: ScreeningDate +
+ * Showtime, BaseTicketPrice
  */
 public class ScreeningDAO extends DBContext {
-    
+
     /**
      * Parse showtime string (e.g., "08:00-10:00") into start and end times
      */
@@ -64,22 +64,21 @@ public class ScreeningDAO extends DBContext {
 
         return list;
     }
-    
-    
+
     private LocalDateTime[] parseShowtime(LocalDate screeningDate, String showtime) {
         if (showtime == null || !showtime.contains("-")) {
             return new LocalDateTime[]{null, null};
         }
-        
+
         try {
             String[] parts = showtime.split("-");
             if (parts.length != 2) {
                 return new LocalDateTime[]{null, null};
             }
-            
+
             LocalTime startTime = LocalTime.parse(parts[0].trim());
             LocalTime endTime = LocalTime.parse(parts[1].trim());
-            
+
             return new LocalDateTime[]{
                 LocalDateTime.of(screeningDate, startTime),
                 LocalDateTime.of(screeningDate, endTime)
@@ -89,7 +88,8 @@ public class ScreeningDAO extends DBContext {
             return new LocalDateTime[]{null, null};
         }
     }
-     public List<Screening> searchScreenings(String keyword, LocalDate from, LocalDate to, String showtime, String status) {
+
+    public List<Screening> searchScreenings(String keyword, LocalDate from, LocalDate to, String showtime, String status) {
         List<Screening> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT s.ScreeningID, s.MovieID, s.RoomID,
@@ -162,158 +162,156 @@ public class ScreeningDAO extends DBContext {
 
         return list;
     }
-     
-         //Thêm lịch chiếu
-   public void insertScreening(Screening sc) {
-    String sql = """
+
+    //Thêm lịch chiếu
+    public void insertScreening(Screening sc) {
+        String sql = """
         INSERT INTO Screenings (MovieID, RoomID, ScreeningDate, Showtime, BaseTicketPrice)
         VALUES (?, ?, ?, ?, ?)
     """;
-    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-        ps.setInt(1, sc.getMovieID());
-        ps.setInt(2, sc.getRoomID());
-        ps.setDate(3, Date.valueOf(sc.getScreeningDate())); // giờ đã có LocalDate
-        ps.setString(4, sc.getShowtime());
-        ps.setDouble(5, sc.getBaseTicketPrice());
-        ps.executeUpdate();
-    } catch (SQLException e) {
-        System.out.println("insertScreening error: " + e.getMessage());
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, sc.getMovieID());
+            ps.setInt(2, sc.getRoomID());
+            ps.setDate(3, Date.valueOf(sc.getScreeningDate())); // giờ đã có LocalDate
+            ps.setString(4, sc.getShowtime());
+            ps.setDouble(5, sc.getBaseTicketPrice());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("insertScreening error: " + e.getMessage());
+        }
     }
-}
 
-    
     /**
      * Get screening detail by ID with full information
      */
     public Screening getScreeningDetail(int screeningID) {
         Screening screening = null;
-        
+
         String sql = "SELECT s.ScreeningID, s.MovieID, s.RoomID, "
-                   + "s.ScreeningDate, s.Showtime, s.BaseTicketPrice, "
-                   + "m.Title AS MovieTitle, m.Status AS MovieStatus, "
-                   + "c.CinemaName, sr.RoomName, sr.RoomType, "
-                   + "ISNULL((SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID), 0) "
-                   + "- ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
-                   + "FROM Tickets t WHERE t.ScreeningID = s.ScreeningID), 0) "
-                   + "- ISNULL((SELECT COUNT(DISTINCT sr2.SeatID) "
-                   + "FROM SeatReservations sr2 "
-                   + "WHERE sr2.ScreeningID = s.ScreeningID AND sr2.ExpiresAt > GETDATE()), 0) AS AvailableSeats "
-                   + "FROM Screenings s "
-                   + "INNER JOIN Movies m ON s.MovieID = m.MovieID "
-                   + "INNER JOIN ScreeningRooms sr ON s.RoomID = sr.RoomID "
-                   + "INNER JOIN Cinemas c ON sr.CinemaID = c.CinemaID "
-                   + "WHERE s.ScreeningID = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+                + "s.ScreeningDate, s.Showtime, s.BaseTicketPrice, "
+                + "m.Title AS MovieTitle, m.Status AS MovieStatus, "
+                + "c.CinemaName, sr.RoomName, sr.RoomType, "
+                + "ISNULL((SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID), 0) "
+                + "- ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
+                + "FROM Tickets t WHERE t.ScreeningID = s.ScreeningID), 0) "
+                + "- ISNULL((SELECT COUNT(DISTINCT sr2.SeatID) "
+                + "FROM SeatReservations sr2 "
+                + "WHERE sr2.ScreeningID = s.ScreeningID AND sr2.ExpiresAt > GETDATE()), 0) AS AvailableSeats "
+                + "FROM Screenings s "
+                + "INNER JOIN Movies m ON s.MovieID = m.MovieID "
+                + "INNER JOIN ScreeningRooms sr ON s.RoomID = sr.RoomID "
+                + "INNER JOIN Cinemas c ON sr.CinemaID = c.CinemaID "
+                + "WHERE s.ScreeningID = ?";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, screeningID);
             ResultSet rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 Date screeningDate = rs.getDate("ScreeningDate");
                 String showtime = rs.getString("Showtime");
                 LocalDateTime[] times = parseShowtime(
-                    screeningDate.toLocalDate(), 
-                    showtime
+                        screeningDate.toLocalDate(),
+                        showtime
                 );
-                
+
                 screening = new Screening(
-                    rs.getInt("ScreeningID"),
-                    rs.getInt("MovieID"),
-                    rs.getInt("RoomID"),
-                    times[0], // startTime
-                    times[1], // endTime
-                    rs.getDouble("BaseTicketPrice"), // ticketPrice
-                    rs.getInt("AvailableSeats"),
-                    rs.getString("MovieTitle"),
-                    rs.getString("CinemaName"),
-                    rs.getString("RoomName"),
-                    rs.getString("MovieStatus"),
-                    rs.getString("RoomType")
+                        rs.getInt("ScreeningID"),
+                        rs.getInt("MovieID"),
+                        rs.getInt("RoomID"),
+                        times[0], // startTime
+                        times[1], // endTime
+                        rs.getDouble("BaseTicketPrice"), // ticketPrice
+                        rs.getInt("AvailableSeats"),
+                        rs.getString("MovieTitle"),
+                        rs.getString("CinemaName"),
+                        rs.getString("RoomName"),
+                        rs.getString("MovieStatus"),
+                        rs.getString("RoomType")
                 );
             }
-            
+
         } catch (SQLException e) {
             System.err.println("Error getting screening detail: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return screening;
     }
-    
+
     /**
      * Get available screenings for a cinema, movie, and date
      */
     public List<Screening> getAvailableScreenings(int cinemaID, int movieID, LocalDate date) {
         List<Screening> screenings = new ArrayList<>();
-        
+
         String sql = "SELECT s.ScreeningID, s.MovieID, s.RoomID, "
-                   + "s.ScreeningDate, s.Showtime, s.BaseTicketPrice, "
-                   + "m.Title AS MovieTitle, m.Status AS MovieStatus, "
-                   + "c.CinemaName, sr.RoomName, sr.RoomType, "
-                   + "ISNULL((SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID), 0) "
-                   + "- ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
-                   + "FROM Tickets t WHERE t.ScreeningID = s.ScreeningID), 0) "
-                   + "- ISNULL((SELECT COUNT(DISTINCT sr2.SeatID) "
-                   + "FROM SeatReservations sr2 "
-                   + "WHERE sr2.ScreeningID = s.ScreeningID AND sr2.ExpiresAt > GETDATE()), 0) AS AvailableSeats "
-                   + "FROM Screenings s "
-                   + "INNER JOIN Movies m ON s.MovieID = m.MovieID "
-                   + "INNER JOIN ScreeningRooms sr ON s.RoomID = sr.RoomID "
-                   + "INNER JOIN Cinemas c ON sr.CinemaID = c.CinemaID "
-                   + "WHERE c.CinemaID = ? "
-                   + "AND s.MovieID = ? "
-                   + "AND s.ScreeningDate = ? "
-                   + "AND m.Status = 'Active' "
-                   + "AND sr.IsActive = 1 "
-                   + "AND c.IsActive = 1 "
-                   + "ORDER BY s.Showtime ASC";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+                + "s.ScreeningDate, s.Showtime, s.BaseTicketPrice, "
+                + "m.Title AS MovieTitle, m.Status AS MovieStatus, "
+                + "c.CinemaName, sr.RoomName, sr.RoomType, "
+                + "ISNULL((SELECT COUNT(*) FROM Seats WHERE RoomID = s.RoomID), 0) "
+                + "- ISNULL((SELECT COUNT(DISTINCT t.SeatID) "
+                + "FROM Tickets t WHERE t.ScreeningID = s.ScreeningID), 0) "
+                + "- ISNULL((SELECT COUNT(DISTINCT sr2.SeatID) "
+                + "FROM SeatReservations sr2 "
+                + "WHERE sr2.ScreeningID = s.ScreeningID AND sr2.ExpiresAt > GETDATE()), 0) AS AvailableSeats "
+                + "FROM Screenings s "
+                + "INNER JOIN Movies m ON s.MovieID = m.MovieID "
+                + "INNER JOIN ScreeningRooms sr ON s.RoomID = sr.RoomID "
+                + "INNER JOIN Cinemas c ON sr.CinemaID = c.CinemaID "
+                + "WHERE c.CinemaID = ? "
+                + "AND s.MovieID = ? "
+                + "AND s.ScreeningDate = ? "
+                + "AND m.Status = 'Active' "
+                + "AND sr.IsActive = 1 "
+                + "AND c.IsActive = 1 "
+                + "ORDER BY s.Showtime ASC";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, cinemaID);
             ps.setInt(2, movieID);
             ps.setDate(3, Date.valueOf(date));
-            
+
             ResultSet rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Date screeningDate = rs.getDate("ScreeningDate");
                 String showtime = rs.getString("Showtime");
-                
+
                 LocalDateTime[] times = parseShowtime(
-                    screeningDate.toLocalDate(), 
-                    showtime
+                        screeningDate.toLocalDate(),
+                        showtime
                 );
-                
+
                 Screening screening = new Screening(
-                    rs.getInt("ScreeningID"),
-                    rs.getInt("MovieID"),
-                    rs.getInt("RoomID"),
-                    times[0], // startTime
-                    times[1], // endTime
-                    rs.getDouble("BaseTicketPrice"), // ticketPrice
-                    rs.getInt("AvailableSeats"),
-                    rs.getString("MovieTitle"),
-                    rs.getString("CinemaName"),
-                    rs.getString("RoomName"),
-                    rs.getString("MovieStatus"),
-                    rs.getString("RoomType")
+                        rs.getInt("ScreeningID"),
+                        rs.getInt("MovieID"),
+                        rs.getInt("RoomID"),
+                        times[0], // startTime
+                        times[1], // endTime
+                        rs.getDouble("BaseTicketPrice"), // ticketPrice
+                        rs.getInt("AvailableSeats"),
+                        rs.getString("MovieTitle"),
+                        rs.getString("CinemaName"),
+                        rs.getString("RoomName"),
+                        rs.getString("MovieStatus"),
+                        rs.getString("RoomType")
                 );
-                
+
                 screenings.add(screening);
             }
-            
+
         } catch (SQLException e) {
             System.err.println("Error getting available screenings: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return screenings;
     }
-      public int countAllScreenings() {
+
+    public int countAllScreenings() {
         String sql = "SELECT COUNT(*) FROM Screenings";
         try (PreparedStatement pre = getConnection().prepareStatement(sql)) {
             ResultSet rs = pre.executeQuery();
@@ -325,7 +323,8 @@ public class ScreeningDAO extends DBContext {
         }
         return 0;
     }
-        public List<Screening> getAllScreeningWithPaging(int page, int pageSize) {
+
+    public List<Screening> getAllScreeningWithPaging(int page, int pageSize) {
         List<Screening> list = new ArrayList<>();
         String sql = """
         SELECT s.ScreeningID, s.MovieID, s.RoomID, 
@@ -374,7 +373,8 @@ public class ScreeningDAO extends DBContext {
 
         return list;
     }
-            public int countSearchScreenings(String keyword, LocalDate from, LocalDate to, String showtime, String status) {
+
+    public int countSearchScreenings(String keyword, LocalDate from, LocalDate to, String showtime, String status) {
         StringBuilder sql = new StringBuilder("""
         SELECT COUNT(*) 
         FROM Screenings s 
@@ -422,7 +422,8 @@ public class ScreeningDAO extends DBContext {
 
         return 0;
     }
-            public List<Screening> searchScreeningsWithPaging(
+
+    public List<Screening> searchScreeningsWithPaging(
             String keyword, LocalDate from, LocalDate to,
             String showtime, String status, int page, int pageSize) {
 
@@ -515,7 +516,8 @@ public class ScreeningDAO extends DBContext {
 
         return list;
     }
-            //cập nhật lịch chiếu
+    //cập nhật lịch chiếu
+
     public boolean updateScreening(int screeningID, int movieID, int roomID,
             LocalDate screeningDate, String showtime, double baseTicketPrice) {
 
@@ -539,6 +541,7 @@ public class ScreeningDAO extends DBContext {
             return false;
         }
     }
+
     //Hủy lịch chiếu
     public boolean cancelScreening(int screeningID) {
         String sql = "DELETE FROM Screenings WHERE ScreeningID = ?";
@@ -551,7 +554,8 @@ public class ScreeningDAO extends DBContext {
         }
         return false;
     }
-     public Integer getSeatCapacityByRoomID(int roomID) {
+
+    public Integer getSeatCapacityByRoomID(int roomID) {
         String sql = "SELECT COUNT(*) AS SeatCapacity FROM Seats WHERE RoomID = ?";
         try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
 
@@ -568,7 +572,8 @@ public class ScreeningDAO extends DBContext {
         }
         return 0;
     }
-      public Screening getScreeningDetails(int screeningID) {
+
+    public Screening getScreeningDetails(int screeningID) {
         Screening sc = null;
         String sql = """
          SELECT s.ScreeningID, s.MovieID, s.RoomID, 
@@ -606,30 +611,29 @@ public class ScreeningDAO extends DBContext {
         }
         return sc;
     }
-      public boolean existsScreening(int movieID, int roomID, LocalDate date, String timeSlot) {
-    String sql = """
+
+    public boolean existsScreening(int roomID, LocalDate date, String timeSlot) {
+        String sql = """
         SELECT COUNT(*) FROM Screenings
-        WHERE MovieID = ? AND RoomID = ? AND ScreeningDate = ? AND Showtime = ?
+        WHERE RoomID = ? 
+          AND ScreeningDate = ? 
+          AND Showtime = ?
     """;
 
-    try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
-        ps.setInt(1, movieID);
-        ps.setInt(2, roomID);
-        ps.setDate(3, Date.valueOf(date));
-        ps.setString(4, timeSlot);
+        try (PreparedStatement ps = getConnection().prepareStatement(sql)) {
+            ps.setInt(1, roomID);
+            ps.setDate(2, Date.valueOf(date));
+            ps.setString(3, timeSlot);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return false;
     }
-    return false;
-}
-
-
 
 }
-

@@ -67,13 +67,13 @@ public class CancelScreeningServlet extends HttpServlet {
             int screeningID = Integer.parseInt(idStr);
             ScreeningDAO dao = new ScreeningDAO();
 
-//            boolean deleted = dao.cancelScreening(screeningID);
+            boolean deleted = dao.cancelScreening(screeningID);
 
-//            if (deleted) {
-//                response.sendRedirect("listScreening?cancelSuccess=1");
-//            } else {
-//                response.sendRedirect("listScreening?cancelFail=1");
-//            }
+            if (deleted) {
+                response.sendRedirect("listScreening?cancelSuccess=1");
+            } else {
+                response.sendRedirect("listScreening?cancelFail=1");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
