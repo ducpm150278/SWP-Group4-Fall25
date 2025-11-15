@@ -4,10 +4,11 @@
     Author     : minhd
 --%>
 
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ page import="entity.Combo" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.math.BigDecimal" %>
+
 <%
     List<Combo> comboList = (List<Combo>) request.getAttribute("comboList");
     
@@ -44,7 +45,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Combo Management</title>
+        <title>MovieTicketBooking - Combo Management</title>
         <style>
             * {
                 margin: 0;
@@ -54,85 +55,41 @@
             }
 
             body {
-                display: flex;
                 min-height: 100vh;
                 background-color: #f5f7fa;
                 color: #333;
             }
 
-            /* Sidebar Styles */
-            .sidebar {
-                width: 23%;
-                background-color: #2c3e50;
-                color: white;
-                padding: 20px 0;
+            /* Layout container */
+            #layoutSidenav {
                 display: flex;
-                flex-direction: column;
-                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
             }
 
-            .logo {
-                padding: 0 20px 20px;
-                border-bottom: 1px solid #34495e;
-                margin-bottom: 20px;
+            /* Sidebar cố định */
+            #layoutSidenav_nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 250px;     /* chiều rộng sidebar */
+                height: 100vh;    /* full chiều cao màn hình */
+                overflow-y: auto; /* cuộn riêng nếu dài */
+                z-index: 1000;
             }
 
-            .logo h1 {
-                font-size: 1.5rem;
-                font-weight: 600;
-            }
-
-            .nav-menu {
-                flex-grow: 1;
-            }
-
-            .nav-item {
-                padding: 15px 20px;
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                transition: background-color 0.3s;
-                text-decoration: none;
-                color: white;
-            }
-
-            .nav-item:hover {
-                background-color: #34495e;
-            }
-
-            .nav-item.active {
-                background-color: #3498db;
-            }
-
-            .nav-item i {
-                margin-right: 10px;
-                font-size: 1.2rem;
-            }
-
-            .user-info {
-                padding: 15px 20px;
-                border-top: 1px solid #34495e;
-                display: flex;
-                align-items: center;
-            }
-
-            .user-avatar {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background-color: #3498db;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 10px;
-                font-weight: bold;
+            /* Nội dung chính */
+            #layoutSidenav_content {
+                margin-left: 250px;  /* tránh bị sidebar che */
+                width: calc(100% - 250px);
+                padding: 20px;
+                min-height: 100vh;
+                background-color: #f5f7fa;
             }
 
             /* Main Content Styles */
             .main-content {
-                flex-grow: 1;
-                padding: 30px;
-                overflow-y: auto;
+                width: 100%;
+                max-width: 1400px;
+                margin: 0 auto;
             }
 
             .header {
@@ -140,11 +97,16 @@
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 30px;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             }
 
             .header h2 {
                 font-size: 1.8rem;
                 color: #2c3e50;
+                margin: 0;
             }
 
             .header-controls {
@@ -607,37 +569,36 @@
 
             /* Responsive Design */
             @media (max-width: 1024px) {
-                .sidebar {
-                    width: 30%;
-                }
-
                 .view-modal-columns {
                     flex-direction: column;
                     gap: 20px;
                 }
+
+                #layoutSidenav_nav {
+                    width: 200px;
+                }
+
+                #layoutSidenav_content {
+                    margin-left: 200px;
+                    width: calc(100% - 200px);
+                }
             }
 
             @media (max-width: 768px) {
-                body {
-                    flex-direction: column;
-                }
-
-                .sidebar {
+                #layoutSidenav_nav {
                     width: 100%;
-                    padding: 10px 0;
+                    height: auto;
+                    position: relative;
                 }
 
-                .nav-menu {
-                    display: flex;
-                    overflow-x: auto;
+                #layoutSidenav_content {
+                    margin-left: 0;
+                    width: 100%;
+                    padding: 10px;
                 }
 
-                .nav-item {
-                    flex-shrink: 0;
-                }
-
-                .user-info {
-                    display: none;
+                #layoutSidenav {
+                    flex-direction: column;
                 }
 
                 .header {
@@ -818,201 +779,180 @@
         </style>
     </head>
     <body>
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <h1>Admin Dashboard</h1>
-            </div>
-            <div class="nav-menu">
-                <a href="users.jsp" class="nav-item">
-                    <i>👥</i> User Management
-                </a>
-                <a href="food-management" class="nav-item">
-                    <i>🍿</i> Food Management
-                </a>
-                <a href="combo-management" class="nav-item active">
-                    <i>📦</i> Combo Management
-                </a>
-                <a href="movies.jsp" class="nav-item">
-                    <i>🎬</i> Movie Management
-                </a>
-                <a href="reports.jsp" class="nav-item">
-                    <i>📊</i> Reports
-                </a>
-                <a href="settings.jsp" class="nav-item">
-                    <i>⚙️</i> Settings
-                </a>
-            </div>
-            <div class="user-info">
-                <div class="user-avatar">AD</div>
-                <div>
-                    <div>Admin User</div>
-                    <div style="font-size: 0.8rem; color: #bdc3c7;">Administrator</div>
-                </div>
-            </div>
-        </div>
+        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+            <%@ include file="view/admin/header.jsp" %>
+        </nav>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <h2>Combo Management</h2>
-                <div class="header-controls">
-                    <div class="search-container">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="searchInput" placeholder="Search combos..." onkeyup="searchCombo()">
-                    </div>
+        <div id="layoutSidenav">
+            <!-- Sidebar -->
+            <div id="layoutSidenav_nav">
+                <%@ include file="view/admin/menu-manager.jsp" %>
+            </div>
 
-                    <div class="filter-container">
-                        <div class="filter-group">
-                            <select id="statusFilter" onchange="filterCombo()">
-                                <option value="all">All Status</option>
-                                <option value="available">Available</option>
-                                <option value="unavailable">Unavailable</option>
-                            </select>
+            <!-- Main Content -->
+            <div id="layoutSidenav_content">
+                <div class="main-content">
+                    <div class="header">
+                        <h2>Combo Management</h2>
+                        <div class="header-controls">
+                            <div class="search-container">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="searchInput" placeholder="Search combos..." onkeyup="searchCombo()">
+                            </div>
+
+                            <div class="filter-container">
+                                <div class="filter-group">
+                                    <select id="statusFilter" onchange="filterCombo()">
+                                        <option value="all">All Status</option>
+                                        <option value="available">Available</option>
+                                        <option value="unavailable">Unavailable</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="openAddComboModal()">
+                                <i>➕</i> Add New Combo
+                            </button>
                         </div>
                     </div>
 
-                    <button class="btn btn-primary" onclick="openAddComboModal()">
-                        <i>➕</i> Add New Combo
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Combo Image</th> 
-                            <th>Combo Name</th>
-                            <th>Description</th>
-                            <th>Prices</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="comboTableBody">
-                        <% if (currentPageComboList != null && !currentPageComboList.isEmpty()) { 
-                            for (Combo combo : currentPageComboList) { 
-                                BigDecimal savings = null;
-                                if (combo.getDiscountPrice() != null && combo.getTotalPrice() != null) {
-                                    savings = combo.getTotalPrice().subtract(combo.getDiscountPrice());
-                                }
-                        %>
-                        <tr data-combo-id="<%= combo.getComboID() != null ? combo.getComboID() : 0 %>">
-                            <td><%= combo.getComboID() != null ? combo.getComboID() : "N/A" %></td>
-                            <td>
-                                <% if (combo.getComboImage() != null && !combo.getComboImage().isEmpty()) { %>
-                                <img src="<%= combo.getComboImage() %>" 
-                                     alt="<%= combo.getComboName() != null ? combo.getComboName() : "Combo Image" %>" 
-                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
-                                <% } else { %>
-                                <div style="width: 60px; height: 60px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #ddd; color: #999;">
-                                    No Image
-                                </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Combo Image</th> 
+                                    <th>Combo Name</th>
+                                    <th>Description</th>
+                                    <th>Prices</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comboTableBody">
+                                <% if (currentPageComboList != null && !currentPageComboList.isEmpty()) { 
+                                    for (Combo combo : currentPageComboList) { 
+                                        BigDecimal savings = null;
+                                        if (combo.getDiscountPrice() != null && combo.getTotalPrice() != null) {
+                                            savings = combo.getTotalPrice().subtract(combo.getDiscountPrice());
+                                        }
+                                %>
+                                <tr data-combo-id="<%= combo.getComboID() != null ? combo.getComboID() : 0 %>">
+                                    <td><%= combo.getComboID() != null ? combo.getComboID() : "N/A" %></td>
+                                    <td>
+                                        <% if (combo.getComboImage() != null && !combo.getComboImage().isEmpty()) { %>
+                                        <img src="<%= combo.getComboImage() %>" 
+                                             alt="<%= combo.getComboName() != null ? combo.getComboName() : "Combo Image" %>" 
+                                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                        <% } else { %>
+                                        <div style="width: 60px; height: 60px; background-color: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 4px; border: 1px solid #ddd; color: #999;">
+                                            No Image
+                                        </div>
+                                        <% } %>
+                                    </td>
+                                    <td><%= combo.getComboName() != null ? combo.getComboName() : "N/A" %></td>
+                                    <td><%= combo.getDescription() != null ? combo.getDescription() : "N/A" %></td>
+                                    <td>
+                                        <% if (combo.getDiscountPrice() != null) { %>
+                                        <div class="discount-price"><%= formatPrice(combo.getDiscountPrice()) %></div>
+                                        <div class="original-price"><%= formatPrice(combo.getTotalPrice()) %></div>
+                                        <% if (savings != null && savings.compareTo(BigDecimal.ZERO) > 0) { %>
+                                        <div style="font-size: 0.8rem; color: #27ae60;">
+                                            Save <%= formatPrice(savings) %>
+                                        </div>
+                                        <% } %>
+                                        <% } else { %>
+                                        <div class="price"><%= formatPrice(combo.getTotalPrice()) %></div>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="status <%= combo.getIsAvailable() != null && combo.getIsAvailable() ? "available" : "unavailable" %>">
+                                            <%= combo.getIsAvailable() != null && combo.getIsAvailable() ? "Available" : "Unavailable" %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="action-btn view" onclick="viewCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
+                                            View
+                                        </button>
+                                        <button class="action-btn manage" onclick="manageComboFood(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
+                                            Manage Food
+                                        </button>
+                                        <button class="action-btn delete" onclick="deleteCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% } 
+                                } else { %>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 40px;">
+                                        <div style="color: #7f8c8d; font-size: 1.1rem;">
+                                            <% if (comboList != null && !comboList.isEmpty()) { %>
+                                            No combos found on this page.
+                                            <% } else { %>
+                                            No combos found.
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
                                 <% } %>
-                            </td>
-                            <td><%= combo.getComboName() != null ? combo.getComboName() : "N/A" %></td>
-                            <td><%= combo.getDescription() != null ? combo.getDescription() : "N/A" %></td>
-                            <td>
-                                <% if (combo.getDiscountPrice() != null) { %>
-                                <div class="discount-price"><%= formatPrice(combo.getDiscountPrice()) %></div>
-                                <div class="original-price"><%= formatPrice(combo.getTotalPrice()) %></div>
-                                <% if (savings != null && savings.compareTo(BigDecimal.ZERO) > 0) { %>
-                                <div style="font-size: 0.8rem; color: #27ae60;">
-                                    Save <%= formatPrice(savings) %>
-                                </div>
-                                <% } %>
-                                <% } else { %>
-                                <div class="price"><%= formatPrice(combo.getTotalPrice()) %></div>
-                                <% } %>
-                            </td>
-                            <td>
-                                <span class="status <%= combo.getIsAvailable() != null && combo.getIsAvailable() ? "available" : "unavailable" %>">
-                                    <%= combo.getIsAvailable() != null && combo.getIsAvailable() ? "Available" : "Unavailable" %>
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn view" onclick="viewCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
-                                    View
-                                </button>
-                                <button class="action-btn manage" onclick="manageComboFood(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
-                                    Manage Food
-                                </button>
-                                <button class="action-btn delete" onclick="deleteCombo(<%= combo.getComboID() != null ? combo.getComboID() : 0 %>)">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                        <% } 
-    } else { %>
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px;">
-                                <div style="color: #7f8c8d; font-size: 1.1rem;">
-                                    <% if (comboList != null && !comboList.isEmpty()) { %>
-                                    No combos found on this page.
-                                    <% } else { %>
-                                    No combos found.
-                                    <% } %>
-                                </div>
-                            </td>
-                        </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Pagination Controls -->
-            <% if (totalPages > 0) { %>
-            <div class="pagination-container">
-                <div class="pagination-info">
-                    Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> entries
-                </div>
-                <div class="pagination">
-                    <%-- Previous button --%>
-                    <% if (currentPage > 1) { %>
-                    <button class="page-btn" onclick="goToPage(<%= currentPage - 1 %>)">
-                        ‹
-                    </button>
-                    <% } else { %>
-                    <button class="page-btn disabled">‹</button>
-                    <% } %>
+                    <!-- Pagination Controls -->
+                    <% if (totalPages > 0) { %>
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> entries
+                        </div>
+                        <div class="pagination">
+                            <%-- Previous button --%>
+                            <% if (currentPage > 1) { %>
+                            <button class="page-btn" onclick="goToPage(<%= currentPage - 1 %>)">
+                                ‹
+                            </button>
+                            <% } else { %>
+                            <button class="page-btn disabled">‹</button>
+                            <% } %>
 
-                    <%-- Page numbers --%>
-                    <% 
-                        int startPage = Math.max(1, currentPage - 1);
-                        int endPage = Math.min(totalPages, currentPage + 1);
-                    
-                        // Always show first page
-                        if (startPage > 1) { 
-                    %>
-                    <button class="page-btn <%= 1 == currentPage ? "active" : "" %>" onclick="goToPage(1)">1</button>
-                    <% if (startPage > 2) { %>
-                    <span class="page-dots">...</span>
-                    <% } %>
-                    <% } %>
+                            <%-- Page numbers --%>
+                            <% 
+                                int startPage = Math.max(1, currentPage - 1);
+                                int endPage = Math.min(totalPages, currentPage + 1);
+                            
+                                // Always show first page
+                                if (startPage > 1) { 
+                            %>
+                            <button class="page-btn <%= 1 == currentPage ? "active" : "" %>" onclick="goToPage(1)">1</button>
+                            <% if (startPage > 2) { %>
+                            <span class="page-dots">...</span>
+                            <% } %>
+                            <% } %>
 
-                    <% for (int i = startPage; i <= endPage; i++) { %>
-                    <button class="page-btn <%= i == currentPage ? "active" : "" %>" onclick="goToPage(<%= i %>)"><%= i %></button>
-                    <% } %>
+                            <% for (int i = startPage; i <= endPage; i++) { %>
+                            <button class="page-btn <%= i == currentPage ? "active" : "" %>" onclick="goToPage(<%= i %>)"><%= i %></button>
+                            <% } %>
 
-                    <%-- Always show last page if needed --%>
-                    <% if (endPage < totalPages) { %>
-                    <% if (endPage < totalPages - 1) { %>
-                    <span class="page-dots">...</span>
-                    <% } %>
-                    <button class="page-btn <%= totalPages == currentPage ? "active" : "" %>" onclick="goToPage(<%= totalPages %>)"><%= totalPages %></button>
-                    <% } %>
+                            <%-- Always show last page if needed --%>
+                            <% if (endPage < totalPages) { %>
+                            <% if (endPage < totalPages - 1) { %>
+                            <span class="page-dots">...</span>
+                            <% } %>
+                            <button class="page-btn <%= totalPages == currentPage ? "active" : "" %>" onclick="goToPage(<%= totalPages %>)"><%= totalPages %></button>
+                            <% } %>
 
-                    <%-- Next button --%>
-                    <% if (currentPage < totalPages) { %>
-                    <button class="page-btn" onclick="goToPage(<%= currentPage + 1 %>)">›</button>
-                    <% } else { %>
-                    <button class="page-btn disabled">›</button>
+                            <%-- Next button --%>
+                            <% if (currentPage < totalPages) { %>
+                            <button class="page-btn" onclick="goToPage(<%= currentPage + 1 %>)">›</button>
+                            <% } else { %>
+                            <button class="page-btn disabled">›</button>
+                            <% } %>
+                        </div>
+                    </div>
                     <% } %>
                 </div>
             </div>
-            <% } %>
         </div>
 
         <!-- Modal View Combo -->

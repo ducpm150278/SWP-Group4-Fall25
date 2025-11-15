@@ -113,7 +113,13 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
                                 Quản lý đồ ăn
                             </a>
-                            
+
+                            <!-- Quản lý đồ ăn -->
+                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="combo-management">
+                                <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
+                                Quản lý Combo
+                            </a>
+
                             <!-- Tài khoản -->
                             <div class="sb-sidenav-menu-heading">Tài khoản</div>
                             <a class="nav-link text-danger" href="logout">
