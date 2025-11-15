@@ -115,7 +115,7 @@
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <i class="fas fa-trophy me-1"></i>
-                                    Top 5 Phim (Theo bộ lọc)
+                                    Top 5 Phim 
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-hover" id="topMoviesTable">
@@ -146,7 +146,7 @@
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <i class="fas fa-store me-1"></i>
-                                    Top 5 Rạp (Theo bộ lọc)
+                                    Top 5 Rạp 
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-hover" id="topCinemasTable">

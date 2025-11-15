@@ -33,6 +33,7 @@ public class AdminStatisticServlet extends HttpServlet {
         cinemaDAO = new CinemaDAO(); 
     }
 
+// (Trong file controller/AdminStatisticServlet.java)
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -59,6 +60,7 @@ public class AdminStatisticServlet extends HttpServlet {
             to = LocalDate.now();
             from = to.minusDays(6);
         }
+
         
         AdminDashboardStatsDTO stats = statisticDAO.getDashboardStats();
         request.setAttribute("stats", stats);
@@ -67,17 +69,20 @@ public class AdminStatisticServlet extends HttpServlet {
         String chartDataJson = this.gson.toJson(chartData);
         request.setAttribute("chartDataJson", chartDataJson);
 
-        List<TopItemDTO> topMovies = statisticDAO.getTopMovies(from, to, cinemaId);
-        List<TopItemDTO> topCinemas = statisticDAO.getTopCinemas(from, to, movieId);
+
+        List<TopItemDTO> topMovies = statisticDAO.getTopMovies_AllTime();
+        List<TopItemDTO> topCinemas = statisticDAO.getTopCinemas_AllTime();
         
         request.setAttribute("topMovies", topMovies);
         request.setAttribute("topCinemas", topCinemas);
+        // ==========================================================
 
         List<Movie> filterMovies = movieDAO.getAllActiveMovies(); 
         List<Cinema> filterCinemas = cinemaDAO.getAllCinemas(); 
         
         request.setAttribute("filterMovies", filterMovies);
         request.setAttribute("filterCinemas", filterCinemas);
+        
         request.setAttribute("selectedFrom", from.toString());
         request.setAttribute("selectedTo", to.toString());
         request.setAttribute("selectedMovieId", movieId);
