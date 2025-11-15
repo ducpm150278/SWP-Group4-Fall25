@@ -14,155 +14,157 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <!-- Custom CSS -->
         <style>
-            :root {
-                --sidebar-width: 250px;
-                --sidebar-bg: #343a40;
-                --sidebar-color: #fff;
-                --sidebar-active-bg: #007bff;
-                --header-bg: #f8f9fa;
-                --content-bg: #f5f5f5;
+            /* Layout container */
+            #layoutSidenav {
+                display: flex;
+                min-height: 100vh;
             }
 
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: var(--content-bg);
-                overflow-x: hidden;
-            }
-
-            /* Sidebar Styles */
-            .sidebar {
-                width: var(--sidebar-width);
-                height: 100vh;
+            /* Sidebar cố định */
+            #layoutSidenav_nav {
                 position: fixed;
-                left: 0;
                 top: 0;
-                background: var(--sidebar-bg);
-                color: var(--sidebar-color);
-                transition: all 0.3s;
+                left: 0;
+                width: 250px;
+                height: 100vh;
+                overflow-y: auto;
                 z-index: 1000;
+                background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             }
 
-            .sidebar-header {
+            /* Nội dung chính */
+            #layoutSidenav_content {
+                margin-left: 250px;
+                width: calc(100% - 250px);
                 padding: 20px;
-                background: rgba(0, 0, 0, 0.2);
-                text-align: center;
+                background-color: #f8f9fa;
+                min-height: 100vh;
+                position: relative;
+                z-index: 1;
             }
 
-            .sidebar-header h3 {
-                margin-bottom: 0;
+            /* CHỈ áp dụng các style sau cho sidebar */
+            #layoutSidenav_nav .sb-sidenav {
+                background: transparent !important;
             }
 
-            .sidebar-menu {
-                padding: 20px 0;
+            #layoutSidenav_nav .sb-sidenav-dark {
+                background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
             }
 
-            .sidebar-menu ul {
-                list-style: none;
-                padding: 0;
-                margin: 0;
+            #layoutSidenav_nav .sb-sidenav-menu {
+                padding: 1rem 0;
             }
 
-            .sidebar-menu li a {
-                display: block;
-                padding: 12px 20px;
-                color: var(--sidebar-color);
+            #layoutSidenav_nav .sb-sidenav-menu-heading {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: #bdc3c7 !important;
+                margin-top: 1rem;
+            }
+
+            #layoutSidenav_nav .nav-link {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem 1.5rem;
+                color: #ecf0f1 !important;
                 text-decoration: none;
-                transition: all 0.3s;
+                transition: all 0.3s ease;
+                border: none;
+                background: transparent;
+                width: 100%;
+                font-size: 0.9rem;
             }
 
-            .sidebar-menu li a:hover {
-                background: rgba(255, 255, 255, 0.1);
+            #layoutSidenav_nav .nav-link:hover {
+                background-color: rgba(255,255,255,0.1) !important;
+                color: #ffffff !important;
+                transform: translateX(5px);
             }
 
-            .sidebar-menu li a i {
-                margin-right: 10px;
+            #layoutSidenav_nav .nav-link.active {
+                background: linear-gradient(90deg, #3498db 0%, #2980b9 100%) !important;
+                color: white !important;
+                border-right: 3px solid #ffffff;
+                box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            }
+
+            #layoutSidenav_nav .nav-link.active i {
+                color: white !important;
+            }
+
+            #layoutSidenav_nav .sb-nav-link-icon {
+                margin-right: 0.75rem;
+                font-size: 1rem;
                 width: 20px;
                 text-align: center;
+                color: #bdc3c7;
             }
 
-            .sidebar-menu li.active a {
-                background: var(--sidebar-active-bg);
+            #layoutSidenav_nav .nav-link.active .sb-nav-link-icon {
+                color: white !important;
             }
 
-            .sidebar-footer {
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-                padding: 15px;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            #layoutSidenav_nav .nav-link:hover .sb-nav-link-icon {
+                color: #3498db;
             }
 
-            /* Main Content Styles */
-            .main-content {
-                margin-left: var(--sidebar-width);
-                min-height: 100vh;
-                transition: all 0.3s;
+            /* Text danger cho logout */
+            #layoutSidenav_nav .nav-link.text-danger {
+                color: #e74c3c !important;
             }
 
-            /* Header Styles */
-            .header {
-                padding: 15px;
-                background: var(--header-bg);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+            #layoutSidenav_nav .nav-link.text-danger:hover {
+                background-color: rgba(231, 76, 60, 0.1) !important;
+                color: #c0392b !important;
             }
 
-            .user-info {
-                display: flex;
-                align-items: center;
+            /* Scrollbar styling chỉ cho sidebar */
+            #layoutSidenav_nav::-webkit-scrollbar {
+                width: 6px;
             }
 
-            .user-info img {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                margin-right: 10px;
+            #layoutSidenav_nav::-webkit-scrollbar-track {
+                background: #34495e;
             }
 
-            /* Card Styles */
-            .card {
-                border: none;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                margin-bottom: 20px;
-                transition: transform 0.3s;
+            #layoutSidenav_nav::-webkit-scrollbar-thumb {
+                background: #3498db;
+                border-radius: 3px;
             }
 
-            .card:hover {
-                transform: translateY(-5px);
-            }
-
-            .card-body {
-                padding: 20px;
-            }
-
-            .card-icon {
-                font-size: 2rem;
-                margin-bottom: 15px;
-                color: #007bff;
-            }
-
-            /* Responsive Styles */
+            /* Responsive adjustments */
             @media (max-width: 768px) {
-                .sidebar {
-                    margin-left: -250px;
+                #layoutSidenav_nav {
+                    width: 70px;
                 }
 
-                .sidebar.active {
-                    margin-left: 0;
+                #layoutSidenav_content {
+                    margin-left: 70px;
+                    width: calc(100% - 70px);
                 }
 
-                .main-content {
-                    margin-left: 0;
+                #layoutSidenav_nav .sb-sidenav-menu-heading,
+                #layoutSidenav_nav .nav-link span {
+                    display: none;
                 }
 
-                .main-content.active {
-                    margin-left: 250px;
+                #layoutSidenav_nav .sb-nav-link-icon {
+                    margin-right: 0;
+                    font-size: 1.2rem;
+                }
+
+                #layoutSidenav_nav .nav-link {
+                    justify-content: center;
+                    padding: 1rem 0.5rem;
                 }
             }
 
+            /* GIỮ LẠI TẤT CẢ CÁC STYLE CŨ CHO CONTENT - KHÔNG THAY ĐỔI */
             #user-management-content .readonly {
                 background-color: #A8A8A8;
                 border: none;
@@ -200,52 +202,52 @@
 
             /* CSS cho dropdown menu */
             #user-management-content .dropdown-menu {
-                border: 1px solid #e9ecef; /* viền nhẹ */
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* bóng đổ */
-                padding: 0.25rem 0; /* padding cho menu */
-                min-width: 12rem; /* chiều rộng tối thiểu */
+                border: 1px solid #e9ecef;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+                padding: 0.25rem 0;
+                min-width: 12rem;
             }
 
             /* CSS cho các item trong dropdown khi bình thường */
             #user-management-content .dropdown-menu li {
-                transition: all 0.2s ease; /* hiệu ứng mượt khi hover */
+                transition: all 0.2s ease;
             }
 
             /* CSS cho các item trong dropdown khi hover */
             #user-management-content .dropdown-menu li:hover {
-                background-color: #f8f9fa; /* màu nền khi hover */
+                background-color: #f8f9fa;
             }
 
             /* CSS cho các link trong dropdown */
             #user-management-content .dropdown-menu li a.dropdown-item {
-                padding: 0.5rem 1.5rem; /* padding cho item */
-                color: #212529; /* màu chữ */
-                font-size: 0.875rem; /* cỡ chữ */
-                display: block; /* hiển thị dạng block */
-                clear: both; /* clear float */
-                font-weight: 400; /* độ đậm chữ */
-                text-decoration: none; /* bỏ gạch chân */
-                white-space: nowrap; /* không xuống dòng */
-                transition: all 0.2s ease; /* hiệu ứng mượt */
+                padding: 0.5rem 1.5rem;
+                color: #212529;
+                font-size: 0.875rem;
+                display: block;
+                clear: both;
+                font-weight: 400;
+                text-decoration: none;
+                white-space: nowrap;
+                transition: all 0.2s ease;
             }
 
             /* CSS cho link khi hover */
             #user-management-content .dropdown-menu li a.dropdown-item:hover {
-                background-color: #f1f3f5; /* màu nền khi hover */
-                color: #0d6efd; /* màu chữ khi hover (màu primary) */
+                background-color: #f1f3f5;
+                color: #0d6efd;
             }
 
             /* CSS cho divider */
             #user-management-content .dropdown-menu li .dropdown-divider {
-                margin: 0.25rem 0; /* khoảng cách trên dưới */
-                border-top: 1px solid #e9ecef; /* đường kẻ ngang */
+                margin: 0.25rem 0;
+                border-top: 1px solid #e9ecef;
             }
 
             /* CSS cho icon trong dropdown item */
             #user-management-content .dropdown-menu li a.dropdown-item i.bi {
-                margin-right: 0.5rem; /* khoảng cách với text */
-                width: 1em; /* chiều rộng icon */
-                text-align: center; /* căn giữa icon */
+                margin-right: 0.5rem;
+                width: 1em;
+                text-align: center;
             }
 
             /* Empty state container */
@@ -452,62 +454,77 @@
                     padding: 0.25rem 0.5rem;
                     font-size: 0.775rem;
                 }
-                
-            </style>
-        </head>
-        <body>
+            }
+        </style>
+        <%
+            String uri = request.getRequestURI().toLowerCase();
+            boolean isFood = uri.contains("managerfood") || uri.contains("managerorder");
+            boolean isBlog = uri.contains("listpost") || uri.contains("addpost");
+            boolean isPromo = uri.contains("promotion-list") || uri.contains("add-promotion");
+        %>
+    </head>
+    <body>
+        <div id="layoutSidenav">
             <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="sidebar-header">
-                    <h3>Admin Panel</h3>
-                </div>
+            <div id="layoutSidenav_nav">
+                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                    <div class="sb-sidenav-menu">
+                        <div class="nav">
+                            <div class="sb-sidenav-menu-heading">Thống kê</div>
+                            <a class="<%= uri.contains("chart") ? "nav-link active" : "nav-link" %>" href="list">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                                Thống kê
+                            </a>
 
-                <div class="sidebar-menu">
-                    <ul>
-                        <li class="${param.section eq 'user-management' ? 'active' : ''}">
-                            <a href="<c:url value='/adminFE/dashboard?section=user-management'/>">
-                                <i class="fas fa-users"></i>
-                                <span>User Management</span>
+                            <div class="sb-sidenav-menu-heading">Quản lý</div>
+                            <a class="<%= uri.equals("/adminFE/dashboard?section=user-management") ? "nav-link active" : "nav-link" %>" href="dashboard?section=user-management">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
+                                Quản lý tài khoản
                             </a>
-                        </li>
-                        <li class="${param.section eq 'cinema-management' ? 'active' : ''}">
-                            <a href="<c:url value='/adminFE/dashboard?section=cinema-management'/>">
-                                <i class="fas fa-tags"></i>
-                                <span>Cinema Management</span>
+                            <a class="<%= uri.equals("/swp-group4-fall25/listmovie.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/list">
+                                <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
+                                Quản lý phim
                             </a>
-                        </li>
-                        <li class="${param.section eq 'screening-room-management' ? 'active' : ''}">
-                            <a href="<c:url value='/adminFE/dashboard?section=screening-room-management'/>">
-                                <i class="fas fa-history"></i>
-                                <span>Screening Room Management</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
 
-                <div class="sidebar-footer">
-                    <button class="btn btn-danger btn-block">
-                        <a href="/SWP-Group4-Fall25/list"><i class="fas fa-sign-out-alt"></i> Back</a>
-                    </button>
-                </div>
+                            <a class="<%= uri.contains("/adminFE/dashboard?section=cinema-management") ? "nav-link active" : "nav-link" %>" href="dashboard?section=cinema-management">
+                                <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
+                                Quản lý rạp chiếu
+                            </a>
+
+                            <a class="<%= uri.contains("/adminFE/dashboard?section=screening-room-management") ? "nav-link active" : "nav-link" %>" href="dashboard?section=screening-room-management">
+                                <div class="sb-nav-link-icon"><i class="fas fa-video""></i></div>
+                                Quản lý phòng chiếu
+                            </a>
+                            <a class="<%= uri.equals("/swp-group4-fall25/listscreening.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/listScreening">
+                                <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
+                                Quản lý lịch chiếu
+                            </a>
+
+                            <a class="<%= uri.contains("/swp-group4-fall25/listdiscount.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/listDiscount">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                Quản lý khuyến mại
+                            </a>
+
+                            <!-- Quản lý đồ ăn -->
+                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/food-management">
+                                <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
+                                Quản lý đồ ăn
+                            </a>
+
+                            <!-- Tài khoản -->
+                            <div class="sb-sidenav-menu-heading">Tài khoản</div>
+                            <a class="nav-link text-danger" href="/SWP-Group4-Fall25/logout">
+                                <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                </nav>
             </div>
 
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Header -->
-                <div class="header">
-                    <button class="btn btn-primary d-md-none" id="sidebarToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-
-                    <div class="user-info">
-                        <!--<img src="https://via.placeholder.com/40" alt="Admin Avatar">-->
-                        <span>Welcome, <c:out value="${sessionScope.admin.name}" default="Admin"/></span>
-                    </div>
-                </div>
-
-                <!-- Content Area -->
-                <div class="container-fluid py-4" id="contentArea">
+            <!-- Content Area - PHẢI NẰM TRONG CÙNG #layoutSidenav -->
+            <div id="layoutSidenav_content">
+                <div class="container-fluid py-4">
                     <c:choose>
                         <c:when test="${param.section eq 'user-management'}">
                             <jsp:include page="user_management.jsp"/>
@@ -528,11 +545,14 @@
                     </c:choose>
                 </div>
             </div>
+        </div> <!-- Đóng #layoutSidenav ở đây -->
 
-            <!-- Bootstrap JS and dependencies -->
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <!-- Chart.js -->
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        </body>
-    </html>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="js/scripts.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+        <script src="assets/demo/chart-area-demo.js"></script>
+        <script src="assets/demo/chart-bar-demo.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+        <script src="js/datatables-simple-demo.js"></script>
+    </body>
+</html>
