@@ -215,9 +215,6 @@
                 <a href="${pageContext.request.contextPath}/guest-movies" class="nav-link-cinema">
                     <i class="fas fa-film"></i> Phim
                 </a>
-                <a href="${pageContext.request.contextPath}/auth/login" class="nav-link-cinema">
-                    <i class="fas fa-user-circle"></i> Tài Khoản
-                </a>
                 <a href="${pageContext.request.contextPath}/auth/login" class="login-btn-cinema">
                     <i class="fas fa-sign-in-alt"></i> Đăng Nhập
                 </a>
