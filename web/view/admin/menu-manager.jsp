@@ -189,10 +189,12 @@
                         <div class="nav">
 
                             <div class="sb-sidenav-menu-heading">Thống kê</div>
-                            <a class="<%= uri.contains("chart") ? "nav-link active" : "nav-link" %>" href="list">
-                                <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
-                                Thống kê
-                            </a>
+                            <li class="nav-item">
+                                <a class="nav-link ${activePage == 'admin-statistic' ? 'active' : ''}" href="${pageContext.request.contextPath}/admin-statistic">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                                    Thống kê
+                                </a>
+                            </li>
 
                             <div class="sb-sidenav-menu-heading">Quản lý</div>
                             <a class="<%= uri.equals("/adminFE/dashboard?section=user-management") ? "nav-link active" : "nav-link" %>" href="adminFE/dashboard?section=user-management">
