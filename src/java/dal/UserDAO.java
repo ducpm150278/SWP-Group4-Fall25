@@ -577,6 +577,12 @@ public class UserDAO extends DBContext {
     }
 
     // Password reset functionality
+    /**
+     * @deprecated This method stores token in Password field which overwrites user's password.
+     * Use VerificationTokenDAO.createVerificationToken() instead.
+     * This method is kept for backward compatibility but should not be used.
+     */
+    @Deprecated
     public boolean storePasswordResetToken(String email, String token) {
         String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE Email = ?";
         try {
@@ -591,6 +597,12 @@ public class UserDAO extends DBContext {
         return false;
     }
 
+    /**
+     * @deprecated This method retrieves user by token stored in Password field.
+     * Use VerificationTokenDAO.verifyToken() and getUserByID() instead.
+     * This method is kept for backward compatibility but should not be used.
+     */
+    @Deprecated
     public User getUserByResetToken(String token) {
         String sql = "SELECT * FROM Users WHERE Password = ?";
         try {
@@ -606,6 +618,12 @@ public class UserDAO extends DBContext {
         return null;
     }
 
+    /**
+     * @deprecated This method updates password using token stored in Password field.
+     * Use VerificationTokenDAO.verifyToken() to get userID, then use updatePassword(userID, newPassword) instead.
+     * This method is kept for backward compatibility but should not be used.
+     */
+    @Deprecated
     public boolean updatePasswordByToken(String token, String newPassword) {
         String sql = "UPDATE Users SET Password = ?, LastModifiedDate = GETDATE() WHERE Password = ?";
         try {
