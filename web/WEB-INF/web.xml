@@ -34,6 +34,14 @@
         <servlet-name>ManagerServlet</servlet-name>
         <servlet-class>controller.ManagerServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AdminStatisticServlet</servlet-name>
+        <servlet-class>controller.AdminStatisticServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RevenueDataServlet</servlet-name>
+        <servlet-class>controller.RevenueDataServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ListRefundsServlet</servlet-name>
         <url-pattern>/list-refunds</url-pattern>
@@ -240,6 +248,14 @@
     <servlet-mapping>
         <servlet-name>ManagerServlet</servlet-name>
         <url-pattern>/manager</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminStatisticServlet</servlet-name>
+        <url-pattern>/admin-statistic</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RevenueDataServlet</servlet-name>
+        <url-pattern>/api/revenue-data</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
