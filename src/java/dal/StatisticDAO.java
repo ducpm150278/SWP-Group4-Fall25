@@ -147,4 +147,58 @@ public class StatisticDAO extends DBContext {
         }
         return list;
     }
+    
+    public List<TopItemDTO> getTopMovies_AllTime() {
+        List<TopItemDTO> list = new ArrayList<>();
+        String sql = "SELECT TOP 5 " +
+                     "    MovieTitle, " +
+                     "    SUM(TicketCount) AS TotalTickets, " +
+                     "    SUM(FinalAmount) AS TotalRevenue " +
+                     "FROM vw_RevenueAnalytics " + 
+                     "GROUP BY MovieID, MovieTitle " +
+                     "ORDER BY TotalRevenue DESC";
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new TopItemDTO(
+                    rs.getString("MovieTitle"),
+                    rs.getInt("TotalTickets"),
+                    rs.getDouble("TotalRevenue")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<TopItemDTO> getTopCinemas_AllTime() {
+        List<TopItemDTO> list = new ArrayList<>();
+        String sql = "SELECT TOP 5 " +
+                     "    CinemaName, " +
+                     "    SUM(TicketCount) AS TotalTickets, " +
+                     "    SUM(FinalAmount) AS TotalRevenue " +
+                     "FROM vw_RevenueAnalytics " + 
+                     "GROUP BY CinemaID, CinemaName " +
+                     "ORDER BY TotalRevenue DESC";
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new TopItemDTO(
+                    rs.getString("CinemaName"),
+                    rs.getInt("TotalTickets"),
+                    rs.getDouble("TotalRevenue")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
