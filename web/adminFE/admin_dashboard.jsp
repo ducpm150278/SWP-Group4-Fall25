@@ -14,90 +14,98 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <!-- Custom CSS -->
         <style>
-            /* Layout container */
-            #layoutSidenav {
+            /* === RESET & BASE STYLES === */
+            * {
+                box-sizing: border-box;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f8f9fa;
+                overflow-x: hidden;
+            }
+
+            /* === LAYOUT STRUCTURE === */
+            .admin-container {
                 display: flex;
                 min-height: 100vh;
             }
 
-            /* Sidebar cố định */
-            #layoutSidenav_nav {
+            /* === SIDEBAR STYLES === */
+            .admin-sidebar {
+                width: 250px;
+                background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 250px;
                 height: 100vh;
-                overflow-y: auto;
                 z-index: 1000;
-                background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
                 box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+                overflow-y: auto;
             }
 
-            /* Nội dung chính */
-            #layoutSidenav_content {
-                margin-left: 250px;
-                width: calc(100% - 250px);
-                padding: 20px;
-                background-color: #f8f9fa;
-                min-height: 100vh;
-                position: relative;
-                z-index: 1;
+            .sidebar-header {
+                padding: 1.5rem 1rem;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                text-align: center;
             }
 
-            /* CHỈ áp dụng các style sau cho sidebar */
-            #layoutSidenav_nav .sb-sidenav {
-                background: transparent !important;
+            .sidebar-brand {
+                color: #ecf0f1;
+                font-size: 1.3rem;
+                font-weight: 700;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
             }
 
-            #layoutSidenav_nav .sb-sidenav-dark {
-                background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
-            }
-
-            #layoutSidenav_nav .sb-sidenav-menu {
+            .sidebar-menu {
                 padding: 1rem 0;
             }
 
-            #layoutSidenav_nav .sb-sidenav-menu-heading {
-                padding: 0.75rem 1.5rem;
+            .menu-section {
+                padding: 0.75rem 1.5rem 0.5rem;
                 font-size: 0.75rem;
                 font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                color: #bdc3c7 !important;
+                color: #bdc3c7;
                 margin-top: 1rem;
             }
 
-            #layoutSidenav_nav .nav-link {
+            .menu-item {
                 display: flex;
                 align-items: center;
                 padding: 0.75rem 1.5rem;
-                color: #ecf0f1 !important;
+                color: #ecf0f1;
                 text-decoration: none;
                 transition: all 0.3s ease;
                 border: none;
                 background: transparent;
                 width: 100%;
                 font-size: 0.9rem;
+                cursor: pointer;
             }
 
-            #layoutSidenav_nav .nav-link:hover {
-                background-color: rgba(255,255,255,0.1) !important;
-                color: #ffffff !important;
+            .menu-item:hover {
+                background-color: rgba(255,255,255,0.1);
+                color: #ffffff;
                 transform: translateX(5px);
             }
 
-            #layoutSidenav_nav .nav-link.active {
-                background: linear-gradient(90deg, #3498db 0%, #2980b9 100%) !important;
-                color: white !important;
+            .menu-item.active {
+                background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+                color: white;
                 border-right: 3px solid #ffffff;
                 box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
             }
 
-            #layoutSidenav_nav .nav-link.active i {
-                color: white !important;
-            }
-
-            #layoutSidenav_nav .sb-nav-link-icon {
+            .menu-icon {
                 margin-right: 0.75rem;
                 font-size: 1rem;
                 width: 20px;
@@ -105,454 +113,649 @@
                 color: #bdc3c7;
             }
 
-            #layoutSidenav_nav .nav-link.active .sb-nav-link-icon {
-                color: white !important;
+            .menu-item.active .menu-icon {
+                color: white;
             }
 
-            #layoutSidenav_nav .nav-link:hover .sb-nav-link-icon {
+            .menu-item:hover .menu-icon {
                 color: #3498db;
             }
 
-            /* Text danger cho logout */
-            #layoutSidenav_nav .nav-link.text-danger {
-                color: #e74c3c !important;
+            .menu-item.logout {
+                color: #e74c3c;
             }
 
-            #layoutSidenav_nav .nav-link.text-danger:hover {
-                background-color: rgba(231, 76, 60, 0.1) !important;
-                color: #c0392b !important;
+            .menu-item.logout:hover {
+                background-color: rgba(231, 76, 60, 0.1);
+                color: #c0392b;
             }
 
-            /* Scrollbar styling chỉ cho sidebar */
-            #layoutSidenav_nav::-webkit-scrollbar {
-                width: 6px;
+            /* === HEADER STYLES === */
+            .admin-header {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                height: 60px;
+                position: fixed;
+                top: 0;
+                left: 250px;
+                right: 0;
+                z-index: 999;
+                transition: all 0.3s ease;
             }
 
-            #layoutSidenav_nav::-webkit-scrollbar-track {
-                background: #34495e;
+            .header-content {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 100%;
+                padding: 0 1.5rem;
             }
 
-            #layoutSidenav_nav::-webkit-scrollbar-thumb {
-                background: #3498db;
-                border-radius: 3px;
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
             }
 
-            /* Responsive adjustments */
+            .sidebar-toggle {
+                background: transparent;
+                border: none;
+                color: #ecf0f1;
+                font-size: 1.2rem;
+                transition: all 0.3s ease;
+                padding: 0.5rem;
+                border-radius: 4px;
+            }
+
+            .sidebar-toggle:hover {
+                color: #3498db;
+                background: rgba(255,255,255,0.1);
+            }
+
+            .header-title {
+                color: #ecf0f1;
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .header-right {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .search-box {
+                position: relative;
+            }
+
+            .search-input {
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #ecf0f1;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                width: 250px;
+                transition: all 0.3s ease;
+            }
+
+            .search-input:focus {
+                outline: none;
+                background: rgba(255,255,255,0.15);
+                border-color: #3498db;
+                width: 300px;
+            }
+
+            .search-input::placeholder {
+                color: #bdc3c7;
+            }
+
+            .user-menu {
+                position: relative;
+            }
+
+            .user-btn {
+                background: transparent;
+                border: none;
+                color: #ecf0f1;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .user-btn:hover {
+                background: rgba(255,255,255,0.1);
+            }
+
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: linear-gradient(45deg, #3498db, #2980b9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.9rem;
+                color: white;
+            }
+
+            .dropdown-menu {
+                border: none;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-radius: 8px;
+                overflow: hidden;
+                min-width: 200px;
+            }
+
+            .dropdown-item {
+                padding: 0.75rem 1.5rem;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .dropdown-item:hover {
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                color: white;
+                transform: translateX(5px);
+            }
+
+            /* === MAIN CONTENT STYLES === */
+            .admin-main {
+                flex: 1;
+                margin-left: 250px;
+                margin-top: 60px;
+                padding: 20px;
+                background-color: #f8f9fa;
+                min-height: calc(100vh - 60px);
+                transition: all 0.3s ease;
+            }
+
+            .content-header {
+                margin-bottom: 2rem;
+            }
+
+            .content-title {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 0.5rem;
+            }
+
+            .content-subtitle {
+                color: #7f8c8d;
+                font-size: 1rem;
+            }
+
+            .content-card {
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            /* === MODAL FIXES === */
+            .modal {
+                z-index: 1060 !important;
+            }
+
+            .modal-backdrop {
+                z-index: 1050 !important;
+            }
+
+            /* === RESPONSIVE STYLES === */
             @media (max-width: 768px) {
-                #layoutSidenav_nav {
+                .admin-sidebar {
                     width: 70px;
+                    transform: translateX(0);
                 }
 
-                #layoutSidenav_content {
+                .admin-sidebar.collapsed {
+                    transform: translateX(-100%);
+                }
+
+                .admin-header {
+                    left: 70px;
+                }
+
+                .admin-main {
                     margin-left: 70px;
-                    width: calc(100% - 70px);
                 }
 
-                #layoutSidenav_nav .sb-sidenav-menu-heading,
-                #layoutSidenav_nav .nav-link span {
+                .sidebar-brand span,
+                .menu-item span,
+                .menu-section {
                     display: none;
                 }
 
-                #layoutSidenav_nav .sb-nav-link-icon {
+                .menu-icon {
                     margin-right: 0;
                     font-size: 1.2rem;
                 }
 
-                #layoutSidenav_nav .nav-link {
+                .menu-item {
                     justify-content: center;
                     padding: 1rem 0.5rem;
                 }
+
+                .search-input {
+                    width: 150px;
+                }
+
+                .search-input:focus {
+                    width: 200px;
+                }
             }
 
-            /* GIỮ LẠI TẤT CẢ CÁC STYLE CŨ CHO CONTENT - KHÔNG THAY ĐỔI */
-            #user-management-content .readonly {
-                background-color: #A8A8A8;
-                border: none;
-            }
-            /* CSS cho password field và toggle button */
-            #user-management-content .password-container {
-                position: relative;
+            @media (max-width: 576px) {
+                .admin-sidebar {
+                    width: 100%;
+                    transform: translateX(-100%);
+                }
+
+                .admin-sidebar.mobile-open {
+                    transform: translateX(0);
+                }
+
+                .admin-header {
+                    left: 0;
+                }
+
+                .admin-main {
+                    margin-left: 0;
+                }
+
+                .search-box {
+                    display: none;
+                }
             }
 
-            #user-management-content .password-toggle-btn {
-                position: absolute;
-                right: 0;
-                top: 50%;
-                transform: translateY(-50%);
-                background: none;
-                border: none;
-                padding: 0 10px;
-                padding-top: 22px;
-                cursor: pointer;
+            /* === SCROLLBAR STYLING === */
+            .admin-sidebar::-webkit-scrollbar {
+                width: 6px;
             }
 
-            #user-management-content .password-toggle-btn:hover {
-                background: none;
+            .admin-sidebar::-webkit-scrollbar-track {
+                background: #34495e;
             }
 
-            #user-management-content .password-toggle-btn:focus {
-                outline: none;
-                box-shadow: none;
+            .admin-sidebar::-webkit-scrollbar-thumb {
+                background: #3498db;
+                border-radius: 3px;
             }
 
-            /* Đảm bảo input password có padding-right để không bị chữ đè lên button */
-            #user-management-content #passwordField {
-                padding-right: 40px;
-            }
-
-            /* CSS cho dropdown menu */
-            #user-management-content .dropdown-menu {
-                border: 1px solid #e9ecef;
-                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-                padding: 0.25rem 0;
-                min-width: 12rem;
-            }
-
-            /* CSS cho các item trong dropdown khi bình thường */
-            #user-management-content .dropdown-menu li {
-                transition: all 0.2s ease;
-            }
-
-            /* CSS cho các item trong dropdown khi hover */
-            #user-management-content .dropdown-menu li:hover {
-                background-color: #f8f9fa;
-            }
-
-            /* CSS cho các link trong dropdown */
-            #user-management-content .dropdown-menu li a.dropdown-item {
-                padding: 0.5rem 1.5rem;
-                color: #212529;
-                font-size: 0.875rem;
-                display: block;
-                clear: both;
-                font-weight: 400;
-                text-decoration: none;
-                white-space: nowrap;
-                transition: all 0.2s ease;
-            }
-
-            /* CSS cho link khi hover */
-            #user-management-content .dropdown-menu li a.dropdown-item:hover {
-                background-color: #f1f3f5;
-                color: #0d6efd;
-            }
-
-            /* CSS cho divider */
-            #user-management-content .dropdown-menu li .dropdown-divider {
-                margin: 0.25rem 0;
-                border-top: 1px solid #e9ecef;
-            }
-
-            /* CSS cho icon trong dropdown item */
-            #user-management-content .dropdown-menu li a.dropdown-item i.bi {
-                margin-right: 0.5rem;
-                width: 1em;
-                text-align: center;
-            }
-
-            /* Empty state container */
-            #user-management-content .empty-state-container {
-                background-color: #f8f9fa;
-                border-radius: 12px;
-                border: 1px dashed #dee2e6;
-                margin: 2rem 0;
-                padding: 3rem !important;
-                animation: fadeIn 0.5s ease;
-            }
-
-            #user-management-content .empty-state-image {
-                opacity: 0.7;
-                filter: grayscale(30%);
-            }
-
-            #user-management-content .empty-state-title {
-                font-size: 1.5rem;
-                font-weight: 500;
-            }
-
-            #user-management-content .empty-state-title i {
-                font-size: 1.8rem;
-                vertical-align: middle;
-                margin-right: 0.5rem;
-            }
-
-            #user-management-content .empty-state-description {
-                font-size: 1.05rem;
-                line-height: 1.6;
-                max-width: 500px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            @keyframes fadeIn {
+            /* === ANIMATIONS === */
+            @keyframes slideIn {
                 from {
                     opacity: 0;
-                    transform: translateY(20px);
+                    transform: translateX(-10px);
                 }
                 to {
                     opacity: 1;
-                    transform: translateY(0);
+                    transform: translateX(0);
                 }
             }
 
-            /* Responsive adjustments */
-            @media (max-width: 576px) {
-                #user-management-content .empty-state-image {
-                    width: 120px;
-                }
-                #user-management-content .empty-state-title {
-                    font-size: 1.3rem;
-                }
-                #user-management-content .d-flex {
-                    flex-direction: column;
-                    gap: 1rem !important;
-                }
+            .menu-item.active {
+                animation: slideIn 0.3s ease;
             }
 
-            #user-management-content .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
-                transition: all 0.3s ease;
-            }
-
-            /* CSS cho các trường readonly trong modal edit */
-            #user-management-content .form-control[readonly] {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                cursor: not-allowed !important;
-                opacity: 0.8 !important;
-            }
-
-            #user-management-content .form-control:not([readonly]) {
-                background-color: #ffffff !important;
-                border-color: #ced4da !important;
-                color: #212529 !important;
-            }
-
-            /* Đảm bảo select box khi disabled cũng có style tương tự */
-            #user-management-content .form-select:disabled {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                cursor: not-allowed !important;
-                opacity: 0.8 !important;
-            }
-
-            #user-management-content .form-select:not(:disabled) {
-                background-color: #ffffff !important;
-                border-color: #ced4da !important;
-                color: #212529 !important;
-            }
-
-            /* Style cho textarea readonly */
-            #user-management-content textarea.form-control[readonly] {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                resize: none !important;
-            }
-
-            /* Hiệu ứng chuyển tiếp mượt mà khi chuyển giữa edit và view mode */
-            #user-management-content .form-control,
-            #user-management-content .form-select {
-                transition: all 0.3s ease-in-out;
-            }
-
-            /* Label style để phân biệt rõ hơn */
-            #user-management-content .modal-body label {
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                color: #495057;
-            }
-
-            /* Style đặc biệt cho password field */
-            #user-management-content #passwordField[readonly] {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                font-family: 'Courier New', monospace;
-            }
-
-            /* Đảm bảo button toggle password vẫn hoạt động tốt */
-            #user-management-content .password-toggle-btn {
-                z-index: 5;
-            }
-
-            /* Khi ở chế độ edit, các field có thể edit sẽ có border highlight */
-            #user-management-content .form-select:not(:disabled) {
-                border-color: #86b7fe !important;
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
-            }
-
-            /* Responsive adjustments */
-            @media (max-width: 576px) {
-                #user-management-content .modal-body .form-control,
-                #user-management-content .modal-body .form-select {
-                    font-size: 14px;
-                }
-            }
-
-            /* Cinema Management Styles */
-            #cinema-management-content .address-cell {
-                max-width: 200px;
+            /* === CONTENT SPECIFIC STYLES === */
+            .table-container {
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
             }
 
-            #cinema-management-content .is-invalid {
-                border-color: #dc3545 !important;
+            .action-buttons {
+                display: flex;
+                gap: 0.5rem;
             }
 
-            #cinema-management-content .invalid-feedback {
-                display: none;
-                width: 100%;
-                margin-top: 0.25rem;
-                font-size: 0.875em;
-                color: #dc3545;
+            .btn-icon {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
             }
 
-            #cinema-management-content .is-invalid ~ .invalid-feedback {
-                display: block;
+            .status-badge {
+                padding: 0.25rem 0.75rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
             }
 
-            #cinema-management-content .form-control[readonly] {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                cursor: not-allowed !important;
-                opacity: 0.8 !important;
+            .badge-active {
+                background: #d4edda;
+                color: #155724;
             }
 
-            #cinema-management-content .form-select:disabled {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                cursor: not-allowed !important;
-                opacity: 0.8 !important;
+            .badge-inactive {
+                background: #f8d7da;
+                color: #721c24;
             }
 
-            #cinema-management-content textarea.form-control[readonly] {
-                background-color: #f8f9fa !important;
-                border-color: #e9ecef !important;
-                color: #6c757d !important;
-                resize: none !important;
+            .badge-pending {
+                background: #fff3cd;
+                color: #856404;
             }
 
-            /* Responsive adjustments for cinema management */
-            @media (max-width: 768px) {
-                #cinema-management-content .table-responsive {
-                    font-size: 0.875rem;
-                }
+            /* === LOADING STATES === */
+            .loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
 
-                #cinema-management-content .address-cell {
-                    max-width: 150px;
-                }
+            .spinner {
+                display: inline-block;
+                width: 1rem;
+                height: 1rem;
+                border: 2px solid transparent;
+                border-top: 2px solid currentColor;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
 
-                #cinema-management-content .btn-sm {
-                    padding: 0.25rem 0.5rem;
-                    font-size: 0.775rem;
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
                 }
             }
         </style>
         <%
             String uri = request.getRequestURI().toLowerCase();
-            boolean isFood = uri.contains("managerfood") || uri.contains("managerorder");
-            boolean isBlog = uri.contains("listpost") || uri.contains("addpost");
-            boolean isPromo = uri.contains("promotion-list") || uri.contains("add-promotion");
+            String section = request.getParameter("section");
         %>
     </head>
     <body>
-        <div id="layoutSidenav">
+        <div class="admin-container">
             <!-- Sidebar -->
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            <div class="sb-sidenav-menu-heading">Thống kê</div>
-                            <a class="<%= uri.contains("chart") ? "nav-link active" : "nav-link" %>" href="list">
-                                <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
-                                Thống kê
-                            </a>
-
-                            <div class="sb-sidenav-menu-heading">Quản lý</div>
-                            <a class="<%= uri.equals("/adminFE/dashboard?section=user-management") ? "nav-link active" : "nav-link" %>" href="dashboard?section=user-management">
-                                <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
-                                Quản lý tài khoản
-                            </a>
-                            <a class="<%= uri.equals("/swp-group4-fall25/listmovie.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/list">
-                                <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
-                                Quản lý phim
-                            </a>
-
-                            <a class="<%= uri.contains("/adminFE/dashboard?section=cinema-management") ? "nav-link active" : "nav-link" %>" href="dashboard?section=cinema-management">
-                                <div class="sb-nav-link-icon"><i class="fas fa-building"></i></div>
-                                Quản lý rạp chiếu
-                            </a>
-
-                            <a class="<%= uri.contains("/adminFE/dashboard?section=screening-room-management") ? "nav-link active" : "nav-link" %>" href="dashboard?section=screening-room-management">
-                                <div class="sb-nav-link-icon"><i class="fas fa-video""></i></div>
-                                Quản lý phòng chiếu
-                            </a>
-                            <a class="<%= uri.equals("/swp-group4-fall25/listscreening.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/listScreening">
-                                <div class="sb-nav-link-icon"><i class="fas fa-film"></i></div>
-                                Quản lý lịch chiếu
-                            </a>
-
-                            <a class="<%= uri.contains("/swp-group4-fall25/listdiscount.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/listDiscount">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                Quản lý khuyến mại
-                            </a>
-
-                            <!-- Quản lý đồ ăn -->
-                            <a class="<%= uri.contains("approve-booking.jsp") ? "nav-link active" : "nav-link" %>" href="/SWP-Group4-Fall25/food-management">
-                                <div class="sb-nav-link-icon"><i class="fas fa-utensils"></i></div>
-                                Quản lý đồ ăn
-                            </a>
-
-                            <!-- Tài khoản -->
-                            <div class="sb-sidenav-menu-heading">Tài khoản</div>
-                            <a class="nav-link text-danger" href="/SWP-Group4-Fall25/logout">
-                                <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
-                                Đăng xuất
-                            </a>
-                        </div>
-                    </div>
-                </nav>
-            </div>
-
-            <!-- Content Area - PHẢI NẰM TRONG CÙNG #layoutSidenav -->
-            <div id="layoutSidenav_content">
-                <div class="container-fluid py-4">
-                    <c:choose>
-                        <c:when test="${param.section eq 'user-management'}">
-                            <jsp:include page="user_management.jsp"/>
-                        </c:when>
-                        <c:when test="${param.section eq 'cinema-management'}">
-                            <jsp:include page="cinema_management.jsp"/>
-                        </c:when>
-                        <c:when test="${param.section eq 'screening-room-management'}">
-                            <jsp:include page="screening_room_management.jsp"/>
-                        </c:when>
-                        <c:otherwise> 
-                            <!-- Default section or dashboard home -->
-                            <div class="text-center py-5">
-                                <h3>Welcome to Admin Dashboard</h3>
-                                <p>Select a section from the sidebar to get started.</p>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
+            <aside class="admin-sidebar" id="adminSidebar">
+                <div class="sidebar-header">
+                    <a href="#" class="sidebar-brand">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>MovieTicketAdmin</span>
+                    </a>
                 </div>
-            </div>
-        </div> <!-- Đóng #layoutSidenav ở đây -->
+                
+                <nav class="sidebar-menu">
+                    <div class="menu-section">Thống kê</div>
+                    <a href="list" class="menu-item <%= uri.contains("chart") ? "active" : "" %>">
+                        <i class="menu-icon fas fa-chart-line"></i>
+                        <span>Thống kê</span>
+                    </a>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="js/scripts.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-        <script src="assets/demo/chart-area-demo.js"></script>
-        <script src="assets/demo/chart-bar-demo.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
-        <script src="js/datatables-simple-demo.js"></script>
+                    <div class="menu-section">Quản lý</div>
+                    <a href="dashboard?section=user-management" class="menu-item <%= "user-management".equals(section) ? "active" : "" %>">
+                        <i class="menu-icon fas fa-user-shield"></i>
+                        <span>Quản lý tài khoản</span>
+                    </a>
+                    <a href="/SWP-Group4-Fall25/list" class="menu-item <%= uri.contains("listmovie") ? "active" : "" %>">
+                        <i class="menu-icon fas fa-film"></i>
+                        <span>Quản lý phim</span>
+                    </a>
+                    <a href="dashboard?section=cinema-management" class="menu-item <%= "cinema-management".equals(section) ? "active" : "" %>">
+                        <i class="menu-icon fas fa-building"></i>
+                        <span>Quản lý rạp chiếu</span>
+                    </a>
+                    <a href="dashboard?section=screening-room-management" class="menu-item <%= "screening-room-management".equals(section) ? "active" : "" %>">
+                        <i class="menu-icon fas fa-video"></i>
+                        <span>Quản lý phòng chiếu</span>
+                    </a>
+                    <a href="/SWP-Group4-Fall25/listScreening" class="menu-item <%= uri.contains("listscreening") ? "active" : "" %>">
+                        <i class="menu-icon fas fa-film"></i>
+                        <span>Quản lý lịch chiếu</span>
+                    </a>
+                    <a href="/SWP-Group4-Fall25/listDiscount" class="menu-item <%= uri.contains("listdiscount") ? "active" : "" %>">
+                        <i class="menu-icon fas fa-tags"></i>
+                        <span>Quản lý khuyến mại</span>
+                    </a>
+                    <a href="/SWP-Group4-Fall25/food-management" class="menu-item <%= uri.contains("food") ? "active" : "" %>">
+                        <i class="menu-icon fas fa-utensils"></i>
+                        <span>Quản lý đồ ăn</span>
+                    </a>
+
+                    <div class="menu-section">Tài khoản</div>
+                    <a href="logout" class="menu-item logout">
+                        <i class="menu-icon fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="admin-main" id="adminMain">
+                <!-- Header -->
+                <header class="admin-header" id="adminHeader">
+                    <div class="header-content">
+<!--                        <div class="header-left">
+                            <button class="sidebar-toggle" id="sidebarToggle">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <h1 class="header-title" id="pageTitle">
+                                <c:choose>
+                                    <c:when test="${param.section eq 'user-management'}">Quản lý tài khoản</c:when>
+                                    <c:when test="${param.section eq 'cinema-management'}">Quản lý rạp chiếu</c:when>
+                                    <c:when test="${param.section eq 'screening-room-management'}">Quản lý phòng chiếu</c:when>
+                                    <c:otherwise>Admin Dashboard</c:otherwise>
+                                </c:choose>
+                            </h1>
+                        </div>-->
+                        
+<!--                        <div class="header-right">
+                            <div class="search-box">
+                                <input type="text" class="search-input" placeholder="Tìm kiếm...">
+                            </div>
+                            
+                            <div class="user-menu">
+                                <button class="user-btn" id="userMenuButton">
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span>Admin</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="userMenuButton">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                                </ul>
+                            </div>
+                        </div>-->
+                    </div>
+                </header>
+
+                <!-- Dynamic Content -->
+                <div class="content-area">
+                    <div class="content-header">
+                        <h2 class="content-title" id="contentTitle">
+                            <c:choose>
+                                <c:when test="${param.section eq 'user-management'}">User Management</c:when>
+                                <c:when test="${param.section eq 'cinema-management'}">Cinema Management</c:when>
+                            </c:choose>
+                        </h2>
+                        <p class="content-subtitle" id="contentSubtitle">
+                            <c:choose>
+                                <c:when test="${param.section eq 'user-management'}">User information management </c:when>
+                                <c:when test="${param.section eq 'cinema-management'}">Cinema information management</c:when>
+                            </c:choose>
+                        </p>
+                    </div>
+
+                    <div class="content-body">
+                        <c:choose>
+                            <c:when test="${param.section eq 'user-management'}">
+                                <jsp:include page="user_management.jsp"/>
+                            </c:when>
+                            <c:when test="${param.section eq 'cinema-management'}">
+                                <jsp:include page="cinema_management.jsp"/>
+                            </c:when>
+                            <c:when test="${param.section eq 'screening-room-management'}">
+                                <jsp:include page="screening_room_management.jsp"/>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="content-card">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-4">
+                                            <div class="card bg-primary text-white">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between">
+                                                        <div>
+                                                            <h4 class="card-title">1,234</h4>
+                                                            <p class="card-text">Người dùng</p>
+                                                        </div>
+                                                        <div class="align-self-center">
+                                                            <i class="fas fa-users fa-2x"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-4">
+                                            <div class="card bg-success text-white">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between">
+                                                        <div>
+                                                            <h4 class="card-title">45</h4>
+                                                            <p class="card-text">Rạp chiếu</p>
+                                                        </div>
+                                                        <div class="align-self-center">
+                                                            <i class="fas fa-building fa-2x"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-4">
+                                            <div class="card bg-warning text-white">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between">
+                                                        <div>
+                                                            <h4 class="card-title">128</h4>
+                                                            <p class="card-text">Phim đang chiếu</p>
+                                                        </div>
+                                                        <div class="align-self-center">
+                                                            <i class="fas fa-film fa-2x"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-4">
+                                            <div class="card bg-info text-white">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between">
+                                                        <div>
+                                                            <h4 class="card-title">5,678</h4>
+                                                            <p class="card-text">Đơn hàng</p>
+                                                        </div>
+                                                        <div class="align-self-center">
+                                                            <i class="fas fa-ticket-alt fa-2x"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center py-5">
+                                        <h3>Chào mừng đến với Admin Dashboard</h3>
+                                        <p class="text-muted">Chọn một mục từ sidebar để bắt đầu</p>
+                                    </div>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Bootstrap & Custom Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // Sidebar Toggle
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                const sidebar = document.getElementById('adminSidebar');
+                const main = document.getElementById('adminMain');
+                const header = document.getElementById('adminHeader');
+                
+                if (window.innerWidth >= 768) {
+                    // Desktop toggle
+                    if (sidebar.style.width === '70px') {
+                        sidebar.style.width = '250px';
+                        main.style.marginLeft = '250px';
+                        header.style.left = '250px';
+                    } else {
+                        sidebar.style.width = '70px';
+                        main.style.marginLeft = '70px';
+                        header.style.left = '70px';
+                    }
+                } else {
+                    // Mobile toggle
+                    sidebar.classList.toggle('mobile-open');
+                }
+            });
+
+            // User Menu Dropdown
+            const userMenuButton = document.getElementById('userMenuButton');
+            const userDropdown = new bootstrap.Dropdown(userMenuButton);
+
+            // Active menu item handling
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('focus', function() {
+                this.style.width = '300px';
+            });
+
+            searchInput.addEventListener('blur', function() {
+                if (window.innerWidth >= 768) {
+                    this.style.width = '250px';
+                }
+            });
+
+            // Responsive handling
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    document.getElementById('adminSidebar').style.transform = 'translateX(0)';
+                }
+            });
+
+            // Modal z-index fix
+            document.addEventListener('DOMContentLoaded', function() {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    modal.style.zIndex = '1060';
+                });
+            });
+
+            // Page title update
+            function updatePageTitle(title, subtitle) {
+                document.getElementById('pageTitle').textContent = title;
+                document.getElementById('contentTitle').textContent = title;
+                document.getElementById('contentSubtitle').textContent = subtitle;
+            }
+
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        </script>
     </body>
 </html>

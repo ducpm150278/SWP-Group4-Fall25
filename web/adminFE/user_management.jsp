@@ -247,7 +247,7 @@
     </c:choose>
 
     <!-- Add User Modal -->
-    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true" data-bs-backdrop="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -257,7 +257,7 @@
                 <form id="addUserForm" action="dashboard" method="POST" novalidate>
                     <input type="hidden" name="action" value="add">
                     <input type="hidden" name="section" value="user-management">
-                    
+
                     <div class="modal-body">
                         <!-- Full Name -->
                         <div class="mb-3">
@@ -304,7 +304,7 @@
                             <strong>Note:</strong> New accounts will be created with "Temporary" status.
                         </div>
                     </div>
-                    
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -318,7 +318,7 @@
     </div>
 
     <!-- Delete Confirm Modal -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" data-bs-backdrop="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -353,7 +353,7 @@
     </div>
 
     <!-- View User Modal -->
-    <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -442,7 +442,7 @@
         </div>
     </div>
 
-        <!-- Toast Notification -->
+    <!-- Toast Notification -->
     <c:if test="${not empty toastType and not empty toastMessage}">
         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060">
             <div class="toast align-items-center text-white bg-${toastType} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
@@ -474,56 +474,56 @@
 
         // ===== TOAST SYSTEM =====
         function showToasts() {
-            <c:if test="${not empty sessionScope.toastType}">
-                <c:choose>
-                    <c:when test="${sessionScope.toastType == 'success'}">
-                        showToast('✅ ${sessionScope.toastMessage}', 'success');
-                    </c:when>
-                    <c:when test="${sessionScope.toastType == 'danger'}">
-                        showToast('❌ ${sessionScope.toastMessage}', 'danger');
-                    </c:when>
-                    <c:when test="${sessionScope.toastType == 'warning'}">
-                        showToast('⚠️ ${sessionScope.toastMessage}', 'warning');
-                    </c:when>
-                </c:choose>
-                <c:remove var="toastType" scope="session"/>
-                <c:remove var="toastMessage" scope="session"/>
-            </c:if>
-            
-            <%-- Giữ lại phần cũ để tương thích ngược --%>
-            <c:if test="${not empty sessionScope.showToast}">
-                <c:choose>
-                    <c:when test="${sessionScope.showToast == 'add_success'}">
-                        showToast('✅ New user created successfully! Credentials sent to email!', 'success');
-                    </c:when>
-                    <c:when test="${sessionScope.showToast == 'add_success_no_email'}">
-                        showToast('⚠️ User created but email sending failed!', 'warning');
-                    </c:when>
-                    <c:when test="${sessionScope.showToast == 'add_error_email'}">
-                        showToast('❌ Email already exists!', 'danger');
-                    </c:when>
-                    <c:when test="${sessionScope.showToast == 'add_error_phone'}">
-                        showToast('❌ Phone number already exists!', 'danger');
-                    </c:when>
-                    <c:when test="${sessionScope.showToast == 'update_success'}">
-                        showToast('✅ User updated successfully!', 'success');
-                    </c:when>
-                    <c:when test="${sessionScope.showToast == 'delete_success'}">
-                        showToast('🗑️ User deleted successfully!', 'success');
-                    </c:when>
-                    <c:otherwise>
-                        showToast('❌ Operation failed!', 'danger');
-                    </c:otherwise>
-                </c:choose>
-                <c:remove var="showToast" scope="session"/>
-                <c:remove var="ExceptionError" scope="session"/>
-            </c:if>
+        <c:if test="${not empty sessionScope.toastType}">
+            <c:choose>
+                <c:when test="${sessionScope.toastType == 'success'}">
+            showToast('✅ ${sessionScope.toastMessage}', 'success');
+                </c:when>
+                <c:when test="${sessionScope.toastType == 'danger'}">
+            showToast('❌ ${sessionScope.toastMessage}', 'danger');
+                </c:when>
+                <c:when test="${sessionScope.toastType == 'warning'}">
+            showToast('⚠️ ${sessionScope.toastMessage}', 'warning');
+                </c:when>
+            </c:choose>
+            <c:remove var="toastType" scope="session"/>
+            <c:remove var="toastMessage" scope="session"/>
+        </c:if>
+
+        <%-- Giữ lại phần cũ để tương thích ngược --%>
+        <c:if test="${not empty sessionScope.showToast}">
+            <c:choose>
+                <c:when test="${sessionScope.showToast == 'add_success'}">
+            showToast('✅ New user created successfully! Credentials sent to email!', 'success');
+                </c:when>
+                <c:when test="${sessionScope.showToast == 'add_success_no_email'}">
+            showToast('⚠️ User created but email sending failed!', 'warning');
+                </c:when>
+                <c:when test="${sessionScope.showToast == 'add_error_email'}">
+            showToast('❌ Email already exists!', 'danger');
+                </c:when>
+                <c:when test="${sessionScope.showToast == 'add_error_phone'}">
+            showToast('❌ Phone number already exists!', 'danger');
+                </c:when>
+                <c:when test="${sessionScope.showToast == 'update_success'}">
+            showToast('✅ User updated successfully!', 'success');
+                </c:when>
+                <c:when test="${sessionScope.showToast == 'delete_success'}">
+            showToast('🗑️ User deleted successfully!', 'success');
+                </c:when>
+                <c:otherwise>
+            showToast('❌ Operation failed!', 'danger');
+                </c:otherwise>
+            </c:choose>
+            <c:remove var="showToast" scope="session"/>
+            <c:remove var="ExceptionError" scope="session"/>
+        </c:if>
         }
 
         function showToast(message, type = 'info') {
             const toastContainer = document.getElementById('toastContainer');
             const toastId = 'toast-' + Date.now();
-            
+
             const bgClass = {
                 'success': 'text-bg-success',
                 'danger': 'text-bg-danger',
@@ -539,16 +539,16 @@
                     </div>
                 </div>
             `;
-            
+
             toastContainer.insertAdjacentHTML('beforeend', toastHTML);
             const toast = new bootstrap.Toast(document.getElementById(toastId), {
                 autohide: true,
                 delay: 5000
             });
             toast.show();
-            
+
             // Remove from DOM after hide
-            document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+            document.getElementById(toastId).addEventListener('hidden.bs.toast', function () {
                 this.remove();
             });
         }
@@ -556,19 +556,20 @@
         // ===== ADD USER FORM =====
         function initializeAddUserForm() {
             const form = document.getElementById('addUserForm');
-            if (!form) return;
+            if (!form)
+                return;
 
             // Real-time validation
             const fields = form.querySelectorAll('input[required], select[required]');
             fields.forEach(field => {
-                field.addEventListener('input', function() {
+                field.addEventListener('input', function () {
                     this.classList.remove('is-invalid', 'is-valid');
                     if (this.checkValidity()) {
                         this.classList.add('is-valid');
                     }
                 });
-                
-                field.addEventListener('blur', function() {
+
+                field.addEventListener('blur', function () {
                     if (!this.checkValidity()) {
                         this.classList.add('is-invalid');
                     }
@@ -576,7 +577,7 @@
             });
 
             // Form submission
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 if (!validateForm(this)) {
                     e.preventDefault();
                     showToast('❌ Please fix the validation errors!', 'error');
@@ -588,7 +589,7 @@
             // Reset form when modal closes
             const modal = document.getElementById('addUserModal');
             if (modal) {
-                modal.addEventListener('hidden.bs.modal', function() {
+                modal.addEventListener('hidden.bs.modal', function () {
                     form.reset();
                     form.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
                         el.classList.remove('is-valid', 'is-invalid');
@@ -601,7 +602,7 @@
         function validateForm(form) {
             let isValid = true;
             const fields = form.querySelectorAll('input[required], select[required]');
-            
+
             fields.forEach(field => {
                 field.classList.remove('is-invalid', 'is-valid');
                 if (!field.checkValidity()) {
@@ -611,14 +612,15 @@
                     field.classList.add('is-valid');
                 }
             });
-            
+
             return isValid;
         }
 
         function setSubmitButtonLoading(loading) {
             const btn = document.getElementById('submitBtn');
-            if (!btn) return;
-            
+            if (!btn)
+                return;
+
             if (loading) {
                 btn.disabled = true;
                 btn.querySelector('.spinner-border')?.classList.remove('d-none');
@@ -633,15 +635,15 @@
         // ===== VIEW USER MODAL =====
         function initializeViewUserModal() {
             // Auto-show modal if viewUser exists
-            <c:if test="${requestScope.viewUser != null}">
-                const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
-                modal.show();
-            </c:if>
+        <c:if test="${requestScope.viewUser != null}">
+            const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+            modal.show();
+        </c:if>
 
             // Handle modal close redirect
             const viewModal = document.getElementById('viewUserModal');
             if (viewModal) {
-                viewModal.addEventListener('hidden.bs.modal', function() {
+                viewModal.addEventListener('hidden.bs.modal', function () {
                     window.location.href = 'dashboard?section=user-management&page=${currentPage}';
                 });
             }
@@ -663,7 +665,7 @@
         function togglePassword() {
             const input = document.getElementById('passwordField');
             const eyeIcon = document.querySelector('.eye-icon');
-            
+
             if (input && eyeIcon) {
                 if (input.type === 'password') {
                     input.type = 'text';
@@ -699,7 +701,7 @@
         function validateEmail(input) {
             const email = input.value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
+
             if (emailRegex.test(email)) {
                 input.classList.remove('is-invalid');
                 input.classList.add('is-valid');
@@ -716,4 +718,17 @@
             console.log(`[User Management] ${message}`);
         }
     </script>
+    <style>
+        /* EMERGENCY FIX: Reset modal z-index */
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+        .modal {
+            z-index: 1050 !important;
+        }
+        body.modal-open {
+            overflow: auto !important;
+            padding-right: 0 !important;
+        }
+    </style>
 </div>
