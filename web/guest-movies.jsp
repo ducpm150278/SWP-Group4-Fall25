@@ -67,15 +67,19 @@
                             <!-- ========== MOVIES GRID ========== -->
                             <!-- Grid hiển thị danh sách các phim -->
                             <div class="movies-grid" id="moviesGrid">
-                                <% if (movies !=null && !movies.isEmpty()) { // Lặp qua từng phim trong danh sách for
-                                    (Movie movie : movies) { //==========XỬ LÝ TRẠNG THÁI PHIM==========// Hỗ trợ
-                                    cả 'Active' (database mới) và 'Showing' (legacy) String
-                                    movieStatus=movie.getStatus(); boolean isShowing="Active"
-                                    .equalsIgnoreCase(movieStatus) || "Showing" .equalsIgnoreCase(movieStatus); // CSS
-                                    class cho status badge String statusClass=isShowing ? "status-showing"
-                                    : "status-upcoming" ; // Text hiển thị trên status badge String statusText=isShowing
-                                    ? "Đang Chiếu" : "Sắp Chiếu" ; // Data attribute cho JavaScript filter String
-                                    dataStatus=isShowing ? "Showing" : "Upcoming" ; %>
+                                <% if (movies !=null && !movies.isEmpty()) { 
+                                    // Lặp qua từng phim trong danh sách 
+                                    for (Movie movie : movies) { 
+                                        //==========XỬ LÝ TRẠNG THÁI PHIM==========
+                                        // Hỗ trợ cả 'Active' (database mới) và 'Showing' (legacy) 
+                                        String movieStatus=movie.getStatus(); 
+                                        boolean isShowing="Active".equalsIgnoreCase(movieStatus) || "Showing" .equalsIgnoreCase(movieStatus); 
+                                        // CSS class cho status badge 
+                                        String statusClass=isShowing ? "status-showing": "status-upcoming" ; 
+                                        // Text hiển thị trên status badge 
+                                        String statusText=isShowing? "Đang Chiếu" : "Sắp Chiếu" ; 
+                                        // Data attribute cho JavaScript filter 
+                                        String dataStatus=isShowing ? "Showing" : "Upcoming" ; %>
                                     <!-- ========== MOVIE CARD ========== -->
                                     <!-- Card click để xem chi tiết phim -->
                                     <div class="movie-card" data-status="<%= dataStatus %>"
@@ -86,8 +90,7 @@
 
                                         <!-- ========== MOVIE POSTER ========== -->
                                         <!-- Hiển thị poster phim với fallback nếu không có ảnh -->
-                                        <img src="<%= movie.getPosterURL() != null ? movie.getPosterURL() : "
-                                            https://via.placeholder.com/280x400?text=No+Image" %>"
+                                        <img src="<%= movie.getPosterURL() != null ? movie.getPosterURL() : "https://via.placeholder.com/280x400?text=No+Image" %>"
                                         alt="<%= movie.getTitle() %>"
                                             class="movie-poster"
                                             data-movie-title="<%= movie.getTitle() %>"
