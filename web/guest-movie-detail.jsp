@@ -52,8 +52,7 @@
                                             <!-- ========== POSTER SECTION ========== -->
                                             <!-- Hiển thị poster lớn của phim -->
                                             <div class="poster-section">
-                                                <img src="<%= movie.getPosterURL() != null ? movie.getPosterURL() : "
-                                                    https://via.placeholder.com/400x600?text=No+Image" %>"
+                                                <img src="<%= movie.getPosterURL() != null ? movie.getPosterURL() : "https://via.placeholder.com/400x600?text=No+Image" %>"
                                                 alt="<%= movie.getTitle() %>" class="movie-poster-large">
                                             </div>
 
@@ -216,8 +215,9 @@
                                         </h2>
 
                                         <!-- ========== DANH SÁCH REVIEWS ========== -->
-                                        <% if (reviews !=null && !reviews.isEmpty()) { // Lặp qua từng review for
-                                            (Review review : reviews) { %>
+                                        <% if (reviews !=null && !reviews.isEmpty()) { 
+                                            // Lặp qua từng review 
+                                            for(Review review : reviews) { %>
                                             <div class="review-card">
                                                 <!-- Review header: tên user và rating -->
                                                 <div class="review-header">
@@ -231,8 +231,7 @@
                                                     <div class="review-rating">
                                                         <% for (int i=1; i <=5; i++) { %>
                                                             <!-- Sao đầy nếu i <= rating, sao mờ nếu không -->
-                                                            <i class="fas fa-star <%= i <= review.getRating() ? "" : "
-                                                                opacity-25" %>"></i>
+                                                            <i class="fas fa-star <%= i <= review.getRating() ? "" : "opacity-25" %>"></i>
                                                             <% } %>
                                                     </div>
                                                 </div>
